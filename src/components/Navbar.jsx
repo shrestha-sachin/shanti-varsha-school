@@ -45,9 +45,14 @@ function Navbar() {
   return (
     <nav className="bg-navy text-white sticky top-0 z-50 shadow-xl backdrop-blur-sm bg-opacity-95 animate-fade-in border-b border-gold/20">
       <div className="max-w-7xl mx-auto px-3 sm:px-4 md:px-6 lg:px-8">
-        <div className="flex justify-between items-center h-16 md:h-20">
-          {/* Logo and School Name */}
-          <Link to="/" className="flex items-center space-x-2 sm:space-x-3 group min-w-0 flex-shrink-0">
+        <div className="flex justify-between items-center h-auto min-h-[64px] md:min-h-[80px] py-2">
+          {/* Logo and School Name with Address */}
+          <div 
+            onClick={() => {
+              window.location.href = '/'
+            }}
+            className="flex items-center space-x-2 sm:space-x-3 group min-w-0 flex-shrink-0 cursor-pointer"
+          >
             {/* Use SVS logo with circular white background - always circular */}
             {!logoError ? (
               <div className="bg-white w-10 h-10 sm:w-12 sm:h-12 md:w-14 md:h-14 rounded-full flex items-center justify-center shadow-lg group-hover:shadow-xl transition-all duration-300 group-hover:scale-105 flex-shrink-0">
@@ -63,10 +68,15 @@ function Navbar() {
                 <GraduationCap className="h-6 w-6 sm:h-7 sm:w-7 md:h-8 md:w-8 text-gold" />
               </div>
             )}
-            <span className="text-xs sm:text-sm md:text-base lg:text-lg font-bold whitespace-nowrap hidden sm:block group-hover:text-gold transition-colors truncate">
-              Shanti Varsha Angreji Ma. Vi.
-            </span>
-          </Link>
+            <div className="flex flex-col min-w-0">
+              <span className="text-xs sm:text-sm md:text-base lg:text-lg font-bold whitespace-nowrap group-hover:text-gold transition-colors leading-tight">
+                Shanti Varsha Angreji Ma. Vi.
+              </span>
+              <span className="text-[10px] sm:text-xs md:text-sm text-gray-300 group-hover:text-gold/80 transition-colors leading-tight truncate">
+                Vyas-5, Chapaghat, Damauli, Tanahun
+              </span>
+            </div>
+          </div>
 
           {/* Desktop Navigation */}
           <div className="hidden lg:flex items-center space-x-1 xl:space-x-2">

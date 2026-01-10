@@ -56,6 +56,27 @@ const galleryImages = [
 ]
 ```
 
+### `/toppers/`
+Place topper student photos here.
+
+**Usage:**
+- Add photos of topper students with these exact filenames:
+  - `sanjana-wagle.jpg` - Ms. Sanjana Wagle (Batch 2069, 4th Nationwide, 93.37%, Topped Tanahun District)
+  - `sneha-giri.jpg` - Sneha Giri (Batch 2081, 4.0 GPA)
+  - `sachin-shrestha.jpg` - Sachin Shrestha (Batch 2078, 4.0 GPA)
+  - `kripa-shahi.jpg` - Kripa Shahi (Batch 2078, 4.0 GPA)
+- Images will automatically display on the homepage
+- Recommended format: Square images (400x400px or 300x300px)
+- Recommended format: JPG or PNG
+
+**Example:**
+```
+/toppers/sanjana-wagle.jpg
+/toppers/sneha-giri.jpg
+/toppers/sachin-shrestha.jpg
+/toppers/kripa-shahi.jpg
+```
+
 ## How to Reference Images
 
 In your React components, reference images from the public folder using absolute paths starting with `/`:
