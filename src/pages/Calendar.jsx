@@ -157,44 +157,56 @@ function Calendar() {
   const weekDays = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 animate-fade-in">
-      <div className="flex items-center space-x-2 mb-8 animate-fade-in-up">
-        <CalendarIcon className="h-8 w-8 text-gold" />
-        <h1 className="text-4xl font-bold text-navy">Academic Calendar</h1>
-      </div>
-
-      <div className="bg-white rounded-lg shadow-md p-6 mb-8 animate-fade-in-up" style={{ animationDelay: '0.2s', animationFillMode: 'both' }}>
-        {/* Calendar Header */}
-        <div className="flex items-center justify-between mb-6">
-          <button
-            onClick={goToPreviousMonth}
-            className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
-            aria-label="Previous month"
-          >
-            <ChevronLeft className="h-6 w-6 text-navy" />
-          </button>
-          
-          <div className="flex items-center space-x-4">
-            <h2 className="text-2xl font-bold text-navy">{getMonthName(currentDate)}</h2>
-            <button
-              onClick={goToToday}
-              className="px-4 py-2 bg-navy text-white rounded-lg hover:bg-navy-dark transition-colors text-sm"
-            >
-              Today
-            </button>
+    <div className="min-h-screen bg-gradient-to-b from-gray-50 via-white to-gray-50/50 py-20 animate-fade-in">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        {/* Header */}
+        <div className="text-center mb-12 animate-fade-in-up" style={{ animationDelay: '0.1s', animationFillMode: 'both' }}>
+          <div className="flex items-center justify-center space-x-3 mb-4">
+            <div className="bg-gradient-to-br from-gold/20 to-gold/10 p-3 rounded-xl shadow-lg">
+              <CalendarIcon className="h-8 w-8 text-gold" />
+            </div>
+            <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-navy bg-gradient-to-r from-navy to-navy-dark bg-clip-text text-transparent">
+              Academic Calendar
+            </h1>
           </div>
-          
-          <button
-            onClick={goToNextMonth}
-            className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
-            aria-label="Next month"
-          >
-            <ChevronRight className="h-6 w-6 text-navy" />
-          </button>
+          <div className="w-24 h-1 bg-gradient-to-r from-transparent via-gold to-transparent mx-auto mb-6"></div>
+          <p className="text-lg md:text-xl text-gray-600 max-w-2xl mx-auto">
+            View important dates, events, and academic schedules for the school year.
+          </p>
         </div>
 
-        {/* Calendar Grid */}
-        <div className="grid grid-cols-7 gap-2">
+        <div className="bg-white rounded-2xl shadow-xl p-6 md:p-8 mb-8 border-2 border-gray-100 hover:shadow-2xl transition-all duration-500 animate-fade-in-up" style={{ animationDelay: '0.2s', animationFillMode: 'both' }}>
+          {/* Calendar Header */}
+          <div className="flex items-center justify-between mb-6">
+            <button
+              onClick={goToPreviousMonth}
+              className="p-2 hover:bg-gold/10 rounded-xl transition-all duration-300 hover:scale-110 group"
+              aria-label="Previous month"
+            >
+              <ChevronLeft className="h-6 w-6 text-navy group-hover:text-gold transition-colors" />
+            </button>
+            
+            <div className="flex items-center space-x-4">
+              <h2 className="text-2xl font-bold text-navy">{getMonthName(currentDate)}</h2>
+              <button
+                onClick={goToToday}
+                className="px-4 py-2 bg-gradient-to-r from-gold to-gold-light text-white rounded-xl hover:from-gold-light hover:to-gold transition-all duration-300 text-sm font-semibold shadow-lg hover:shadow-xl transform hover:scale-105"
+              >
+                Today
+              </button>
+            </div>
+            
+            <button
+              onClick={goToNextMonth}
+              className="p-2 hover:bg-gold/10 rounded-xl transition-all duration-300 hover:scale-110 group"
+              aria-label="Next month"
+            >
+              <ChevronRight className="h-6 w-6 text-navy group-hover:text-gold transition-colors" />
+            </button>
+          </div>
+
+          {/* Calendar Grid */}
+          <div className="grid grid-cols-7 gap-2">
           {/* Week day headers */}
           {weekDays.map((day) => (
             <div key={day} className="text-center font-semibold text-navy py-2">
@@ -202,19 +214,19 @@ function Calendar() {
             </div>
           ))}
 
-          {/* Calendar days */}
-          {days.map((day, index) => {
-            const dayEvents = getEventsForDate(day)
-            const todayClass = isToday(day) ? 'ring-2 ring-gold bg-gold/10' : ''
-            
-            return (
-              <div
-                key={index}
-                className={`min-h-[80px] border rounded-lg p-2 ${
-                  day ? 'bg-white hover:bg-gray-50 cursor-pointer' : 'bg-gray-50'
-                } ${todayClass} transition-colors`}
-                onClick={() => day && setSelectedDate(day)}
-              >
+            {/* Calendar days */}
+            {days.map((day, index) => {
+              const dayEvents = getEventsForDate(day)
+              const todayClass = isToday(day) ? 'ring-2 ring-gold bg-gold/10 shadow-lg' : ''
+              
+              return (
+                <div
+                  key={index}
+                  className={`min-h-[80px] border-2 rounded-xl p-2 ${
+                    day ? 'bg-white hover:bg-gold/5 cursor-pointer hover:border-gold/40 hover:shadow-md' : 'bg-gray-50'
+                  } ${todayClass} transition-all duration-300 transform hover:scale-[1.02]`}
+                  onClick={() => day && setSelectedDate(day)}
+                >
                 {day && (
                   <>
                     <div className={`text-sm font-semibold mb-1 ${isToday(day) ? 'text-gold' : 'text-gray-700'}`}>
@@ -241,15 +253,16 @@ function Calendar() {
               </div>
             )
           })}
+          </div>
         </div>
-      </div>
 
-      {/* Selected Date Events */}
-      {selectedDate && (
-        <div className="bg-white rounded-lg shadow-md p-6">
-          <h3 className="text-xl font-bold text-navy mb-4">
-            Events on {selectedDate} {getMonthName(currentDate)}
-          </h3>
+        {/* Selected Date Events */}
+        {selectedDate && (
+          <div className="bg-white rounded-2xl shadow-xl p-6 md:p-8 border-2 border-gray-100 animate-fade-in-up mb-8">
+            <h3 className="text-xl font-bold text-navy mb-4 flex items-center space-x-2">
+              <div className="w-1 h-6 bg-gradient-to-b from-gold to-gold-dark rounded-full"></div>
+              <span>Events on {selectedDate} {getMonthName(currentDate)}</span>
+            </h3>
           {getEventsForDate(selectedDate).length > 0 ? (
             <div className="space-y-3">
               {getEventsForDate(selectedDate).map((event) => (
@@ -275,17 +288,17 @@ function Calendar() {
           ) : (
             <p className="text-gray-500">No events scheduled for this date.</p>
           )}
-          <button
-            onClick={() => setSelectedDate(null)}
-            className="mt-4 text-navy hover:text-gold transition-colors"
-          >
-            Close
-          </button>
-        </div>
-      )}
+            <button
+              onClick={() => setSelectedDate(null)}
+              className="mt-4 px-4 py-2 bg-gradient-to-r from-gold to-gold-light text-white rounded-xl hover:from-gold-light hover:to-gold transition-all duration-300 font-semibold shadow-lg hover:shadow-xl transform hover:scale-105"
+            >
+              Close
+            </button>
+          </div>
+        )}
 
-      {/* Legend */}
-      <div className="mt-8 bg-gray-50 rounded-lg p-6">
+        {/* Legend */}
+        <div className="mt-8 bg-white rounded-2xl shadow-xl p-6 border-2 border-gray-100 animate-fade-in-up" style={{ animationDelay: '0.3s', animationFillMode: 'both' }}>
         <h3 className="text-lg font-semibold text-navy mb-4">Event Types</h3>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           <div className="flex items-center space-x-2">
@@ -305,6 +318,7 @@ function Calendar() {
             <span className="text-sm text-gray-700">Meetings</span>
           </div>
         </div>
+      </div>
       </div>
     </div>
   )

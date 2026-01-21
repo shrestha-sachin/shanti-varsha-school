@@ -43,7 +43,7 @@ function Navbar() {
   ]
 
   return (
-    <nav className="bg-navy text-white sticky top-0 z-50 shadow-xl backdrop-blur-sm bg-opacity-95 animate-fade-in border-b border-gold/20">
+    <nav className="bg-navy text-white sticky top-0 z-50 shadow-xl backdrop-blur-sm animate-fade-in border-b border-gold/20" style={{ backgroundColor: 'rgba(13, 71, 161, 0.98)' }}>
       <div className="max-w-7xl mx-auto px-3 sm:px-4 md:px-6 lg:px-8">
         <div className="flex justify-between items-center h-auto min-h-[64px] md:min-h-[80px] py-2">
           {/* Logo and School Name with Address */}
@@ -84,15 +84,15 @@ function Navbar() {
               <Link
                 key={link.path}
                 to={link.path}
-                className={`relative px-3 xl:px-4 py-2 rounded-lg text-sm font-medium transition-all duration-300 whitespace-nowrap ${
+                className={`relative px-3 xl:px-4 py-2 rounded-lg text-sm font-medium transition-all duration-300 whitespace-nowrap magnetic ${
                   isActive(link.path)
-                    ? 'bg-gold text-white shadow-lg shadow-gold/30'
-                    : 'text-gray-200 hover:text-gold hover:bg-white/10'
+                    ? 'bg-gradient-to-r from-gold to-gold-light text-white shadow-lg shadow-gold/30 animate-glow'
+                    : 'text-gray-200 hover:text-gold hover:bg-white/10 hover:scale-105'
                 }`}
               >
                 {link.label}
                 {isActive(link.path) && (
-                  <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-white rounded-full"></span>
+                  <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-white rounded-full animate-shimmer-effect"></span>
                 )}
               </Link>
             ))}

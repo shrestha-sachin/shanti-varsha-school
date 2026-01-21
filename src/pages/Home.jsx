@@ -55,7 +55,7 @@ function Home() {
   return (
     <div className="animate-fade-in">
       {/* Hero Section */}
-      <section className="relative h-[650px] md:h-[700px] flex items-center justify-center text-white overflow-hidden">
+      <section className="relative h-[650px] md:h-[700px] flex items-center justify-center text-white overflow-hidden particle-bg">
         {/* School Background Image with zoom animation */}
         <div 
           className="absolute inset-0 bg-center bg-cover bg-no-repeat animate-fade-in-zoom"
@@ -63,14 +63,16 @@ function Home() {
             backgroundImage: 'url(/images/school.webp)',
             backgroundSize: '120%',
             backgroundPosition: 'center',
+            transition: 'background-size 10s ease-in-out',
           }}
         >
         </div>
         {/* Gradient overlay from right to left - darker on right, lighter on left */}
         <div 
-          className="absolute inset-0 z-[1] animate-fade-in"
+          className="absolute inset-0 z-[1] animate-fade-in animate-gradient"
           style={{
             background: 'linear-gradient(to left, rgba(10, 61, 145, 0.75) 0%, rgba(13, 71, 161, 0.55) 40%, rgba(13, 71, 161, 0.35) 100%)',
+            backgroundSize: '200% 200%',
             animationDelay: '0.3s',
             animationFillMode: 'both',
           }}
@@ -78,9 +80,10 @@ function Home() {
         {/* Additional subtle dark overlay with animated pattern */}
         <div className="absolute inset-0 bg-black/5 z-[1]"></div>
         
-        {/* Floating decorative elements */}
-        <div className="absolute top-20 left-10 w-32 h-32 bg-gold/10 rounded-full blur-2xl animate-float z-[2]" style={{ animationDelay: '0s' }}></div>
-        <div className="absolute bottom-20 right-10 w-40 h-40 bg-gold/10 rounded-full blur-3xl animate-float z-[2]" style={{ animationDelay: '1.5s' }}></div>
+        {/* Floating decorative elements with morphing */}
+        <div className="absolute top-20 left-10 w-32 h-32 bg-gold/10 rounded-full blur-2xl animate-float animate-morph z-[2]" style={{ animationDelay: '0s' }}></div>
+        <div className="absolute bottom-20 right-10 w-40 h-40 bg-gold/10 rounded-full blur-3xl animate-float animate-morph z-[2]" style={{ animationDelay: '1.5s' }}></div>
+        <div className="absolute top-1/2 left-1/4 w-24 h-24 bg-navy/20 rounded-full blur-xl animate-float z-[2]" style={{ animationDelay: '3s' }}></div>
         
         <div className="relative z-10 text-center px-4 max-w-5xl mx-auto">
           <h1 className="text-5xl md:text-7xl lg:text-8xl font-bold mb-8 drop-shadow-2xl animate-fade-in-up leading-tight">
@@ -93,11 +96,11 @@ function Home() {
           </p>
           <Link
             to="/about"
-            className="group inline-flex items-center space-x-3 bg-gradient-to-r from-gold to-gold-light text-white px-5 py-3 rounded-2xl font-bold text-lg hover:from-gold-light hover:to-gold transition-all duration-500 shadow-2xl shadow-gold/40 animate-fade-in-up hover:scale-110 hover:shadow-gold/60 transform hover:-translate-y-1" 
+            className="group btn-modern inline-flex items-center space-x-3 bg-gradient-to-r from-gold to-gold-light text-white px-5 py-3 rounded-2xl font-bold text-lg hover:from-gold-light hover:to-gold transition-all duration-500 shadow-2xl shadow-gold/40 animate-fade-in-up hover:scale-110 hover:shadow-gold/60 transform hover:-translate-y-1 glow-border relative overflow-hidden" 
             style={{ animationDelay: '0.4s', animationFillMode: 'both' }}
           >
-            <span>Learn More</span>
-            <ArrowRight className="h-6 w-6 group-hover:translate-x-2 transition-transform duration-300" />
+            <span className="relative z-10">Learn More</span>
+            <ArrowRight className="h-6 w-6 group-hover:translate-x-2 transition-transform duration-300 relative z-10" />
           </Link>
         </div>
         
@@ -122,10 +125,10 @@ function Home() {
           <div className="mt-10 text-center animate-fade-in-up" style={{ animationDelay: '0.7s', animationFillMode: 'both' }}>
             <Link
               to="/notices"
-              className="group inline-flex items-center space-x-3 text-navy font-bold text-lg hover:text-gold transition-all duration-500 hover:scale-110 bg-white px-6 py-3 rounded-full shadow-lg hover:shadow-xl border-2 border-navy/20 hover:border-gold/40"
+              className="group btn-modern magnetic inline-flex items-center space-x-3 text-navy font-bold text-lg hover:text-gold transition-all duration-500 hover:scale-110 bg-white px-6 py-3 rounded-full shadow-lg hover:shadow-xl border-2 border-navy/20 hover:border-gold/40 glow-border"
             >
-              <span>View All Notices</span>
-              <ArrowRight className="h-5 w-5 group-hover:translate-x-2 transition-transform duration-300" />
+              <span className="relative z-10">View All Notices</span>
+              <ArrowRight className="h-5 w-5 group-hover:translate-x-2 transition-transform duration-300 relative z-10" />
             </Link>
           </div>
         </div>
@@ -156,9 +159,11 @@ function Home() {
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 lg:gap-8">
             {/* Sanjana Wagle - 4th Topper Nationwide 2069 */}
-            <div className="group bg-white rounded-2xl shadow-xl p-6 text-center hover:shadow-2xl transition-all duration-500 transform hover:-translate-y-3 hover:scale-[1.02] border-2 border-gold/20 hover:border-gold/60 animate-scale-in relative overflow-hidden backdrop-blur-sm" style={{ animationDelay: '0.7s', animationFillMode: 'both' }}>
+            <div className="group card-3d magnetic hover-lift bg-white rounded-2xl shadow-xl p-6 text-center hover:shadow-2xl transition-all duration-500 transform hover:-translate-y-3 hover:scale-[1.02] border-2 border-gold/20 hover:border-gold/60 animate-scale-in relative overflow-hidden backdrop-blur-sm glow-border" style={{ animationDelay: '0.7s', animationFillMode: 'both' }}>
               {/* Shimmer effect on hover */}
-              <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 animate-shimmer"></div>
+              <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 animate-shimmer-effect"></div>
+              {/* Glow effect */}
+              <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 animate-glow"></div>
               
               {/* Badge */}
               <div className="absolute top-0 right-0 bg-gradient-to-br from-gold to-gold-dark text-white px-4 py-1.5 rounded-bl-2xl rounded-tr-2xl text-xs font-bold shadow-lg transform group-hover:scale-110 transition-transform duration-300 z-10">
@@ -254,9 +259,11 @@ function Home() {
             </div>
 
             {/* Kripa Shahi - 4.0 GPA 2078 */}
-            <div className="group bg-white rounded-2xl shadow-xl p-6 text-center hover:shadow-2xl transition-all duration-500 transform hover:-translate-y-3 hover:scale-[1.02] border-2 border-gold/20 hover:border-gold/60 animate-scale-in relative overflow-hidden backdrop-blur-sm" style={{ animationDelay: '1s', animationFillMode: 'both' }}>
+            <div className="group card-3d magnetic hover-lift bg-white rounded-2xl shadow-xl p-6 text-center hover:shadow-2xl transition-all duration-500 transform hover:-translate-y-3 hover:scale-[1.02] border-2 border-gold/20 hover:border-gold/60 animate-scale-in relative overflow-hidden backdrop-blur-sm glow-border" style={{ animationDelay: '1s', animationFillMode: 'both' }}>
               {/* Shimmer effect on hover */}
-              <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 animate-shimmer"></div>
+              <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 animate-shimmer-effect"></div>
+              {/* Glow effect */}
+              <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 animate-glow"></div>
               
               {/* Badge */}
               <div className="absolute top-0 right-0 bg-gradient-to-br from-gold to-gold-dark text-white px-4 py-1.5 rounded-bl-2xl rounded-tr-2xl text-xs font-bold shadow-lg transform group-hover:scale-110 transition-transform duration-300 z-10">
@@ -303,9 +310,11 @@ function Home() {
 
 
             {/* Sneha Giri - 4.0 GPA 2071 */}
-            <div className="group bg-white rounded-2xl shadow-xl p-6 text-center hover:shadow-2xl transition-all duration-500 transform hover:-translate-y-3 hover:scale-[1.02] border-2 border-gold/20 hover:border-gold/60 animate-scale-in relative overflow-hidden backdrop-blur-sm" style={{ animationDelay: '0.8s', animationFillMode: 'both' }}>
+            <div className="group card-3d magnetic hover-lift bg-white rounded-2xl shadow-xl p-6 text-center hover:shadow-2xl transition-all duration-500 transform hover:-translate-y-3 hover:scale-[1.02] border-2 border-gold/20 hover:border-gold/60 animate-scale-in relative overflow-hidden backdrop-blur-sm glow-border" style={{ animationDelay: '0.8s', animationFillMode: 'both' }}>
               {/* Shimmer effect on hover */}
-              <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 animate-shimmer"></div>
+              <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 animate-shimmer-effect"></div>
+              {/* Glow effect */}
+              <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 animate-glow"></div>
               
               {/* Badge */}
               <div className="absolute top-0 right-0 bg-gradient-to-br from-gold to-gold-dark text-white px-4 py-1.5 rounded-bl-2xl rounded-tr-2xl text-xs font-bold shadow-lg transform group-hover:scale-110 transition-transform duration-300 z-10">
@@ -391,49 +400,49 @@ function Home() {
           </div>
           
           <div className="grid grid-cols-2 md:grid-cols-4 gap-6 md:gap-8">
-            <div className="group bg-white/10 backdrop-blur-md rounded-2xl p-8 text-center hover:bg-white/20 transition-all duration-500 transform hover:scale-110 hover:-translate-y-2 border border-gold/20 hover:border-gold/40 animate-scale-in shadow-xl hover:shadow-2xl" style={{ animationDelay: '1.3s', animationFillMode: 'both' }}>
+            <div className="group glass-dark card-3d magnetic hover-lift rounded-2xl p-8 text-center hover:bg-white/20 transition-all duration-500 transform hover:scale-110 hover:-translate-y-2 border border-gold/20 hover:border-gold/40 animate-scale-in shadow-xl hover:shadow-2xl glow-border" style={{ animationDelay: '1.3s', animationFillMode: 'both' }}>
               <div className="flex justify-center mb-6">
-                <div className="bg-gradient-to-br from-gold/30 to-gold/10 p-5 rounded-full group-hover:from-gold/40 group-hover:to-gold/20 transition-all duration-500 shadow-lg group-hover:shadow-gold/50">
-                  <Users className="h-10 w-10 text-gold group-hover:scale-110 transition-transform duration-500" />
+                <div className="bg-gradient-to-br from-gold/30 to-gold/10 p-5 rounded-full group-hover:from-gold/40 group-hover:to-gold/20 transition-all duration-500 shadow-lg group-hover:shadow-gold/50 animate-rotate-in">
+                  <Users className="h-10 w-10 text-gold group-hover:scale-110 group-hover:rotate-12 transition-all duration-500" />
                 </div>
               </div>
-              <div className="text-5xl md:text-6xl font-bold text-gold mb-3 group-hover:scale-110 transition-transform duration-500">
+              <div className="text-5xl md:text-6xl font-bold gradient-text mb-3 group-hover:scale-110 transition-transform duration-500">
                 {counters.students}+
               </div>
               <div className="text-gray-200 font-semibold text-lg">Active Students</div>
             </div>
 
-            <div className="group bg-white/10 backdrop-blur-md rounded-2xl p-8 text-center hover:bg-white/20 transition-all duration-500 transform hover:scale-110 hover:-translate-y-2 border border-gold/20 hover:border-gold/40 animate-scale-in shadow-xl hover:shadow-2xl" style={{ animationDelay: '1.4s', animationFillMode: 'both' }}>
+            <div className="group glass-dark card-3d magnetic hover-lift rounded-2xl p-8 text-center hover:bg-white/20 transition-all duration-500 transform hover:scale-110 hover:-translate-y-2 border border-gold/20 hover:border-gold/40 animate-scale-in shadow-xl hover:shadow-2xl glow-border" style={{ animationDelay: '1.4s', animationFillMode: 'both' }}>
               <div className="flex justify-center mb-6">
-                <div className="bg-gradient-to-br from-gold/30 to-gold/10 p-5 rounded-full group-hover:from-gold/40 group-hover:to-gold/20 transition-all duration-500 shadow-lg group-hover:shadow-gold/50">
-                  <GraduationCap className="h-10 w-10 text-gold group-hover:scale-110 transition-transform duration-500" />
+                <div className="bg-gradient-to-br from-gold/30 to-gold/10 p-5 rounded-full group-hover:from-gold/40 group-hover:to-gold/20 transition-all duration-500 shadow-lg group-hover:shadow-gold/50 animate-rotate-in">
+                  <GraduationCap className="h-10 w-10 text-gold group-hover:scale-110 group-hover:rotate-12 transition-all duration-500" />
                 </div>
               </div>
-              <div className="text-5xl md:text-6xl font-bold text-gold mb-3 group-hover:scale-110 transition-transform duration-500">
+              <div className="text-5xl md:text-6xl font-bold gradient-text mb-3 group-hover:scale-110 transition-transform duration-500">
                 {counters.teachers}+
               </div>
               <div className="text-gray-200 font-semibold text-lg">Qualified Teachers</div>
             </div>
 
-            <div className="group bg-white/10 backdrop-blur-md rounded-2xl p-8 text-center hover:bg-white/20 transition-all duration-500 transform hover:scale-110 hover:-translate-y-2 border border-gold/20 hover:border-gold/40 animate-scale-in shadow-xl hover:shadow-2xl" style={{ animationDelay: '1.5s', animationFillMode: 'both' }}>
+            <div className="group glass-dark card-3d magnetic hover-lift rounded-2xl p-8 text-center hover:bg-white/20 transition-all duration-500 transform hover:scale-110 hover:-translate-y-2 border border-gold/20 hover:border-gold/40 animate-scale-in shadow-xl hover:shadow-2xl glow-border" style={{ animationDelay: '1.5s', animationFillMode: 'both' }}>
               <div className="flex justify-center mb-6">
-                <div className="bg-gradient-to-br from-gold/30 to-gold/10 p-5 rounded-full group-hover:from-gold/40 group-hover:to-gold/20 transition-all duration-500 shadow-lg group-hover:shadow-gold/50">
-                  <Calendar className="h-10 w-10 text-gold group-hover:scale-110 transition-transform duration-500" />
+                <div className="bg-gradient-to-br from-gold/30 to-gold/10 p-5 rounded-full group-hover:from-gold/40 group-hover:to-gold/20 transition-all duration-500 shadow-lg group-hover:shadow-gold/50 animate-rotate-in">
+                  <Calendar className="h-10 w-10 text-gold group-hover:scale-110 group-hover:rotate-12 transition-all duration-500" />
                 </div>
               </div>
-              <div className="text-5xl md:text-6xl font-bold text-gold mb-3 group-hover:scale-110 transition-transform duration-500">
+              <div className="text-5xl md:text-6xl font-bold gradient-text mb-3 group-hover:scale-110 transition-transform duration-500">
                 {counters.years}+
               </div>
               <div className="text-gray-200 font-semibold text-lg">Years of Excellence</div>
             </div>
 
-            <div className="group bg-white/10 backdrop-blur-md rounded-2xl p-8 text-center hover:bg-white/20 transition-all duration-500 transform hover:scale-110 hover:-translate-y-2 border border-gold/20 hover:border-gold/40 animate-scale-in shadow-xl hover:shadow-2xl" style={{ animationDelay: '1.6s', animationFillMode: 'both' }}>
+            <div className="group glass-dark card-3d magnetic hover-lift rounded-2xl p-8 text-center hover:bg-white/20 transition-all duration-500 transform hover:scale-110 hover:-translate-y-2 border border-gold/20 hover:border-gold/40 animate-scale-in shadow-xl hover:shadow-2xl glow-border" style={{ animationDelay: '1.6s', animationFillMode: 'both' }}>
               <div className="flex justify-center mb-6">
-                <div className="bg-gradient-to-br from-gold/30 to-gold/10 p-5 rounded-full group-hover:from-gold/40 group-hover:to-gold/20 transition-all duration-500 shadow-lg group-hover:shadow-gold/50">
-                  <Award className="h-10 w-10 text-gold group-hover:scale-110 transition-transform duration-500" />
+                <div className="bg-gradient-to-br from-gold/30 to-gold/10 p-5 rounded-full group-hover:from-gold/40 group-hover:to-gold/20 transition-all duration-500 shadow-lg group-hover:shadow-gold/50 animate-rotate-in">
+                  <Award className="h-10 w-10 text-gold group-hover:scale-110 group-hover:rotate-12 transition-all duration-500" />
                 </div>
               </div>
-              <div className="text-5xl md:text-6xl font-bold text-gold mb-3 group-hover:scale-110 transition-transform duration-500">
+              <div className="text-5xl md:text-6xl font-bold gradient-text mb-3 group-hover:scale-110 transition-transform duration-500">
                 {counters.awards}+
               </div>
               <div className="text-gray-200 font-semibold text-lg">Awards & Achievements</div>
