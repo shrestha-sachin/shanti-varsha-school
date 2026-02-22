@@ -6,12 +6,84 @@ export default {
   ],
   theme: {
     extend: {
+      fontFamily: {
+        sans: ['Inter', 'system-ui', '-apple-system', 'sans-serif'],
+        display: ['Poppins', 'Inter', 'system-ui', 'sans-serif'],
+      },
       colors: {
-        'navy': '#0d47a1',      // Deep blue - primary color
-        'navy-dark': '#0a3d91',  // Darker navy for hover states
-        'gold': '#06b6d4',       // Vibrant cyan/teal accent
-        'gold-light': '#22d3ee', // Lighter cyan for hover
-        'gold-dark': '#0891b2', // Darker cyan
+        // Primary brand colors
+        'navy': '#0d47a1',
+        'navy-dark': '#0a3d91',
+        'navy-darker': '#072f6e',
+        'navy-light': '#1565c0',
+        // Accent gold/teal
+        'gold': '#06b6d4',
+        'gold-light': '#22d3ee',
+        'gold-dark': '#0891b2',
+        'gold-darker': '#0e7490',
+        // Status colors
+        'success': '#10b981',
+        'success-light': '#d1fae5',
+        'danger': '#ef4444',
+        'danger-light': '#fee2e2',
+        'warning': '#f59e0b',
+        'warning-light': '#fef3c7',
+        'info': '#3b82f6',
+        'info-light': '#dbeafe',
+        // Category colors
+        'cat-general': '#6366f1',
+        'cat-exam': '#ef4444',
+        'cat-event': '#10b981',
+        'cat-urgent': '#f59e0b',
+        'cat-news': '#8b5cf6',
+        'cat-academic': '#0d47a1',
+        'cat-sports': '#f97316',
+        'cat-arts': '#ec4899',
+      },
+      animation: {
+        'fade-in': 'fadeIn 0.6s ease-out forwards',
+        'fade-in-up': 'fadeInUp 0.7s ease-out forwards',
+        'fade-in-down': 'fadeInDown 0.7s ease-out forwards',
+        'slide-in-left': 'slideInLeft 0.7s ease-out forwards',
+        'slide-in-right': 'slideInRight 0.7s ease-out forwards',
+        'scale-in': 'scaleIn 0.5s ease-out forwards',
+        'float': 'float 3s ease-in-out infinite',
+        'pulse-slow': 'pulse 2.5s ease-in-out infinite',
+        'shimmer': 'shimmer 2s linear infinite',
+        'gradient-shift': 'gradientShift 4s ease infinite',
+        'spin-slow': 'spin 8s linear infinite',
+        'bounce-gentle': 'bounceGentle 2s ease-in-out infinite',
+        'typewriter': 'typewriter 3s steps(40) forwards',
+        'blink': 'blink 1s step-end infinite',
+        'ripple': 'ripple 0.6s ease-out forwards',
+        'count-up': 'scaleIn 0.3s ease-out forwards',
+      },
+      keyframes: {
+        fadeIn: { from: { opacity: 0 }, to: { opacity: 1 } },
+        fadeInUp: { from: { opacity: 0, transform: 'translateY(30px)' }, to: { opacity: 1, transform: 'translateY(0)' } },
+        fadeInDown: { from: { opacity: 0, transform: 'translateY(-30px)' }, to: { opacity: 1, transform: 'translateY(0)' } },
+        slideInLeft: { from: { opacity: 0, transform: 'translateX(-40px)' }, to: { opacity: 1, transform: 'translateX(0)' } },
+        slideInRight: { from: { opacity: 0, transform: 'translateX(40px)' }, to: { opacity: 1, transform: 'translateX(0)' } },
+        scaleIn: { from: { opacity: 0, transform: 'scale(0.9)' }, to: { opacity: 1, transform: 'scale(1)' } },
+        float: { '0%,100%': { transform: 'translateY(0)' }, '50%': { transform: 'translateY(-12px)' } },
+        shimmer: { '0%': { backgroundPosition: '-1000px 0' }, '100%': { backgroundPosition: '1000px 0' } },
+        gradientShift: { '0%,100%': { backgroundPosition: '0% 50%' }, '50%': { backgroundPosition: '100% 50%' } },
+        bounceGentle: { '0%,100%': { transform: 'translateY(0)' }, '50%': { transform: 'translateY(-8px)' } },
+        typewriter: { from: { width: '0' }, to: { width: '100%' } },
+        blink: { '0%,100%': { opacity: 1 }, '50%': { opacity: 0 } },
+        ripple: { '0%': { transform: 'scale(0)', opacity: 0.5 }, '100%': { transform: 'scale(4)', opacity: 0 } },
+      },
+      boxShadow: {
+        'glow-gold': '0 0 20px rgba(6, 182, 212, 0.4), 0 0 40px rgba(6, 182, 212, 0.2)',
+        'glow-navy': '0 0 20px rgba(13, 71, 161, 0.4), 0 0 40px rgba(13, 71, 161, 0.2)',
+        'card': '0 4px 24px rgba(0,0,0,0.06)',
+        'card-hover': '0 12px 48px rgba(0,0,0,0.12)',
+        'premium': '0 20px 60px rgba(13, 71, 161, 0.15), 0 4px 16px rgba(0,0,0,0.08)',
+      },
+      backgroundImage: {
+        'gradient-navy': 'linear-gradient(135deg, #0d47a1 0%, #0a3d91 100%)',
+        'gradient-gold': 'linear-gradient(135deg, #06b6d4 0%, #22d3ee 100%)',
+        'gradient-hero': 'linear-gradient(135deg, #072f6e 0%, #0d47a1 50%, #0891b2 100%)',
       },
     },
   },

@@ -1,126 +1,128 @@
 import { useState, useEffect } from 'react'
-import { Calendar, Bell } from 'lucide-react'
+import { Calendar, Bell, Pin, ChevronRight, Search } from 'lucide-react'
 
-function NoticeBoard({ limit = null }) {
+const CATEGORY_STYLES = {
+  General: { badge: 'badge-general', border: 'border-l-indigo-500' },
+  Exam: { badge: 'badge-exam', border: 'border-l-red-500' },
+  Event: { badge: 'badge-event', border: 'border-l-emerald-500' },
+  Urgent: { badge: 'badge-urgent', border: 'border-l-amber-500' },
+  Meeting: { badge: 'badge-meeting', border: 'border-l-sky-500' },
+}
+
+function NoticeBoard({ limit = null, showSearch = false }) {
   const [notices, setNotices] = useState([])
 
-  useEffect(() => {
-    // Load notices from localStorage
-    const storedNotices = localStorage.getItem('schoolNotices')
-    if (storedNotices) {
-      const parsedNotices = JSON.parse(storedNotices)
-      // Sort by date (newest first)
-      const sortedNotices = parsedNotices.sort((a, b) => new Date(b.date) - new Date(a.date))
-      setNotices(sortedNotices)
+  const loadNotices = () => {
+    const stored = localStorage.getItem('schoolNotices')
+    if (stored) {
+      const parsed = JSON.parse(stored)
+      // Pinned first, then by date desc
+      const sorted = parsed.sort((a, b) => {
+        if (a.pinned && !b.pinned) return -1
+        if (!a.pinned && b.pinned) return 1
+        return new Date(b.date) - new Date(a.date)
+      })
+      setNotices(sorted)
     } else {
-      // Initialize with sample notices
       const sampleNotices = [
-        {
-          id: 1,
-          title: 'Welcome to New Academic Session',
-          date: new Date().toISOString().split('T')[0],
-        },
-        {
-          id: 2,
-          title: 'Annual Sports Day Announcement',
-          date: new Date(Date.now() - 86400000).toISOString().split('T')[0],
-        },
-        {
-          id: 3,
-          title: 'Parent-Teacher Meeting Scheduled',
-          date: new Date(Date.now() - 172800000).toISOString().split('T')[0],
-        },
+        { id: 1, title: 'Welcome to the New Academic Session 2081', date: new Date().toISOString().split('T')[0], category: 'General', pinned: true, description: 'We warmly welcome all students and staff to the new academic session. May this year be filled with learning and success.' },
+        { id: 2, title: 'Annual Sports Day Announcement', date: new Date(Date.now() - 86400000).toISOString().split('T')[0], category: 'Event', pinned: false, description: 'Our annual sports day will be held on the school grounds. Students are encouraged to participate in various events.' },
+        { id: 3, title: 'Half-Yearly Exam Schedule Released', date: new Date(Date.now() - 172800000).toISOString().split('T')[0], category: 'Exam', pinned: false, description: 'The half-yearly examination schedule has been released. Please check the timetable and prepare accordingly.' },
       ]
       localStorage.setItem('schoolNotices', JSON.stringify(sampleNotices))
       setNotices(sampleNotices)
     }
-  }, [])
+  }
 
-  // Listen for storage changes (when admin adds new notice)
   useEffect(() => {
-    const handleStorageChange = () => {
-      const storedNotices = localStorage.getItem('schoolNotices')
-      if (storedNotices) {
-        const parsedNotices = JSON.parse(storedNotices)
-        const sortedNotices = parsedNotices.sort((a, b) => new Date(b.date) - new Date(a.date))
-        setNotices(sortedNotices)
-      }
-    }
-
-    window.addEventListener('storage', handleStorageChange)
-    // Also listen for custom event (for same-tab updates)
-    window.addEventListener('noticeUpdated', handleStorageChange)
-
+    loadNotices()
+    const handler = () => loadNotices()
+    window.addEventListener('storage', handler)
+    window.addEventListener('noticeUpdated', handler)
     return () => {
-      window.removeEventListener('storage', handleStorageChange)
-      window.removeEventListener('noticeUpdated', handleStorageChange)
+      window.removeEventListener('storage', handler)
+      window.removeEventListener('noticeUpdated', handler)
     }
   }, [])
 
   const displayNotices = limit ? notices.slice(0, limit) : notices
 
-  const formatDate = (dateString) => {
-    const date = new Date(dateString)
-    return date.toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric',
+  const formatDate = (dateString) =>
+    new Date(dateString).toLocaleDateString('en-US', {
+      year: 'numeric', month: 'short', day: 'numeric',
     })
-  }
 
   if (displayNotices.length === 0) {
     return (
-      <div className="bg-white rounded-2xl shadow-xl p-10 border-2 border-gray-100 hover:shadow-2xl transition-all duration-500 animate-fade-in-up">
+      <div className="bg-white rounded-2xl shadow-card p-10 border border-gray-100">
         <div className="flex items-center space-x-4 mb-6">
-          <div className="bg-gradient-to-br from-gold/20 to-gold/10 p-3 rounded-xl shadow-lg">
+          <div className="bg-gradient-to-br from-gold/20 to-gold/10 p-3 rounded-xl">
             <Bell className="h-7 w-7 text-gold animate-pulse-slow" />
           </div>
-          <h2 className="text-3xl md:text-4xl font-bold text-navy bg-gradient-to-r from-navy to-navy-dark bg-clip-text text-transparent">
-            Notice Board
-          </h2>
+          <h2 className="text-3xl font-display font-bold section-heading">Notice Board</h2>
         </div>
-        <p className="text-gray-500 text-center py-12 text-lg">No notices available at the moment.</p>
+        <p className="text-gray-400 text-center py-10 text-base">No notices available at the moment.</p>
       </div>
     )
   }
 
   return (
-    <div className="bg-white rounded-2xl shadow-xl p-8 md:p-10 border-2 border-gray-100 hover:shadow-2xl transition-all duration-500 animate-fade-in-up">
-      <div className="flex items-center space-x-4 mb-10">
-        <div className="bg-gradient-to-br from-gold/20 to-gold/10 p-3 rounded-xl shadow-lg">
-          <Bell className="h-7 w-7 text-gold animate-pulse-slow" />
+    <div className="bg-white rounded-2xl shadow-card border border-gray-100 overflow-hidden">
+      {/* Header */}
+      <div className="p-6 md:p-8 border-b border-gray-100 bg-gradient-to-r from-navy/[0.03] to-transparent">
+        <div className="flex items-center space-x-4">
+          <div className="bg-gradient-to-br from-gold/20 to-gold/10 p-3 rounded-xl shadow-sm">
+            <Bell className="h-7 w-7 text-gold animate-pulse-slow" />
+          </div>
+          <div>
+            <h2 className="text-2xl md:text-3xl font-display font-bold section-heading">Notice Board</h2>
+            <p className="text-gray-500 text-sm mt-0.5">{displayNotices.length} notice{displayNotices.length !== 1 ? 's' : ''}</p>
+          </div>
         </div>
-        <h2 className="text-3xl md:text-4xl font-bold text-navy bg-gradient-to-r from-navy to-navy-dark bg-clip-text text-transparent">
-          Notice Board
-        </h2>
       </div>
-      <div className="space-y-4">
-        {displayNotices.map((notice, index) => (
-          <div
-            key={notice.id}
-            className="group relative border-l-4 border-gold bg-gradient-to-r from-gray-50 via-white to-gray-50/50 p-6 rounded-r-2xl hover:shadow-xl transition-all duration-500 transform hover:-translate-x-2 hover:scale-[1.02] animate-fade-in-up overflow-hidden"
-            style={{ animationDelay: `${index * 0.1}s`, animationFillMode: 'both' }}
-          >
-            {/* Hover gradient overlay */}
-            <div className="absolute inset-0 bg-gradient-to-r from-gold/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
-            
-            {/* Animated border effect */}
-            <div className="absolute left-0 top-0 bottom-0 w-1 bg-gold transform scale-y-0 group-hover:scale-y-100 transition-transform duration-500 origin-top"></div>
-            
-            <div className="relative z-10">
-              <h3 className="text-lg md:text-xl font-bold text-navy mb-3 group-hover:text-gold transition-colors duration-300">
-                {notice.title}
-              </h3>
-              <div className="flex items-center space-x-2 text-gray-600">
-                <Calendar className="h-5 w-5 text-gold group-hover:scale-110 transition-transform duration-300" />
-                <span className="text-sm md:text-base font-medium">{formatDate(notice.date)}</span>
+
+      {/* Notices */}
+      <div className="p-6 md:p-8 space-y-3">
+        {displayNotices.map((notice, index) => {
+          const cat = CATEGORY_STYLES[notice.category] || CATEGORY_STYLES.General
+          return (
+            <div
+              key={notice.id}
+              className={`group relative border-l-4 ${cat.border} bg-gray-50 hover:bg-white p-5 rounded-r-2xl hover:shadow-card transition-all duration-300 hover:-translate-x-1 hover:translate-y-0 animate-fade-in-up`}
+              style={{ animationDelay: `${index * 0.08}s` }}
+            >
+              {/* Hover shimmer */}
+              <div className="absolute inset-0 rounded-r-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-500 animate-shimmer-effect pointer-events-none" />
+
+              <div className="relative z-10">
+                <div className="flex items-start justify-between gap-3 mb-2">
+                  <div className="flex items-center gap-2 flex-wrap">
+                    {notice.pinned && (
+                      <span className="flex items-center gap-1 text-[10px] font-bold text-amber-600 bg-amber-50 border border-amber-200 px-2 py-0.5 rounded-full">
+                        <Pin className="h-2.5 w-2.5" /> Pinned
+                      </span>
+                    )}
+                    {notice.category && (
+                      <span className={`badge ${cat.badge} text-[11px]`}>{notice.category}</span>
+                    )}
+                  </div>
+                  <div className="flex items-center gap-1.5 text-gray-400 text-xs whitespace-nowrap flex-shrink-0">
+                    <Calendar className="h-3.5 w-3.5" />
+                    {formatDate(notice.date)}
+                  </div>
+                </div>
+                <h3 className="text-base font-semibold text-navy group-hover:text-gold transition-colors duration-300 leading-snug">
+                  {notice.title}
+                </h3>
+                {notice.description && (
+                  <p className="text-gray-500 text-sm mt-1.5 leading-relaxed line-clamp-2">
+                    {notice.description}
+                  </p>
+                )}
               </div>
             </div>
-            
-            {/* Decorative element */}
-            <div className="absolute top-2 right-2 w-2 h-2 bg-gold/30 rounded-full opacity-0 group-hover:opacity-100 group-hover:animate-pulse-slow transition-opacity duration-500"></div>
-          </div>
-        ))}
+          )
+        })}
       </div>
     </div>
   )

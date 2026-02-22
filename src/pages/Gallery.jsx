@@ -1,70 +1,167 @@
-import { Image as ImageIcon } from 'lucide-react'
+import { useState, useEffect, useCallback } from 'react'
+import { X, ZoomIn, ChevronLeft, ChevronRight, Camera, ImageOff } from 'lucide-react'
+
+const SAMPLE_GALLERY = [
+  { id: 1, imageUrl: '/images/gallery/1.jpg', caption: 'Annual Sports Day', album: 'Sports 2081', date: '2024-01-15' },
+  { id: 2, imageUrl: '/images/gallery/2.jpg', caption: 'Science Exhibition', album: 'Academic 2081', date: '2024-02-10' },
+  { id: 3, imageUrl: '/images/gallery/3.jpg', caption: 'Cultural Program', album: 'Events 2081', date: '2024-03-05' },
+  { id: 4, imageUrl: '/images/gallery/4.jpg', caption: 'Award Ceremony', album: 'Events 2081', date: '2024-04-20' },
+  { id: 5, imageUrl: '/images/gallery/5.jpg', caption: 'Campus View', album: 'Campus', date: '2024-01-01' },
+  { id: 6, imageUrl: '/images/gallery/6.jpg', caption: 'Classroom Activities', album: 'Academic 2081', date: '2024-02-25' },
+]
+
+function Lightbox({ images, index, onClose, onPrev, onNext }) {
+  const img = images[index]
+  useEffect(() => {
+    const onKey = (e) => {
+      if (e.key === 'Escape') onClose()
+      if (e.key === 'ArrowLeft') onPrev()
+      if (e.key === 'ArrowRight') onNext()
+    }
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+  }, [onClose, onPrev, onNext])
+
+  if (!img) return null
+  return (
+    <div className="lightbox-overlay" onClick={e => e.target === e.currentTarget && onClose()}>
+      {/* Nav prev */}
+      <button onClick={onPrev} disabled={index === 0} className="absolute left-4 top-1/2 -translate-y-1/2 bg-white/15 hover:bg-white/30 text-white p-3 rounded-full backdrop-blur-sm transition-all disabled:opacity-30">
+        <ChevronLeft className="h-6 w-6" />
+      </button>
+
+      <div className="max-w-4xl max-h-[85vh] flex flex-col items-center px-16">
+        <img
+          src={img.imageUrl}
+          alt={img.caption || 'Gallery image'}
+          className="max-h-[75vh] max-w-full object-contain rounded-2xl shadow-2xl animate-scale-in"
+        />
+        {img.caption && (
+          <div className="mt-4 text-white/90 text-center text-sm font-medium bg-black/30 backdrop-blur-sm px-6 py-2 rounded-full">
+            {img.caption}
+            {img.album && <span className="ml-2 text-gold-light">· {img.album}</span>}
+          </div>
+        )}
+        <p className="text-white/40 text-xs mt-2">{index + 1} / {images.length}</p>
+      </div>
+
+      {/* Nav next */}
+      <button onClick={onNext} disabled={index === images.length - 1} className="absolute right-4 top-1/2 -translate-y-1/2 bg-white/15 hover:bg-white/30 text-white p-3 rounded-full backdrop-blur-sm transition-all disabled:opacity-30">
+        <ChevronRight className="h-6 w-6" />
+      </button>
+
+      {/* Close */}
+      <button onClick={onClose} className="absolute top-4 right-4 bg-white/15 hover:bg-white/30 text-white p-2.5 rounded-full backdrop-blur-sm transition-all">
+        <X className="h-5 w-5" />
+      </button>
+    </div>
+  )
+}
 
 function Gallery() {
-  // Add your image filenames here (e.g., ['image1.jpg', 'image2.jpg', ...])
-  // Images should be placed in the public/gallery/ folder
-  const galleryImages = [
-    // 'gallery1.jpg',
-    // 'gallery2.jpg',
-    // 'gallery3.jpg',
-    // Add more image filenames as needed
-  ]
+  const [allImages, setAllImages] = useState([])
+  const [activeAlbum, setActiveAlbum] = useState('All')
+  const [lightboxIndex, setLightboxIndex] = useState(null)
+  const [imgErrors, setImgErrors] = useState({})
 
-  // Placeholder gallery if no images are added
-  const placeholderImages = Array.from({ length: 9 }, (_, i) => i + 1)
+  useEffect(() => {
+    const stored = JSON.parse(localStorage.getItem('schoolGallery') || '[]')
+    setAllImages(stored.length > 0 ? stored : SAMPLE_GALLERY)
+  }, [])
+
+  const albums = ['All', ...new Set(allImages.map(g => g.album).filter(Boolean))]
+  const filtered = activeAlbum === 'All' ? allImages : allImages.filter(g => g.album === activeAlbum)
+
+  const openLightbox = (idx) => setLightboxIndex(idx)
+  const closeLightbox = () => setLightboxIndex(null)
+  const prev = () => setLightboxIndex(i => Math.max(0, i - 1))
+  const next = () => setLightboxIndex(i => Math.min(filtered.length - 1, i + 1))
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-gray-50 via-white to-gray-50/50 py-20 animate-fade-in">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        {/* Header */}
-        <div className="text-center mb-16 animate-fade-in-up" style={{ animationDelay: '0.1s', animationFillMode: 'both' }}>
-          <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-navy mb-4 bg-gradient-to-r from-navy to-navy-dark bg-clip-text text-transparent">
-            Gallery
-          </h1>
-          <div className="w-24 h-1 bg-gradient-to-r from-transparent via-gold to-transparent mx-auto mb-6"></div>
-          <p className="text-lg md:text-xl text-gray-600 max-w-2xl mx-auto">
-            Explore moments from our school events, activities, and celebrations.
-          </p>
+    <div className="min-h-screen bg-slate-50 animate-fade-in">
+      {/* Hero */}
+      <section className="page-hero py-20 text-white">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex items-center gap-4 animate-fade-in-up">
+            <div className="bg-white/15 p-3 rounded-2xl backdrop-blur-sm">
+              <Camera className="h-8 w-8 text-white" />
+            </div>
+            <div>
+              <h1 className="font-display font-bold text-3xl md:text-5xl">Photo Gallery</h1>
+              <p className="text-gold-light text-sm mt-1">Memories from our school life</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+        {/* Album tabs */}
+        <div className="flex items-center gap-3 flex-wrap mb-8 animate-fade-in-up">
+          {albums.map(album => (
+            <button
+              key={album}
+              onClick={() => setActiveAlbum(album)}
+              className={`px-5 py-2 rounded-full text-sm font-semibold transition-all duration-300 ${activeAlbum === album
+                  ? 'bg-gradient-to-r from-navy to-gold text-white shadow-lg'
+                  : 'bg-white text-gray-600 border border-gray-200 hover:border-gold/40 hover:text-navy'
+                }`}
+            >
+              {album}
+              <span className={`ml-1.5 text-xs ${activeAlbum === album ? 'text-white/70' : 'text-gray-400'}`}>
+                ({album === 'All' ? allImages.length : allImages.filter(g => g.album === album).length})
+              </span>
+            </button>
+          ))}
         </div>
 
-        {galleryImages.length > 0 ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 animate-fade-in-up" style={{ animationDelay: '0.2s', animationFillMode: 'both' }}>
-            {galleryImages.map((image, index) => (
-              <div
-                key={index}
-                className="group aspect-square rounded-2xl shadow-xl overflow-hidden hover:shadow-2xl transition-all duration-500 transform hover:-translate-y-2 hover:scale-[1.02] border-2 border-gray-100 hover:border-gold/40 animate-scale-in"
-                style={{ animationDelay: `${0.3 + index * 0.1}s`, animationFillMode: 'both' }}
-              >
-                <img
-                  src={`/gallery/${image}`}
-                  alt={`Gallery image ${index + 1}`}
-                  className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
-                />
-              </div>
-            ))}
+        {/* Masonry grid */}
+        {filtered.length === 0 ? (
+          <div className="text-center py-24">
+            <Camera className="h-16 w-16 text-gray-200 mx-auto mb-4" />
+            <p className="text-gray-400 text-lg font-medium">No photos in this album yet.</p>
           </div>
         ) : (
-          <>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            {placeholderImages.map((num, index) => (
+          <div className="columns-2 sm:columns-3 md:columns-4 gap-3 space-y-3">
+            {filtered.map((img, idx) => (
               <div
-                key={num}
-                className="group aspect-square bg-gradient-to-br from-navy via-navy-dark to-blue-900 rounded-2xl shadow-xl flex flex-col items-center justify-center text-white relative overflow-hidden hover:shadow-2xl transition-all duration-500 transform hover:-translate-y-2 hover:scale-[1.02] border-2 border-gray-100 hover:border-gold/40 animate-scale-in"
-                style={{ animationDelay: `${0.2 + index * 0.1}s`, animationFillMode: 'both' }}
+                key={img.id}
+                className="group relative break-inside-avoid rounded-xl overflow-hidden cursor-pointer shadow-sm hover:shadow-xl transition-all duration-400 animate-fade-in"
+                style={{ animationDelay: `${idx * 0.04}s` }}
+                onClick={() => openLightbox(idx)}
               >
-                <div className="absolute inset-0 bg-gradient-to-br from-gold/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
-                <ImageIcon className="h-16 w-16 mb-4 opacity-50 group-hover:opacity-100 group-hover:scale-110 transition-all duration-500 relative z-10" />
-                <span className="text-2xl font-bold opacity-50 group-hover:opacity-100 transition-opacity duration-500 relative z-10">Image {num}</span>
+                {!imgErrors[img.id] ? (
+                  <img
+                    src={img.imageUrl}
+                    alt={img.caption || 'Gallery'}
+                    className="w-full h-auto object-cover group-hover:scale-105 transition-transform duration-500"
+                    onError={() => setImgErrors(p => ({ ...p, [img.id]: true }))}
+                  />
+                ) : (
+                  <div className="w-full h-40 bg-gradient-to-br from-gray-100 to-gray-200 flex flex-col items-center justify-center gap-2">
+                    <ImageOff className="h-8 w-8 text-gray-300" />
+                    <span className="text-xs text-gray-400">No image</span>
+                  </div>
+                )}
+                <div className="absolute inset-0 bg-navy/60 opacity-0 group-hover:opacity-100 transition-all duration-400 flex flex-col items-center justify-center gap-2">
+                  <ZoomIn className="h-8 w-8 text-white" />
+                  {img.caption && <p className="text-white text-xs text-center px-3 leading-tight font-medium">{img.caption}</p>}
+                  {img.album && <span className="badge badge-news text-[10px]">{img.album}</span>}
+                </div>
               </div>
             ))}
           </div>
-          <p className="text-center text-gray-600 mt-12 text-lg animate-fade-in-up" style={{ animationDelay: '1.2s', animationFillMode: 'both' }}>
-            To add gallery images, place them in the <code className="bg-gray-100 px-2 py-1 rounded border border-gold/20">public/gallery/</code> folder
-            and update the <code className="bg-gray-100 px-2 py-1 rounded border border-gold/20">galleryImages</code> array in Gallery.jsx
-          </p>
-        </>
-      )}
+        )}
       </div>
+
+      {lightboxIndex !== null && (
+        <Lightbox
+          images={filtered}
+          index={lightboxIndex}
+          onClose={closeLightbox}
+          onPrev={prev}
+          onNext={next}
+        />
+      )}
     </div>
   )
 }
