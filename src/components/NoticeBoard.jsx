@@ -1,48 +1,28 @@
 import { useState, useEffect } from 'react'
 import { Calendar, Bell, Pin, ChevronRight, Search } from 'lucide-react'
+import { supabase } from '../supabaseClient'
 
 const CATEGORY_STYLES = {
-  General: { badge: 'badge-general', border: 'border-l-indigo-500' },
-  Exam: { badge: 'badge-exam', border: 'border-l-red-500' },
-  Event: { badge: 'badge-event', border: 'border-l-emerald-500' },
-  Urgent: { badge: 'badge-urgent', border: 'border-l-amber-500' },
-  Meeting: { badge: 'badge-meeting', border: 'border-l-sky-500' },
+  General: { badge: 'badge-general', border: 'border-l-cat-general' },
+  Exam: { badge: 'badge-exam', border: 'border-l-cat-exam' },
+  Event: { badge: 'badge-event', border: 'border-l-cat-event' },
+  Urgent: { badge: 'badge-urgent', border: 'border-l-cat-urgent' },
+  Meeting: { badge: 'badge-meeting', border: 'border-l-cat-academic' },
 }
 
 function NoticeBoard({ limit = null, showSearch = false }) {
   const [notices, setNotices] = useState([])
 
-  const loadNotices = () => {
-    const stored = localStorage.getItem('schoolNotices')
-    if (stored) {
-      const parsed = JSON.parse(stored)
-      // Pinned first, then by date desc
-      const sorted = parsed.sort((a, b) => {
-        if (a.pinned && !b.pinned) return -1
-        if (!a.pinned && b.pinned) return 1
-        return new Date(b.date) - new Date(a.date)
-      })
-      setNotices(sorted)
-    } else {
-      const sampleNotices = [
-        { id: 1, title: 'Welcome to the New Academic Session 2081', date: new Date().toISOString().split('T')[0], category: 'General', pinned: true, description: 'We warmly welcome all students and staff to the new academic session. May this year be filled with learning and success.' },
-        { id: 2, title: 'Annual Sports Day Announcement', date: new Date(Date.now() - 86400000).toISOString().split('T')[0], category: 'Event', pinned: false, description: 'Our annual sports day will be held on the school grounds. Students are encouraged to participate in various events.' },
-        { id: 3, title: 'Half-Yearly Exam Schedule Released', date: new Date(Date.now() - 172800000).toISOString().split('T')[0], category: 'Exam', pinned: false, description: 'The half-yearly examination schedule has been released. Please check the timetable and prepare accordingly.' },
-      ]
-      localStorage.setItem('schoolNotices', JSON.stringify(sampleNotices))
-      setNotices(sampleNotices)
-    }
+  const loadNotices = async () => {
+    const { data } = await supabase.from('school_notices')
+      .select('*')
+      .order('pinned', { ascending: false })
+      .order('date', { ascending: false })
+    if (data) setNotices(data)
   }
 
   useEffect(() => {
     loadNotices()
-    const handler = () => loadNotices()
-    window.addEventListener('storage', handler)
-    window.addEventListener('noticeUpdated', handler)
-    return () => {
-      window.removeEventListener('storage', handler)
-      window.removeEventListener('noticeUpdated', handler)
-    }
   }, [])
 
   const displayNotices = limit ? notices.slice(0, limit) : notices
@@ -98,7 +78,7 @@ function NoticeBoard({ limit = null, showSearch = false }) {
                 <div className="flex items-start justify-between gap-3 mb-2">
                   <div className="flex items-center gap-2 flex-wrap">
                     {notice.pinned && (
-                      <span className="flex items-center gap-1 text-[10px] font-bold text-amber-600 bg-amber-50 border border-amber-200 px-2 py-0.5 rounded-full">
+                      <span className="flex items-center gap-1 text-[10px] font-bold text-cat-urgent bg-amber-50 border border-cat-urgent/20 px-2 py-0.5 rounded-full">
                         <Pin className="h-2.5 w-2.5" /> Pinned
                       </span>
                     )}

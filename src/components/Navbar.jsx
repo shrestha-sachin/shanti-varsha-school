@@ -6,14 +6,17 @@ function Navbar() {
   const [isOpen, setIsOpen] = useState(false)
   const [logoError, setLogoError] = useState(false)
   const [isLoggedIn, setIsLoggedIn] = useState(false)
+  const [userRole, setUserRole] = useState('')
   const [scrolled, setScrolled] = useState(false)
   const [noticeCount, setNoticeCount] = useState(0)
   const location = useLocation()
   const navigate = useNavigate()
 
   useEffect(() => {
-    const loggedIn = localStorage.getItem('adminLoggedIn') === 'true'
+    const loggedIn = localStorage.getItem('isLoggedIn') === 'true' || localStorage.getItem('adminLoggedIn') === 'true'
+    const role = localStorage.getItem('userRole') || (localStorage.getItem('adminLoggedIn') === 'true' ? 'admin' : '')
     setIsLoggedIn(loggedIn)
+    setUserRole(role)
 
     const updateNoticeCount = () => {
       const notices = JSON.parse(localStorage.getItem('schoolNotices') || '[]')
@@ -22,8 +25,10 @@ function Navbar() {
     updateNoticeCount()
 
     const handleStorage = () => {
-      const loggedIn = localStorage.getItem('adminLoggedIn') === 'true'
+      const loggedIn = localStorage.getItem('isLoggedIn') === 'true' || localStorage.getItem('adminLoggedIn') === 'true'
+      const role = localStorage.getItem('userRole') || (localStorage.getItem('adminLoggedIn') === 'true' ? 'admin' : '')
       setIsLoggedIn(loggedIn)
+      setUserRole(role)
       updateNoticeCount()
     }
 
@@ -45,9 +50,13 @@ function Navbar() {
   useEffect(() => { setIsOpen(false) }, [location.pathname])
 
   const handleLogout = () => {
+    localStorage.removeItem('isLoggedIn')
+    localStorage.removeItem('username')
+    localStorage.removeItem('userRole')
     localStorage.removeItem('adminLoggedIn')
     localStorage.removeItem('adminUsername')
     setIsLoggedIn(false)
+    setUserRole('')
     navigate('/')
   }
 
@@ -122,13 +131,13 @@ function Navbar() {
             {isLoggedIn ? (
               <>
                 <Link
-                  to="/admin"
-                  className={`px-3 xl:px-4 py-2 rounded-xl text-sm font-medium transition-all duration-300 ${isActive('/admin')
+                  to={userRole === 'admin' ? '/admin' : userRole === 'teacher' ? '/staff' : '/student'}
+                  className={`px-3 xl:px-4 py-2 rounded-xl text-sm font-medium transition-all duration-300 ${isActive('/admin') || isActive('/staff') || isActive('/student')
                     ? 'bg-gold text-white shadow-lg shadow-gold/30'
                     : 'text-gold hover:text-white hover:bg-gold/20 border border-gold/30'
                     }`}
                 >
-                  Admin
+                  Dashboard
                 </Link>
                 <button
                   onClick={handleLogout}
@@ -139,15 +148,22 @@ function Navbar() {
                 </button>
               </>
             ) : (
-              <Link
-                to="/login"
-                className={`px-3 xl:px-4 py-2 rounded-xl text-sm font-medium transition-all duration-300 border ${isActive('/login')
-                  ? 'bg-gold text-white border-gold shadow-lg'
-                  : 'text-gray-300 border-white/20 hover:text-gold hover:border-gold/50 hover:bg-white/5'
-                  }`}
-              >
-                Admin Login
-              </Link>
+              <div className="relative group">
+                <button
+                  className={`px-3 xl:px-4 py-2 rounded-xl text-sm font-medium transition-all duration-300 border flex items-center gap-1.5 ${isActive('/login')
+                    ? 'bg-gold text-white border-gold shadow-lg'
+                    : 'text-gray-300 border-white/20 hover:text-gold hover:border-gold/50 hover:bg-white/5'
+                    }`}
+                >
+                  Login <ChevronDown className="h-4 w-4 transition-transform duration-300 group-hover:-rotate-180" />
+                </button>
+                <div className="absolute right-0 mt-2 w-48 py-2 bg-white rounded-xl shadow-xl border border-gray-100 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 transform origin-top-right scale-95 group-hover:scale-100 z-50">
+                  <Link to="/login" state={{ role: 'student' }} className="block px-4 py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-50 hover:text-gold transition-colors">Student Login</Link>
+                  <Link to="/login" state={{ role: 'teacher' }} className="block px-4 py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-50 hover:text-gold transition-colors">Teacher Login</Link>
+                  <div className="border-t border-gray-100 my-1"></div>
+                  <Link to="/login" state={{ role: 'admin' }} className="block px-4 py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-50 hover:text-gold transition-colors">Admin Login</Link>
+                </div>
+              </div>
             )}
           </div>
 
@@ -191,11 +207,11 @@ function Navbar() {
               {isLoggedIn ? (
                 <>
                   <Link
-                    to="/admin"
-                    className={`flex items-center px-4 py-3 rounded-xl text-sm font-medium mb-1.5 transition-all duration-300 ${isActive('/admin') ? 'bg-gold text-white' : 'text-gold hover:bg-gold/20'
+                    to={userRole === 'admin' ? '/admin' : userRole === 'teacher' ? '/staff' : '/student'}
+                    className={`flex items-center px-4 py-3 rounded-xl text-sm font-medium mb-1.5 transition-all duration-300 ${isActive('/admin') || isActive('/staff') || isActive('/student') ? 'bg-gold text-white' : 'text-gold hover:bg-gold/20'
                       }`}
                   >
-                    Admin Dashboard
+                    Dashboard
                   </Link>
                   <button
                     onClick={handleLogout}
@@ -205,12 +221,19 @@ function Navbar() {
                   </button>
                 </>
               ) : (
-                <Link
-                  to="/login"
-                  className="flex items-center justify-center px-4 py-3 rounded-xl text-sm font-semibold bg-gradient-to-r from-gold to-gold-light text-white shadow-lg"
-                >
-                  Admin Login
-                </Link>
+                <div className="space-y-1 bg-white/5 rounded-xl border border-white/10 p-2">
+                  <div className="text-[10px] font-bold text-gray-400 px-3 uppercase tracking-wider mb-2 mt-1">Select Login Module</div>
+                  <Link to="/login" state={{ role: 'student' }} onClick={() => setIsOpen(false)} className="flex items-center justify-between px-3 py-2.5 rounded-lg text-sm font-medium text-gray-300 hover:bg-white/10 hover:text-gold transition-colors">
+                    Student Login <ChevronDown className="h-3.5 w-3.5 -rotate-90" />
+                  </Link>
+                  <Link to="/login" state={{ role: 'teacher' }} onClick={() => setIsOpen(false)} className="flex items-center justify-between px-3 py-2.5 rounded-lg text-sm font-medium text-gray-300 hover:bg-white/10 hover:text-gold transition-colors">
+                    Teacher Login <ChevronDown className="h-3.5 w-3.5 -rotate-90" />
+                  </Link>
+                  <div className="border-t border-white/10 my-1 mx-2"></div>
+                  <Link to="/login" state={{ role: 'admin' }} onClick={() => setIsOpen(false)} className="flex items-center justify-between px-3 py-2.5 rounded-lg text-sm font-medium text-gold hover:bg-white/10 transition-colors">
+                    Admin Login <ChevronDown className="h-3.5 w-3.5 -rotate-90" />
+                  </Link>
+                </div>
               )}
             </div>
           </div>

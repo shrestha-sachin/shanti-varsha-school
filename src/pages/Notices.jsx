@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import { Bell, Search, Filter, Calendar, Pin, ChevronLeft, ChevronRight } from 'lucide-react'
+import { supabase } from '../supabaseClient'
 
 const CATEGORIES = ['All', 'General', 'Exam', 'Event', 'Urgent', 'Meeting']
 const BADGE_MAP = {
@@ -7,8 +8,8 @@ const BADGE_MAP = {
   Urgent: 'badge-urgent', Meeting: 'badge-meeting',
 }
 const BORDER_MAP = {
-  General: 'border-l-indigo-500', Exam: 'border-l-red-500',
-  Event: 'border-l-emerald-500', Urgent: 'border-l-amber-500', Meeting: 'border-l-sky-500',
+  General: 'border-l-cat-general', Exam: 'border-l-cat-exam',
+  Event: 'border-l-cat-event', Urgent: 'border-l-cat-urgent', Meeting: 'border-l-cat-academic',
 }
 
 const PAGE_SIZE = 8
@@ -20,24 +21,14 @@ function Notices() {
   const [page, setPage] = useState(1)
 
   useEffect(() => {
-    const stored = JSON.parse(localStorage.getItem('schoolNotices') || '[]')
-    if (stored.length === 0) {
-      const sample = [
-        { id: 1, title: 'Welcome to Academic Session 2081-82', date: new Date().toISOString().split('T')[0], category: 'General', pinned: true, description: 'We welcome all students and staff to the new academic session. Attendance is mandatory from Day 1.' },
-        { id: 2, title: 'Half-Yearly Examination Schedule', date: new Date(Date.now() - 172800000).toISOString().split('T')[0], category: 'Exam', pinned: false, description: 'The half-yearly exam schedule has been released. Students are advised to prepare accordingly.' },
-        { id: 3, title: 'Annual Sports Day – Registration Open', date: new Date(Date.now() - 259200000).toISOString().split('T')[0], category: 'Event', pinned: false, description: 'Register for Annual Sports Day events before the deadline.' },
-        { id: 4, title: 'URGENT: School Closed Tomorrow', date: new Date(Date.now() - 86400000).toISOString().split('T')[0], category: 'Urgent', pinned: true, description: 'Due to inclement weather, the school will remain closed tomorrow.' },
-      ]
-      localStorage.setItem('schoolNotices', JSON.stringify(sample))
-      setNotices(sample)
-    } else {
-      const sorted = stored.sort((a, b) => {
-        if (a.pinned && !b.pinned) return -1
-        if (!a.pinned && b.pinned) return 1
-        return new Date(b.date) - new Date(a.date)
-      })
-      setNotices(sorted)
+    const fetchNotices = async () => {
+      const { data } = await supabase.from('school_notices')
+        .select('*')
+        .order('pinned', { ascending: false })
+        .order('date', { ascending: false })
+      if (data) setNotices(data)
     }
+    fetchNotices()
   }, [])
 
   const filtered = notices.filter(n => {
@@ -132,7 +123,7 @@ function Notices() {
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2 mb-2 flex-wrap">
                         {notice.pinned && (
-                          <span className="flex items-center gap-1 text-[10px] font-bold text-amber-600 bg-amber-50 border border-amber-200 px-2 py-0.5 rounded-full">
+                          <span className="flex items-center gap-1 text-[10px] font-bold text-cat-urgent bg-amber-50 border border-cat-urgent/20 px-2 py-0.5 rounded-full">
                             <Pin className="h-2.5 w-2.5" /> Pinned
                           </span>
                         )}

@@ -1,14 +1,6 @@
 import { useState, useEffect, useCallback } from 'react'
 import { X, ZoomIn, ChevronLeft, ChevronRight, Camera, ImageOff } from 'lucide-react'
-
-const SAMPLE_GALLERY = [
-  { id: 1, imageUrl: '/images/gallery/1.jpg', caption: 'Annual Sports Day', album: 'Sports 2081', date: '2024-01-15' },
-  { id: 2, imageUrl: '/images/gallery/2.jpg', caption: 'Science Exhibition', album: 'Academic 2081', date: '2024-02-10' },
-  { id: 3, imageUrl: '/images/gallery/3.jpg', caption: 'Cultural Program', album: 'Events 2081', date: '2024-03-05' },
-  { id: 4, imageUrl: '/images/gallery/4.jpg', caption: 'Award Ceremony', album: 'Events 2081', date: '2024-04-20' },
-  { id: 5, imageUrl: '/images/gallery/5.jpg', caption: 'Campus View', album: 'Campus', date: '2024-01-01' },
-  { id: 6, imageUrl: '/images/gallery/6.jpg', caption: 'Classroom Activities', album: 'Academic 2081', date: '2024-02-25' },
-]
+import { supabase } from '../supabaseClient'
 
 function Lightbox({ images, index, onClose, onPrev, onNext }) {
   const img = images[index]
@@ -32,7 +24,7 @@ function Lightbox({ images, index, onClose, onPrev, onNext }) {
 
       <div className="max-w-4xl max-h-[85vh] flex flex-col items-center px-16">
         <img
-          src={img.imageUrl}
+          src={img.image_url}
           alt={img.caption || 'Gallery image'}
           className="max-h-[75vh] max-w-full object-contain rounded-2xl shadow-2xl animate-scale-in"
         />
@@ -65,8 +57,11 @@ function Gallery() {
   const [imgErrors, setImgErrors] = useState({})
 
   useEffect(() => {
-    const stored = JSON.parse(localStorage.getItem('schoolGallery') || '[]')
-    setAllImages(stored.length > 0 ? stored : SAMPLE_GALLERY)
+    const fetchGallery = async () => {
+      const { data } = await supabase.from('school_gallery').select('*').order('date', { ascending: false })
+      if (data) setAllImages(data)
+    }
+    fetchGallery()
   }, [])
 
   const albums = ['All', ...new Set(allImages.map(g => g.album).filter(Boolean))]
@@ -131,7 +126,7 @@ function Gallery() {
               >
                 {!imgErrors[img.id] ? (
                   <img
-                    src={img.imageUrl}
+                    src={img.image_url}
                     alt={img.caption || 'Gallery'}
                     className="w-full h-auto object-cover group-hover:scale-105 transition-transform duration-500"
                     onError={() => setImgErrors(p => ({ ...p, [img.id]: true }))}

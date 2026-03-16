@@ -1,6 +1,7 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
-import { LogIn, Lock, User, AlertCircle } from 'lucide-react'
+import { LogIn, Lock, User, AlertCircle, Loader2 } from 'lucide-react'
+import { supabase } from '../supabaseClient'
 
 function Login() {
   const [username, setUsername] = useState('')
@@ -8,14 +9,28 @@ function Login() {
   const [error, setError] = useState('')
   const navigate = useNavigate()
   const location = useLocation()
+  const [loading, setLoading] = useState(false)
 
-  // Default admin credentials (in production, this would be handled by a backend)
-  const ADMIN_CREDENTIALS = {
-    username: 'admin',
-    password: 'admin123', // In production, this should be hashed and stored securely
+  const roleTitle = location.state?.role 
+    ? location.state.role.charAt(0).toUpperCase() + location.state.role.slice(1) + ' Login' 
+    : 'Login Portal'
+
+  // Hardcoded admin login (change this in your Supabase 'school_staff' table later for full security)
+  const CREDENTIALS = {
+    admin: { username: 'admin', password: 'admin123', role: 'admin' },
   }
 
-  const handleSubmit = (e) => {
+  useEffect(() => {
+    if (location.state?.role) {
+      const selectedRole = location.state.role
+      if (CREDENTIALS[selectedRole]) {
+        setUsername(CREDENTIALS[selectedRole].username)
+        setPassword(CREDENTIALS[selectedRole].password)
+      }
+    }
+  }, [location.state?.role])
+
+  const handleSubmit = async (e) => {
     e.preventDefault()
     setError('')
 
@@ -24,16 +39,39 @@ function Login() {
       return
     }
 
-    // Check credentials
-    if (username === ADMIN_CREDENTIALS.username && password === ADMIN_CREDENTIALS.password) {
-      // Store login state
-      localStorage.setItem('adminLoggedIn', 'true')
-      localStorage.setItem('adminUsername', username)
+    setLoading(true)
+    // 1. Check Supabase for Student
+    const { data: sData } = await supabase.from('class_students').select('*').eq('username', username.trim()).eq('password', password.trim()).maybeSingle()
+    
+    if (sData) {
+      localStorage.setItem('isLoggedIn', 'true')
+      localStorage.setItem('studentId', sData.id)
+      localStorage.setItem('username', sData.username)
+      localStorage.setItem('userRole', 'student')
+      localStorage.setItem('mustChangePassword', sData.password_changed ? 'false' : 'true')
+      setLoading(false)
+      navigate('/student', { replace: true })
+      return
+    }
+
+    // 2. Fallback to hardcoded roles for Demo/Admin
+    const userRoleKey = Object.keys(CREDENTIALS).find(
+      key => CREDENTIALS[key].username === username && CREDENTIALS[key].password === password
+    )
+
+    if (userRoleKey) {
+      const user = CREDENTIALS[userRoleKey]
+      localStorage.setItem('isLoggedIn', 'true')
+      localStorage.setItem('username', user.username)
+      localStorage.setItem('userRole', user.role)
+      setLoading(false)
       
-      // Redirect to admin page or the page they were trying to access
-      const from = location.state?.from?.pathname || '/admin'
+      let defaultPath = '/admin'
+      if (user.role === 'teacher') defaultPath = '/staff'
+      const from = location.state?.from?.pathname || defaultPath
       navigate(from, { replace: true })
     } else {
+      setLoading(false)
       setError('Invalid username or password.')
     }
   }
@@ -44,15 +82,15 @@ function Login() {
         <div className="bg-white rounded-2xl shadow-2xl p-8 md:p-10 border-2 border-gray-100 relative overflow-hidden">
           <div className="absolute top-0 right-0 w-64 h-64 bg-gold/5 rounded-full blur-3xl -z-0"></div>
           <div className="relative z-10">
-            <div className="flex items-center justify-center space-x-3 mb-6 animate-fade-in-up" style={{ animationDelay: '0.2s', animationFillMode: 'both' }}>
-              <div className="bg-gradient-to-br from-gold/20 to-gold/10 p-3 rounded-xl shadow-lg">
-                <Lock className="h-8 w-8 text-gold" />
+            <div className="flex flex-col items-center justify-center space-y-4 mb-6 animate-fade-in-up" style={{ animationDelay: '0.2s', animationFillMode: 'both' }}>
+              <div className="bg-white p-2 rounded-2xl shadow-xl border-2 border-gold/20">
+                <img src="/logos/SVS logo.png" alt="SVS Logo" className="h-20 w-20 object-contain" />
               </div>
-              <h2 className="text-3xl font-bold text-navy bg-gradient-to-r from-navy to-navy-dark bg-clip-text text-transparent">Admin Login</h2>
+              <h2 className="text-3xl font-bold text-navy bg-gradient-to-r from-navy to-navy-dark bg-clip-text text-transparent">{roleTitle}</h2>
             </div>
           
             <p className="text-center text-gray-600 mb-8 animate-fade-in-up" style={{ animationDelay: '0.3s', animationFillMode: 'both' }}>
-              Enter your credentials to access the admin dashboard
+              Enter your credentials to access your dashboard
             </p>
 
             {error && (

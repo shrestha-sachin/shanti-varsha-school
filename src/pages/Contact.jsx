@@ -34,19 +34,23 @@ function Contact() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-gray-50 via-white to-gray-50/50 py-20 animate-fade-in">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        {/* Header */}
-        <div className="text-center mb-16 animate-fade-in-up" style={{ animationDelay: '0.1s', animationFillMode: 'both' }}>
-          <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-navy mb-4 bg-gradient-to-r from-navy to-navy-dark bg-clip-text text-transparent">
-            Contact Us
-          </h1>
-          <div className="w-24 h-1 bg-gradient-to-r from-transparent via-gold to-transparent mx-auto mb-6"></div>
-          <p className="text-lg md:text-xl text-gray-600 max-w-2xl mx-auto">
-            We'd love to hear from you. Get in touch with us and we'll respond as soon as possible.
-          </p>
+    <div className="min-h-screen bg-slate-50 animate-fade-in">
+      {/* Hero */}
+      <section className="page-hero py-20 text-white">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex items-center gap-4 animate-fade-in-up">
+            <div className="bg-white/15 p-3 rounded-2xl backdrop-blur-sm">
+              <Phone className="h-8 w-8 text-white" />
+            </div>
+            <div>
+              <h1 className="font-display font-bold text-3xl md:text-5xl">Contact Us</h1>
+              <p className="text-gold-light text-sm mt-1">We'd love to hear from you. Get in touch with us and we'll respond as soon as possible.</p>
+            </div>
+          </div>
         </div>
+      </section>
 
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12">
           {/* Contact Information */}
           <div className="space-y-6 animate-fade-in-up" style={{ animationDelay: '0.2s', animationFillMode: 'both' }}>

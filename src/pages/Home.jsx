@@ -6,6 +6,7 @@ import {
   Clock, ChevronRight
 } from 'lucide-react'
 import NoticeBoard from '../components/NoticeBoard'
+import { supabase } from '../supabaseClient'
 
 function useScrollReveal() {
   useEffect(() => {
@@ -54,26 +55,34 @@ const toppers = [
 ]
 
 const stats = [
-  { icon: Users, label: 'Active Students', value: 500, suffix: '+', color: 'from-blue-400 to-blue-600' },
+  { icon: Users, label: 'Active Students', value: 500, suffix: '+', color: 'from-navy-light to-navy' },
   { icon: GraduationCap, label: 'Qualified Teachers', value: 25, suffix: '+', color: 'from-gold to-gold-dark' },
-  { icon: Calendar, label: 'Years of Excellence', value: 15, suffix: '+', color: 'from-emerald-400 to-emerald-600' },
-  { icon: Award, label: 'Awards & Achievements', value: 50, suffix: '+', color: 'from-purple-400 to-purple-600' },
+  { icon: Calendar, label: 'Years of Excellence', value: 15, suffix: '+', color: 'from-navy-light to-navy' },
+  { icon: Award, label: 'Awards & Achievements', value: 50, suffix: '+', color: 'from-gold to-gold-dark' },
 ]
 
 const features = [
-  { icon: BookOpen, title: 'Quality Education', desc: 'Comprehensive curriculum with modern teaching methodologies tailored to equip students with skills for the future.', color: 'from-blue-500 to-navy' },
+  { icon: BookOpen, title: 'Quality Education', desc: 'Comprehensive curriculum with modern teaching methodologies tailored to equip students with skills for the future.', color: 'from-navy-light to-navy' },
   { icon: UserCheck, title: 'Experienced Faculty', desc: 'Our dedicated and highly qualified teachers are genuinely invested in every student\'s academic and personal growth.', color: 'from-gold to-gold-dark' },
-  { icon: Sparkles, title: 'Holistic Development', desc: 'Beyond academics — we nurture leadership, creativity, sportsmanship, and extracurricular excellence in every child.', color: 'from-purple-500 to-indigo-600' },
+  { icon: Sparkles, title: 'Holistic Development', desc: 'Beyond academics — we nurture leadership, creativity, sportsmanship, and extracurricular excellence in every child.', color: 'from-navy to-navy-darker' },
 ]
 
 function Home() {
   const [imgErrors, setImgErrors] = useState({})
   const [latestNews, setLatestNews] = useState([])
+
   useScrollReveal()
 
   useEffect(() => {
-    const news = JSON.parse(localStorage.getItem('schoolNews') || '[]')
-    setLatestNews(news.filter(n => n.published !== false).sort((a, b) => new Date(b.date) - new Date(a.date)).slice(0, 3))
+    const fetchLatestNews = async () => {
+      const { data } = await supabase.from('school_news')
+        .select('*')
+        .eq('published', true)
+        .order('date', { ascending: false })
+        .limit(3)
+      if (data) setLatestNews(data)
+    }
+    fetchLatestNews()
   }, [])
 
   const imgError = (key) => setImgErrors(p => ({ ...p, [key]: true }))
@@ -128,7 +137,7 @@ function Home() {
       </section>
 
       {/* ── STATS BAND (directly below hero, no gap) ── */}
-      <section className="bg-gradient-to-r from-emerald-700 via-teal-600 to-cyan-600 py-0">
+      <section className="bg-gradient-hero py-0">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-2 md:grid-cols-4 divide-x divide-white/20">
             {stats.map(({ icon: Icon, label, value, suffix }, i) => (
@@ -182,10 +191,10 @@ function Home() {
             {/* Right: highlight cards */}
             <div className="reveal-right grid grid-cols-2 gap-4">
               {[
-                { icon: GraduationCap, label: 'NEB Affiliated', desc: 'Officially affiliated with the National Examination Board of Nepal', color: 'bg-blue-50 text-blue-700 border-blue-100' },
-                { icon: Trophy, label: 'District Topper', desc: 'Multiple district and national rank holders from our school', color: 'bg-amber-50 text-amber-700 border-amber-100' },
-                { icon: BookOpen, label: 'English Medium', desc: 'English-medium instruction from Grade 1 through Grade 10', color: 'bg-emerald-50 text-emerald-700 border-emerald-100' },
-                { icon: Clock, label: 'Since 2043 B.S.', desc: 'Over three decades of trusted education in the Tanahun community', color: 'bg-purple-50 text-purple-700 border-purple-100' },
+                { icon: GraduationCap, label: 'NEB Affiliated', desc: 'Officially affiliated with the National Examination Board of Nepal', color: 'bg-navy/5 text-navy border-navy/20' },
+                { icon: Trophy, label: 'District Topper', desc: 'Multiple district and national rank holders from our school', color: 'bg-gold/10 text-gold-dark border-gold/20' },
+                { icon: BookOpen, label: 'English Medium', desc: 'English-medium instruction from Grade 1 through Grade 10', color: 'bg-navy/5 text-navy border-navy/20' },
+                { icon: Clock, label: 'Since 2043 B.S.', desc: 'Over three decades of trusted education in the Tanahun community', color: 'bg-gold/10 text-gold-dark border-gold/20' },
               ].map(({ icon: Icon, label, desc, color }) => (
                 <div key={label} className={`p-5 rounded-2xl border ${color} card-hover`}>
                   <Icon className="h-7 w-7 mb-3 opacity-80" />
@@ -222,7 +231,7 @@ function Home() {
       </section>
 
       {/* ── TOPPERS ── */}
-      <section className="bg-white py-20 overflow-hidden">
+      <section className={`bg-white pt-20 ${latestNews.length > 0 ? 'pb-10' : 'pb-4'} overflow-hidden`}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-14 reveal">
             <div className="flex items-center justify-center gap-4 mb-3">
@@ -272,7 +281,7 @@ function Home() {
 
       {/* ── LATEST NEWS ── */}
       {latestNews.length > 0 && (
-        <section className="bg-gradient-to-b from-gray-50 to-white py-20">
+        <section className="bg-gradient-to-b from-gray-50 to-white pt-16 pb-10">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="flex items-end justify-between mb-10 reveal">
               <div>
@@ -290,7 +299,12 @@ function Home() {
             </div>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               {latestNews.map((n, i) => (
-                <Link to="/news" key={n.id} className="group bg-white rounded-2xl p-5 border border-gray-100 hover:border-gold/30 card-hover block reveal" style={{ transitionDelay: `${i * 0.1}s` }}>
+                <Link 
+                  to={`/news/${n.id}`} 
+                  key={n.id} 
+                  className="group bg-white rounded-2xl p-5 border border-gray-100 hover:border-gold/30 card-hover block reveal" 
+                  style={{ transitionDelay: `${i * 0.1}s` }}
+                >
                   <span className="badge badge-news text-[11px] mb-3 inline-block">{n.category}</span>
                   <h3 className="font-display font-bold text-navy text-base mb-2 leading-snug group-hover:text-gold transition-colors line-clamp-2">{n.title}</h3>
                   <p className="text-gray-500 text-sm leading-relaxed line-clamp-2">{n.content}</p>
@@ -306,7 +320,7 @@ function Home() {
       )}
 
       {/* ── NOTICE BOARD ── */}
-      <section className="bg-white pb-20 pt-0">
+      <section className="bg-white pt-8 pb-20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="reveal">
             <NoticeBoard limit={3} />

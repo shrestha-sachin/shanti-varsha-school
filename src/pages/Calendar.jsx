@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import { Calendar as CalendarIcon, ChevronLeft, ChevronRight, BookOpen, GraduationCap, Trophy, Users } from 'lucide-react'
+import { supabase } from '../supabaseClient'
 
 function Calendar() {
   const [currentDate, setCurrentDate] = useState(new Date())
@@ -7,65 +8,11 @@ function Calendar() {
   const [selectedDate, setSelectedDate] = useState(null)
 
   useEffect(() => {
-    // Load calendar events from localStorage
-    const storedEvents = localStorage.getItem('schoolCalendarEvents')
-    if (storedEvents) {
-      setEvents(JSON.parse(storedEvents))
-    } else {
-      // Initialize with sample events
-      const sampleEvents = [
-        {
-          id: 1,
-          title: 'First Day of School',
-          date: new Date(new Date().getFullYear(), 0, 15).toISOString().split('T')[0],
-          type: 'academic',
-        },
-        {
-          id: 2,
-          title: 'Mid-Term Exams',
-          date: new Date(new Date().getFullYear(), 2, 10).toISOString().split('T')[0],
-          type: 'exam',
-        },
-        {
-          id: 3,
-          title: 'Annual Sports Day',
-          date: new Date(new Date().getFullYear(), 3, 20).toISOString().split('T')[0],
-          type: 'event',
-        },
-        {
-          id: 4,
-          title: 'Parent-Teacher Meeting',
-          date: new Date(new Date().getFullYear(), 4, 5).toISOString().split('T')[0],
-          type: 'meeting',
-        },
-        {
-          id: 5,
-          title: 'Final Examinations',
-          date: new Date(new Date().getFullYear(), 5, 1).toISOString().split('T')[0],
-          type: 'exam',
-        },
-      ]
-      localStorage.setItem('schoolCalendarEvents', JSON.stringify(sampleEvents))
-      setEvents(sampleEvents)
+    const fetchEvents = async () => {
+      const { data } = await supabase.from('school_events').select('*')
+      if (data) setEvents(data)
     }
-  }, [])
-
-  // Listen for storage changes
-  useEffect(() => {
-    const handleStorageChange = () => {
-      const storedEvents = localStorage.getItem('schoolCalendarEvents')
-      if (storedEvents) {
-        setEvents(JSON.parse(storedEvents))
-      }
-    }
-
-    window.addEventListener('storage', handleStorageChange)
-    window.addEventListener('calendarUpdated', handleStorageChange)
-
-    return () => {
-      window.removeEventListener('storage', handleStorageChange)
-      window.removeEventListener('calendarUpdated', handleStorageChange)
-    }
+    fetchEvents()
   }, [])
 
   const getDaysInMonth = (date) => {
@@ -121,13 +68,13 @@ function Calendar() {
   const getEventColor = (type) => {
     switch (type) {
       case 'exam':
-        return 'bg-red-100 text-red-800 border-red-300'
+        return 'bg-cat-exam/10 text-cat-exam border-cat-exam/30'
       case 'event':
-        return 'bg-green-100 text-green-800 border-green-300'
+        return 'bg-cat-event/10 text-cat-event border-cat-event/30'
       case 'meeting':
-        return 'bg-blue-100 text-blue-800 border-blue-300'
+        return 'bg-cat-academic/10 text-cat-academic border-cat-academic/30'
       default:
-        return 'bg-gold/20 text-navy border-gold'
+        return 'bg-gold/20 text-navy border-gold/40'
     }
   }
 
@@ -157,24 +104,23 @@ function Calendar() {
   const weekDays = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-gray-50 via-white to-gray-50/50 py-20 animate-fade-in">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        {/* Header */}
-        <div className="text-center mb-12 animate-fade-in-up" style={{ animationDelay: '0.1s', animationFillMode: 'both' }}>
-          <div className="flex items-center justify-center space-x-3 mb-4">
-            <div className="bg-gradient-to-br from-gold/20 to-gold/10 p-3 rounded-xl shadow-lg">
-              <CalendarIcon className="h-8 w-8 text-gold" />
+    <div className="min-h-screen bg-slate-50 animate-fade-in">
+      {/* Hero */}
+      <section className="page-hero py-20 text-white">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex items-center gap-4 animate-fade-in-up">
+            <div className="bg-white/15 p-3 rounded-2xl backdrop-blur-sm">
+              <CalendarIcon className="h-8 w-8 text-white" />
             </div>
-            <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-navy bg-gradient-to-r from-navy to-navy-dark bg-clip-text text-transparent">
-              Academic Calendar
-            </h1>
+            <div>
+              <h1 className="font-display font-bold text-3xl md:text-5xl">Academic Calendar</h1>
+              <p className="text-gold-light text-sm mt-1">View important dates, events, and academic schedules for the school year.</p>
+            </div>
           </div>
-          <div className="w-24 h-1 bg-gradient-to-r from-transparent via-gold to-transparent mx-auto mb-6"></div>
-          <p className="text-lg md:text-xl text-gray-600 max-w-2xl mx-auto">
-            View important dates, events, and academic schedules for the school year.
-          </p>
         </div>
+      </section>
 
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <div className="bg-white rounded-2xl shadow-xl p-6 md:p-8 mb-8 border-2 border-gray-100 hover:shadow-2xl transition-all duration-500 animate-fade-in-up" style={{ animationDelay: '0.2s', animationFillMode: 'both' }}>
           {/* Calendar Header */}
           <div className="flex items-center justify-between mb-6">
@@ -302,19 +248,19 @@ function Calendar() {
         <h3 className="text-lg font-semibold text-navy mb-4">Event Types</h3>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           <div className="flex items-center space-x-2">
-            <div className="w-4 h-4 bg-gold/20 border border-gold rounded"></div>
+            <div className="w-4 h-4 bg-gold/20 border border-gold/40 rounded"></div>
             <span className="text-sm text-gray-700">Academic</span>
           </div>
           <div className="flex items-center space-x-2">
-            <div className="w-4 h-4 bg-red-100 border border-red-300 rounded"></div>
+            <div className="w-4 h-4 bg-cat-exam/10 border border-cat-exam/30 rounded"></div>
             <span className="text-sm text-gray-700">Examinations</span>
           </div>
           <div className="flex items-center space-x-2">
-            <div className="w-4 h-4 bg-green-100 border border-green-300 rounded"></div>
+            <div className="w-4 h-4 bg-cat-event/10 border border-cat-event/30 rounded"></div>
             <span className="text-sm text-gray-700">Events</span>
           </div>
           <div className="flex items-center space-x-2">
-            <div className="w-4 h-4 bg-blue-100 border border-blue-300 rounded"></div>
+            <div className="w-4 h-4 bg-cat-academic/10 border border-cat-academic/30 rounded"></div>
             <span className="text-sm text-gray-700">Meetings</span>
           </div>
         </div>

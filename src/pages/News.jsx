@@ -1,5 +1,7 @@
 import { useState, useEffect } from 'react'
+import { Link } from 'react-router-dom'
 import { Search, Newspaper, Calendar, Tag, X, ChevronLeft, ChevronRight, Eye, Filter } from 'lucide-react'
+import { supabase } from '../supabaseClient'
 
 const CATEGORY_BADGE = {
     'School News': 'badge-general',
@@ -10,60 +12,22 @@ const CATEGORY_BADGE = {
     'Community': 'badge-event',
 }
 
-function NewsModal({ article, onClose }) {
-    if (!article) return null
-    return (
-        <div className="modal-overlay" onClick={e => e.target === e.currentTarget && onClose()}>
-            <div className="modal-content">
-                {article.imageUrl && (
-                    <div className="w-full h-48 sm:h-64 overflow-hidden rounded-t-2xl">
-                        <img src={article.imageUrl} alt={article.title} className="w-full h-full object-cover" />
-                    </div>
-                )}
-                <div className="p-6 sm:p-8">
-                    <div className="flex items-start justify-between gap-4 mb-4">
-                        <div className="flex items-center gap-2 flex-wrap">
-                            <span className={`badge ${CATEGORY_BADGE[article.category] || 'badge-general'}`}>{article.category}</span>
-                            <span className="text-gray-400 text-xs flex items-center gap-1">
-                                <Calendar className="h-3.5 w-3.5" />
-                                {new Date(article.date).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}
-                            </span>
-                        </div>
-                        <button onClick={onClose} className="p-2 hover:bg-gray-100 rounded-xl transition-all flex-shrink-0">
-                            <X className="h-5 w-5 text-gray-500" />
-                        </button>
-                    </div>
-                    <h2 className="font-display font-bold text-navy text-2xl mb-4 leading-tight">{article.title}</h2>
-                    <div className="prose max-w-none text-gray-600 leading-relaxed whitespace-pre-line text-sm sm:text-base">
-                        {article.content}
-                    </div>
-                </div>
-            </div>
-        </div>
-    )
-}
+
 
 function News() {
     const [allNews, setAllNews] = useState([])
     const [search, setSearch] = useState('')
     const [activeCategory, setActiveCategory] = useState('All')
-    const [selectedArticle, setSelectedArticle] = useState(null)
 
     useEffect(() => {
-        const stored = JSON.parse(localStorage.getItem('schoolNews') || '[]')
-        const published = stored.filter(n => n.published !== false).sort((a, b) => new Date(b.date) - new Date(a.date))
-        if (published.length === 0) {
-            // Sample news
-            const sample = [
-                { id: 1, title: 'School Celebrates Annual Sports Day 2081', category: 'Sports', date: new Date().toISOString().split('T')[0], content: 'Shanti Varsha Angreji Ma. Vi. held its annual sports day with great enthusiasm. Students participated in various track and field events, demonstrating exceptional athletic spirit and sportsmanship.\n\nThe event was attended by parents, guardians, and community members who cheered enthusiastically for the young athletes.\n\nThe school management congratulated all participants and winners for their outstanding performance.', imageUrl: '', published: true },
-                { id: 2, title: 'Outstanding SEE Results — Students Achieve Excellence', category: 'Achievement', date: new Date(Date.now() - 172800000).toISOString().split('T')[0], content: 'Students of Shanti Varsha Angreji Ma. Vi. have achieved outstanding results in the SEE (Secondary Education Examination). Multiple students secured GPA 4.0, bringing pride to the school and the community.\n\nThe school management, teachers, and parents congratulated the successful students and encouraged them to pursue excellence in higher education.', imageUrl: '', published: true },
-                { id: 3, title: 'New Computer Lab Inaugurated', category: 'School News', date: new Date(Date.now() - 432000000).toISOString().split('T')[0], content: 'A state-of-the-art computer lab has been inaugurated at our school, equipped with modern computers and high-speed internet to support digital education.\n\nThis facility will enable students to enhance their technical skills and prepare for the digital future.', imageUrl: '', published: true },
-            ]
-            localStorage.setItem('schoolNews', JSON.stringify(sample))
-            setAllNews(sample)
-        } else {
-            setAllNews(published)
+        const fetchNews = async () => {
+            const { data } = await supabase.from('school_news')
+                .select('*')
+                .eq('published', true)
+                .order('date', { ascending: false })
+            if (data) setAllNews(data)
         }
+        fetchNews()
     }, [])
 
     const categories = ['All', ...new Set(allNews.map(n => n.category))]
@@ -128,15 +92,15 @@ function News() {
                 ) : (
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                         {filtered.map((article, idx) => (
-                            <div
+                            <Link
                                 key={article.id}
-                                className="group bg-white rounded-2xl shadow-card border border-gray-100 overflow-hidden card-hover cursor-pointer animate-fade-in-up"
+                                to={`/news/${article.id}`}
+                                className="group bg-white rounded-2xl shadow-card border border-gray-100 overflow-hidden card-hover animate-fade-in-up block"
                                 style={{ animationDelay: `${idx * 0.07}s` }}
-                                onClick={() => setSelectedArticle(article)}
                             >
-                                {article.imageUrl ? (
+                                {article.image_url ? (
                                     <div className="h-44 overflow-hidden">
-                                        <img src={article.imageUrl} alt={article.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+                                        <img src={article.image_url} alt={article.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
                                     </div>
                                 ) : (
                                     <div className="h-44 bg-gradient-to-br from-navy/10 to-gold/10 flex items-center justify-center">
@@ -156,16 +120,15 @@ function News() {
                                     </h3>
                                     <p className="text-gray-500 text-sm leading-relaxed line-clamp-3">{article.content}</p>
                                     <div className="mt-4 flex items-center gap-1 text-gold text-sm font-semibold">
-                                        <Eye className="h-4 w-4" /> Read more
+                                        <Eye className="h-4 w-4" /> Read full article
                                     </div>
                                 </div>
-                            </div>
+                            </Link>
                         ))}
                     </div>
                 )}
             </div>
 
-            {selectedArticle && <NewsModal article={selectedArticle} onClose={() => setSelectedArticle(null)} />}
         </div>
     )
 }

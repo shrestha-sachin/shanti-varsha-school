@@ -36,9 +36,9 @@ function Footer() {
   ]
 
   const socials = [
-    { icon: Facebook, href: '#', label: 'Facebook', color: 'hover:text-blue-400' },
-    { icon: Instagram, href: '#', label: 'Instagram', color: 'hover:text-pink-400' },
-    { icon: Youtube, href: '#', label: 'YouTube', color: 'hover:text-red-400' },
+    { icon: Facebook, href: '#', label: 'Facebook', color: 'hover:text-gold' },
+    { icon: Instagram, href: '#', label: 'Instagram', color: 'hover:text-gold' },
+    { icon: Youtube, href: '#', label: 'YouTube', color: 'hover:text-gold' },
   ]
 
   return (
