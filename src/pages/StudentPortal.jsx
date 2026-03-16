@@ -42,6 +42,8 @@ function StudentPortal() {
         setTerm(gData.term || 'N/A')
         setAttendance(gData.attendance || 'Not Marked')
       }
+      const { data: eData } = await supabase.from('school_events').select('*').gte('date', new Date().toISOString().split('T')[0]).order('date', { ascending: true }).limit(5)
+      if (eData) setUpcomingEvents(eData)
     }
     fetchData()
   }, [])
@@ -73,29 +75,28 @@ function StudentPortal() {
         </div>
       )}
       {/* Header Profile Section */}
-      <div className="bg-white shadow">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-          <div className="flex flex-col md:flex-row items-center md:items-start gap-6">
+      <div className="bg-white shadow-sm border-b border-gray-100">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 md:py-8">
+          <div className="flex flex-col md:flex-row items-center md:items-start gap-5 md:gap-7">
             <div className="relative">
-              <div className="w-24 h-24 md:w-32 md:h-32 rounded-full border-4 border-gold/30 bg-gray-100 flex items-center justify-center overflow-hidden shadow-lg group">
-                <img src="/images/toppers/sachin-shrestha.png" alt="Profile" className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300" onError={(e) => { e.target.style.display = 'none'; e.target.nextSibling.style.display = 'block' }} />
-                <User className="h-12 w-12 text-gray-400 hidden" />
+              <div className="w-20 h-20 md:w-32 md:h-32 rounded-3xl md:rounded-full border-4 border-gold/20 bg-gray-50 flex items-center justify-center overflow-hidden shadow-xl group">
+                <img src="/images/toppers/sachin-shrestha.png" alt="Profile" className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" onError={(e) => { e.target.style.display = 'none'; e.target.nextSibling.style.display = 'block' }} />
+                <User className="h-10 w-10 text-gray-300 hidden" />
               </div>
-              <div className="absolute -bottom-2 -right-2 bg-green-500 w-6 h-6 rounded-full border-4 border-white"></div>
+              <div className="absolute -bottom-1 -right-1 bg-green-500 w-5 h-5 rounded-full border-4 border-white shadow-sm"></div>
             </div>
             
-            <div className="flex-1 text-center md:text-left">
-              <h1 className="text-2xl md:text-3xl font-bold text-navy mb-1">{studentInfo.name}</h1>
-              <div className="flex flex-wrap justify-center md:justify-start gap-3 mt-3">
-                <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-blue-50 text-blue-700 text-xs font-semibold border border-blue-100"><User className="w-3.5 h-3.5" /> ID: {studentInfo.id}</span>
-                <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-gold/10 text-gold-dark text-xs font-semibold border border-gold/20"><GraduationCap className="w-3.5 h-3.5" /> Grade: {studentInfo.grade} | Roll: {studentInfo.rollNo}</span>
-                <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-gray-100 text-gray-700 text-xs font-semibold border border-gray-200"><Calendar className="w-3.5 h-3.5" /> DOB: {studentInfo.dob}</span>
+            <div className="flex-1 text-center md:text-left min-w-0">
+              <h1 className="text-xl md:text-3xl font-bold text-navy mb-1 truncate">{studentInfo.name}</h1>
+              <div className="flex flex-wrap justify-center md:justify-start gap-2 mt-3">
+                <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg bg-blue-50 text-blue-700 text-[10px] sm:text-xs font-bold border border-blue-100 uppercase tracking-wide"><User className="w-3 h-3" /> ID: {studentInfo.id}</span>
+                <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg bg-gold/10 text-gold-dark text-[10px] sm:text-xs font-bold border border-gold/20 uppercase tracking-wide"><GraduationCap className="w-3 h-3" /> Grade: {studentInfo.grade}</span>
+                <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg bg-gray-100 text-gray-700 text-[10px] sm:text-xs font-bold border border-gray-200 uppercase tracking-wide"><Calendar className="w-3 h-3" /> Roll: {studentInfo.rollNo}</span>
               </div>
 
-              <div className="flex flex-wrap justify-center md:justify-start gap-4 mt-4 text-sm text-gray-500">
-                <div className="flex items-center gap-1.5"><User className="w-4 h-4 text-gray-400" /> Class Teacher: <span className="font-medium text-navy">{studentInfo.classTeacher}</span></div>
-                <div className="flex items-center gap-1.5"><Phone className="w-4 h-4 text-gray-400" /> Teacher Contact: {studentInfo.teacherContact}</div>
-                
+              <div className="flex flex-wrap justify-center md:justify-start gap-x-5 gap-y-2 mt-4 text-xs font-medium text-gray-500">
+                <div className="flex items-center gap-1.5"><User className="w-3.5 h-3.5 text-gray-400" /> Class Teacher: <span className="text-navy">{studentInfo.classTeacher || 'N/A'}</span></div>
+                <div className="flex items-center gap-1.5"><Phone className="w-3.5 h-3.5 text-gray-400" /> Help: {studentInfo.teacherContact || 'Contact Admin'}</div>                
                 {/* Attendance Badge */}
                 <div className="flex items-center gap-1.5 ml-0 md:ml-4">
                   <span className="text-xs font-bold text-gray-500 uppercase tracking-wider">Today's Attendance:</span>

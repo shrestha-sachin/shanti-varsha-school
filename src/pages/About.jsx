@@ -185,7 +185,7 @@ function About() {
                   <span>Management Committee</span>
                 </h2>
               </div>
-              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-3 gap-6">
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
                 {managementCommittee.map((member, index) => (
                   <div
                     key={member.id}
@@ -231,7 +231,7 @@ function About() {
                   <span>Our Teachers & Staff</span>
                 </h2>
               </div>
-              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-3 gap-6">
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
                 {teachers.map((teacher, index) => (
                   <div
                     key={teacher.id}
@@ -286,8 +286,8 @@ function About() {
                   >
                     <div className="flex flex-col md:flex-row gap-6 items-start">
                       {/* Photo on the side */}
-                      <div className="flex-shrink-0">
-                        <div className="w-32 h-32 md:w-40 md:h-40 rounded-2xl bg-gradient-to-br from-gold/30 via-gold/20 to-navy/20 flex items-center justify-center overflow-hidden border-4 border-gold/40 shadow-xl group-hover:border-gold transition-all duration-500 group-hover:shadow-gold/50 relative">
+                      <div className="flex-shrink-0 w-full md:w-auto flex justify-center md:block">
+                        <div className="w-28 h-28 sm:w-32 sm:h-32 md:w-40 md:h-40 rounded-2xl bg-gradient-to-br from-gold/30 via-gold/20 to-navy/20 flex items-center justify-center overflow-hidden border-4 border-gold/40 shadow-xl group-hover:border-gold transition-all duration-500 group-hover:shadow-gold/50 relative">
                           {!imageErrors[`testimonial-${testimonial.id}`] ? (
                             <img
                               src={testimonial.image}

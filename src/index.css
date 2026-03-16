@@ -602,11 +602,55 @@
 /* ============================================================
    SMOOTH TRANSITIONS
    ============================================================ */
-*, *::before, *::after {
-  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+/* ============================================================
+   RESPONSIVE UTILITIES
+   ============================================================ */
+@layer utilities {
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+
+  /* Responsive typography */
+  @media (max-width: 640px) {
+    .section-heading {
+      font-size: 1.875rem !important; /* 30px */
+      line-height: 1.25;
+    }
+  }
 }
 
-/* Magnetic hover for nav links */
-.magnetic {
-  transition: transform 0.3s cubic-bezier(0.23, 1, 0.32, 1);
+/* Base resets for mobile */
+@media (max-width: 768px) {
+  .grid {
+    gap: 1rem !important;
+  }
+  .p-8 {
+    padding: 1.25rem !important;
+  }
+  
+  /* Scrollable tables */
+  .overflow-x-auto {
+    -webkit-overflow-scrolling: touch;
+  }
+  table {
+    min-width: 600px;
+  }
+  .table-container {
+    overflow-x: auto;
+    width: 100%;
+    border-radius: 0.75rem;
+  }
+}
+
+/* Hide scrollbar utility */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
 }

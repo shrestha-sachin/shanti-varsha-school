@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { Menu, X, GraduationCap, LogOut, Bell, ChevronDown } from 'lucide-react'
+import { supabase } from '../supabaseClient'
 
 function Navbar() {
   const [isOpen, setIsOpen] = useState(false)
@@ -18,9 +19,9 @@ function Navbar() {
     setIsLoggedIn(loggedIn)
     setUserRole(role)
 
-    const updateNoticeCount = () => {
-      const notices = JSON.parse(localStorage.getItem('schoolNotices') || '[]')
-      setNoticeCount(notices.length)
+    const updateNoticeCount = async () => {
+      const { count } = await supabase.from('school_notices').select('*', { count: 'exact', head: true })
+      if (count !== null) setNoticeCount(count)
     }
     updateNoticeCount()
 
@@ -29,14 +30,11 @@ function Navbar() {
       const role = localStorage.getItem('userRole') || (localStorage.getItem('adminLoggedIn') === 'true' ? 'admin' : '')
       setIsLoggedIn(loggedIn)
       setUserRole(role)
-      updateNoticeCount()
     }
 
     window.addEventListener('storage', handleStorage)
-    window.addEventListener('noticeUpdated', handleStorage)
     return () => {
       window.removeEventListener('storage', handleStorage)
-      window.removeEventListener('noticeUpdated', handleStorage)
     }
   }, [])
 

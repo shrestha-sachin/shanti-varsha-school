@@ -137,19 +137,19 @@ function Home() {
       </section>
 
       {/* ── STATS BAND (directly below hero, no gap) ── */}
-      <section className="bg-gradient-hero py-0">
+      <section className="bg-gradient-hero py-4 md:py-0 border-y border-white/10">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-2 md:grid-cols-4 divide-x divide-white/20">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 md:divide-x divide-white/10">
             {stats.map(({ icon: Icon, label, value, suffix }, i) => (
-              <div key={label} className="flex flex-col sm:flex-row items-center gap-3 sm:gap-4 px-6 py-7 hover:bg-white/15 transition-all duration-300 group">
-                <div className="flex-shrink-0 w-12 h-12 rounded-xl bg-white/20 backdrop-blur-sm flex items-center justify-center shadow-lg group-hover:scale-110 group-hover:bg-white/30 transition-all duration-300">
+              <div key={label} className={`flex items-center gap-4 px-6 py-6 sm:py-7 hover:bg-white/10 transition-all duration-300 group ${i > 1 ? 'hidden sm:flex' : 'flex'} lg:flex`}>
+                <div className="flex-shrink-0 w-12 h-12 rounded-xl bg-white/15 backdrop-blur-sm flex items-center justify-center shadow-lg group-hover:scale-110 group-hover:bg-white/25 transition-all duration-300 border border-white/10">
                   <Icon className="h-6 w-6 text-white" />
                 </div>
-                <div className="text-center sm:text-left">
-                  <div className="text-2xl sm:text-3xl font-display font-extrabold text-white leading-none drop-shadow">
+                <div>
+                  <div className="text-2xl sm:text-3xl font-display font-extrabold text-white leading-none drop-shadow-sm">
                     <AnimatedCounter target={value} />{suffix}
                   </div>
-                  <div className="text-white/75 text-xs mt-0.5 font-medium">{label}</div>
+                  <div className="text-white/70 text-[10px] sm:text-xs mt-1 font-bold uppercase tracking-wider">{label}</div>
                 </div>
               </div>
             ))}

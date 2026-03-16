@@ -18,32 +18,32 @@ function Lightbox({ images, index, onClose, onPrev, onNext }) {
   return (
     <div className="lightbox-overlay" onClick={e => e.target === e.currentTarget && onClose()}>
       {/* Nav prev */}
-      <button onClick={onPrev} disabled={index === 0} className="absolute left-4 top-1/2 -translate-y-1/2 bg-white/15 hover:bg-white/30 text-white p-3 rounded-full backdrop-blur-sm transition-all disabled:opacity-30">
-        <ChevronLeft className="h-6 w-6" />
+      <button onClick={onPrev} disabled={index === 0} className="absolute left-2 sm:left-4 top-1/2 -translate-y-1/2 bg-white/20 hover:bg-white/40 text-white p-2.5 sm:p-3 rounded-full backdrop-blur-md transition-all disabled:opacity-30 z-50">
+        <ChevronLeft className="h-5 w-5 sm:h-6 sm:w-6" />
       </button>
 
-      <div className="max-w-4xl max-h-[85vh] flex flex-col items-center px-16">
+      <div className="w-full max-w-4xl max-h-[85vh] flex flex-col items-center px-4 sm:px-16">
         <img
           src={img.image_url}
           alt={img.caption || 'Gallery image'}
-          className="max-h-[75vh] max-w-full object-contain rounded-2xl shadow-2xl animate-scale-in"
+          className="max-h-[70vh] sm:max-h-[75vh] w-full object-contain rounded-2xl shadow-2xl animate-scale-in"
         />
         {img.caption && (
-          <div className="mt-4 text-white/90 text-center text-sm font-medium bg-black/30 backdrop-blur-sm px-6 py-2 rounded-full">
+          <div className="mt-4 text-white/90 text-center text-xs sm:text-sm font-bold bg-black/40 backdrop-blur-md px-5 py-2.5 rounded-2xl border border-white/10 shadow-xl max-w-[90%]">
             {img.caption}
-            {img.album && <span className="ml-2 text-gold-light">· {img.album}</span>}
+            {img.album && <span className="block sm:inline sm:ml-2 text-gold-light mt-1 sm:mt-0 opacity-80 font-medium">· {img.album}</span>}
           </div>
         )}
-        <p className="text-white/40 text-xs mt-2">{index + 1} / {images.length}</p>
+        <p className="text-white/40 text-[10px] mt-3 font-bold uppercase tracking-widest">{index + 1} / {images.length}</p>
       </div>
 
       {/* Nav next */}
-      <button onClick={onNext} disabled={index === images.length - 1} className="absolute right-4 top-1/2 -translate-y-1/2 bg-white/15 hover:bg-white/30 text-white p-3 rounded-full backdrop-blur-sm transition-all disabled:opacity-30">
-        <ChevronRight className="h-6 w-6" />
+      <button onClick={onNext} disabled={index === images.length - 1} className="absolute right-2 sm:right-4 top-1/2 -translate-y-1/2 bg-white/20 hover:bg-white/40 text-white p-2.5 sm:p-3 rounded-full backdrop-blur-md transition-all disabled:opacity-30 z-50">
+        <ChevronRight className="h-5 w-5 sm:h-6 sm:w-6" />
       </button>
 
       {/* Close */}
-      <button onClick={onClose} className="absolute top-4 right-4 bg-white/15 hover:bg-white/30 text-white p-2.5 rounded-full backdrop-blur-sm transition-all">
+      <button onClick={onClose} className="absolute top-4 right-4 bg-red-500/20 hover:bg-red-500/40 text-white p-2.5 rounded-full backdrop-blur-md transition-all border border-red-500/20 z-50">
         <X className="h-5 w-5" />
       </button>
     </div>
@@ -91,18 +91,18 @@ function Gallery() {
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         {/* Album tabs */}
-        <div className="flex items-center gap-3 flex-wrap mb-8 animate-fade-in-up">
+        <div className="flex items-center gap-2 overflow-x-auto pb-4 scrollbar-hide no-scrollbar -mx-4 px-4 sm:mx-0 sm:px-0 animate-fade-in-up">
           {albums.map(album => (
             <button
               key={album}
               onClick={() => setActiveAlbum(album)}
-              className={`px-5 py-2 rounded-full text-sm font-semibold transition-all duration-300 ${activeAlbum === album
+              className={`px-5 py-2.5 rounded-full text-xs sm:text-sm font-bold transition-all duration-300 whitespace-nowrap ${activeAlbum === album
                   ? 'bg-gradient-to-r from-navy to-gold text-white shadow-lg'
-                  : 'bg-white text-gray-600 border border-gray-200 hover:border-gold/40 hover:text-navy'
+                  : 'bg-white text-gray-500 border border-gray-100 hover:border-gold/40 hover:text-navy active:scale-95'
                 }`}
             >
               {album}
-              <span className={`ml-1.5 text-xs ${activeAlbum === album ? 'text-white/70' : 'text-gray-400'}`}>
+              <span className={`ml-1.5 text-[10px] ${activeAlbum === album ? 'text-white/70' : 'text-gray-400'}`}>
                 ({album === 'All' ? allImages.length : allImages.filter(g => g.album === album).length})
               </span>
             </button>

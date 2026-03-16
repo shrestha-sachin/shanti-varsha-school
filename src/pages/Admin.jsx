@@ -29,7 +29,7 @@ function useLocalStorage(key, initial) {
 function Toast({ msg }) {
   if (!msg.text) return null
   return (
-    <div className={`fixed top-6 right-6 z-50 flex items-center gap-3 px-5 py-4 rounded-2xl shadow-2xl border animate-fade-in-up text-sm font-semibold ${msg.type === 'success'
+    <div className={`fixed top-6 right-6 z-[100] flex items-center gap-3 px-5 py-4 rounded-2xl shadow-2xl border animate-fade-in-up text-sm font-semibold ${msg.type === 'success'
         ? 'bg-success-light border-success/40 text-green-800'
         : 'bg-danger-light border-danger/40 text-red-800'
       }`}>
@@ -74,20 +74,26 @@ function NoticesTab({ toast }) {
     if (!form.title.trim()) return toast({ type: 'error', text: 'Title is required.' })
     
     const payload = { ...form }
-    if (editing) {
-      const { error } = await supabase.from('school_notices').update(payload).eq('id', editing.id)
-      if (!error) toast({ type: 'success', text: 'Notice updated!' })
-      setEditing(null)
+    const { error } = await supabase.from('school_notices').upsert(editing ? { ...payload, id: editing.id } : [payload])
+    
+    if (error) {
+      toast({ type: 'error', text: `Failed: ${error.message}` })
     } else {
-      const { error } = await supabase.from('school_notices').insert([payload])
-      if (!error) toast({ type: 'success', text: 'Notice added!' })
+      toast({ type: 'success', text: editing ? 'Notice updated!' : 'Notice added!' })
+      setEditing(null)
+      setForm({ title: '', date: today(), category: 'General', description: '', pinned: false })
+      fetchNotices()
     }
-    setForm({ title: '', date: today(), category: 'General', description: '', pinned: false })
-    fetchNotices()
   }
 
   const startEdit = (n) => { setEditing(n); setForm({ title: n.title, date: n.date, category: n.category || 'General', description: n.description || '', pinned: !!n.pinned }) }
-  const del = async (id) => { if (confirm('Delete this notice?')) { await supabase.from('school_notices').delete().eq('id', id); toast({ type: 'success', text: 'Deleted.' }); fetchNotices() } }
+  const del = async (id) => { 
+    if (confirm('Delete this notice?')) { 
+      const { error } = await supabase.from('school_notices').delete().eq('id', id)
+      if (error) toast({ type: 'error', text: error.message })
+      else { toast({ type: 'success', text: 'Deleted.' }); fetchNotices() } 
+    } 
+  }
   const cancel = () => { setEditing(null); setForm({ title: '', date: today(), category: 'General', description: '', pinned: false }) }
 
   return (
@@ -163,20 +169,26 @@ function NewsTab({ toast }) {
     e.preventDefault()
     if (!form.title.trim()) return toast({ type: 'error', text: 'Title is required.' })
     
-    if (editing) {
-      const { error } = await supabase.from('school_news').update(form).eq('id', editing.id)
-      if (!error) toast({ type: 'success', text: 'News updated!' })
-      setEditing(null)
+    const { error } = await supabase.from('school_news').upsert(editing ? { ...form, id: editing.id } : [form])
+    
+    if (error) {
+      toast({ type: 'error', text: `Failed: ${error.message}` })
     } else {
-      const { error } = await supabase.from('school_news').insert([form])
-      if (!error) toast({ type: 'success', text: 'News article added!' })
+      toast({ type: 'success', text: editing ? 'News updated!' : 'News article added!' })
+      setEditing(null)
+      setForm({ title: '', category: 'School News', content: '', image_url: '', date: today(), published: true })
+      fetchNews()
     }
-    setForm({ title: '', category: 'School News', content: '', image_url: '', date: today(), published: true })
-    fetchNews()
   }
 
   const startEdit = (n) => { setEditing(n); setForm({ title: n.title, category: n.category, content: n.content || '', image_url: n.image_url || '', date: n.date, published: !!n.published }) }
-  const del = async (id) => { if (confirm('Delete this article?')) { await supabase.from('school_news').delete().eq('id', id); toast({ type: 'success', text: 'Deleted.' }); fetchNews() } }
+  const del = async (id) => { 
+    if (confirm('Delete this article?')) { 
+      const { error } = await supabase.from('school_news').delete().eq('id', id)
+      if (error) toast({ type: 'error', text: error.message })
+      else { toast({ type: 'success', text: 'Deleted.' }); fetchNews() } 
+    } 
+  }
   const cancel = () => { setEditing(null); setForm({ title: '', category: 'School News', content: '', image_url: '', date: today(), published: true }) }
   const togglePublish = async (n) => {
     const { error } = await supabase.from('school_news').update({ published: !n.published }).eq('id', n.id)
@@ -275,20 +287,26 @@ function ArticlesTab({ toast }) {
   const save = async (e) => {
     e.preventDefault()
     if (!form.title.trim()) return toast({ type: 'error', text: 'Title is required.' })
-    if (editing) {
-      const { error } = await supabase.from('school_articles').update(form).eq('id', editing.id)
-      if (!error) toast({ type: 'success', text: 'Article updated!' })
-      setEditing(null)
+    const { error } = await supabase.from('school_articles').upsert(editing ? { ...form, id: editing.id } : [form])
+    
+    if (error) {
+      toast({ type: 'error', text: `Failed: ${error.message}` })
     } else {
-      const { error } = await supabase.from('school_articles').insert([form])
-      if (!error) toast({ type: 'success', text: 'Article published!' })
+      toast({ type: 'success', text: editing ? 'Article updated!' : 'Article published!' })
+      setEditing(null)
+      setForm({ title: '', author: '', tags: '', body: '', date: today(), published: true })
+      fetchArticles()
     }
-    setForm({ title: '', author: '', tags: '', body: '', date: today(), published: true })
-    fetchArticles()
   }
 
   const startEdit = (a) => { setEditing(a); setForm({ title: a.title, author: a.author || '', tags: a.tags || '', body: a.body || '', date: a.date, published: !!a.published }) }
-  const del = async (id) => { if (confirm('Delete this article?')) { await supabase.from('school_articles').delete().eq('id', id); toast({ type: 'success', text: 'Deleted.' }); fetchArticles() } }
+  const del = async (id) => { 
+    if (confirm('Delete this article?')) { 
+      const { error } = await supabase.from('school_articles').delete().eq('id', id)
+      if (error) toast({ type: 'error', text: error.message })
+      else { toast({ type: 'success', text: 'Deleted.' }); fetchArticles() } 
+    } 
+  }
   const cancel = () => { setEditing(null); setForm({ title: '', author: '', tags: '', body: '', date: today(), published: true }) }
 
   return (
@@ -371,20 +389,26 @@ function CalendarTab({ toast }) {
   const save = async (e) => {
     e.preventDefault()
     if (!form.title.trim()) return toast({ type: 'error', text: 'Title is required.' })
-    if (editing) {
-      const { error } = await supabase.from('school_events').update(form).eq('id', editing.id)
-      if (!error) toast({ type: 'success', text: 'Event updated!' })
-      setEditing(null)
+    const { error } = await supabase.from('school_events').upsert(editing ? { ...form, id: editing.id } : [form])
+    
+    if (error) {
+      toast({ type: 'error', text: `Failed: ${error.message}` })
     } else {
-      const { error } = await supabase.from('school_events').insert([form])
-      if (!error) toast({ type: 'success', text: 'Event added!' })
+      toast({ type: 'success', text: editing ? 'Event updated!' : 'Event added!' })
+      setEditing(null)
+      setForm({ title: '', date: today(), type: 'Academic', description: '' })
+      fetchEvents()
     }
-    setForm({ title: '', date: today(), type: 'Academic', description: '' })
-    fetchEvents()
   }
 
   const startEdit = (ev) => { setEditing(ev); setForm({ title: ev.title, date: ev.date, type: ev.type || 'Academic', description: ev.description || '' }) }
-  const del = async (id) => { if (confirm('Delete this event?')) { await supabase.from('school_events').delete().eq('id', id); toast({ type: 'success', text: 'Deleted.' }); fetchEvents() } }
+  const del = async (id) => { 
+    if (confirm('Delete this event?')) { 
+      const { error } = await supabase.from('school_events').delete().eq('id', id)
+      if (error) toast({ type: 'error', text: error.message })
+      else { toast({ type: 'success', text: 'Deleted.' }); fetchEvents() } 
+    } 
+  }
   const cancel = () => { setEditing(null); setForm({ title: '', date: today(), type: 'Academic', description: '' }) }
 
   const typeColors = { Exam: 'badge-exam', Event: 'badge-event', Academic: 'badge-academic', Meeting: 'badge-meeting', Holiday: 'badge-event', Sports: 'badge-sports' }
@@ -539,20 +563,26 @@ function GalleryTab({ toast }) {
   const save = async (e) => {
     e.preventDefault()
     if (!form.image_url.trim()) return toast({ type: 'error', text: 'Image URL is required.' })
-    if (editing) {
-      const { error } = await supabase.from('school_gallery').update(form).eq('id', editing.id)
-      if (!error) toast({ type: 'success', text: 'Updated!' })
-      setEditing(null)
+    const { error } = await supabase.from('school_gallery').upsert(editing ? { ...form, id: editing.id } : [form])
+    
+    if (error) {
+      toast({ type: 'error', text: `Failed: ${error.message}` })
     } else {
-      const { error } = await supabase.from('school_gallery').insert([form])
-      if (!error) toast({ type: 'success', text: 'Image added to gallery!' })
+      toast({ type: 'success', text: editing ? 'Updated!' : 'Image added to gallery!' })
+      setEditing(null)
+      setForm({ album: '', image_url: '', caption: '', date: today() })
+      fetchGallery()
     }
-    setForm({ album: '', image_url: '', caption: '', date: today() })
-    fetchGallery()
   }
 
   const startEdit = (g) => { setEditing(g); setForm({ album: g.album || '', image_url: g.image_url, caption: g.caption || '', date: g.date }) }
-  const del = async (id) => { if (confirm('Delete this image?')) { await supabase.from('school_gallery').delete().eq('id', id); toast({ type: 'success', text: 'Deleted.' }); fetchGallery() } }
+  const del = async (id) => { 
+    if (confirm('Delete this image?')) { 
+      const { error } = await supabase.from('school_gallery').delete().eq('id', id)
+      if (error) toast({ type: 'error', text: error.message })
+      else { toast({ type: 'success', text: 'Deleted.' }); fetchGallery() } 
+    } 
+  }
   const cancel = () => { setEditing(null); setForm({ album: '', image_url: '', caption: '', date: today() }) }
 
   return (
@@ -669,45 +699,129 @@ function SettingsTab({ toast }) {
 }
 
 // ── DASHBOARD TAB ─────────────────────────────────────────────────────────────
-function DashboardTab() {
+function DashboardTab({ setActiveTab }) {
   const [stats, setStats] = useState([])
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
     const fetchStats = async () => {
-       const [ {count: stCount}, {count: nCount}, {count: sCount} ] = await Promise.all([
-          supabase.from('class_students').select('*', { count: 'exact', head: true }),
-          supabase.from('school_notices').select('*', { count: 'exact', head: true }),
-          supabase.from('school_staff').select('*', { count: 'exact', head: true })
-       ])
-       setStats([
-          { label: 'Students', value: stCount || 0, icon: GraduationCap, color: 'from-blue-500 to-blue-600', bg: 'bg-blue-50', text: 'text-blue-600' },
-          { label: 'Notices', value: nCount || 0, icon: Bell, color: 'from-amber-500 to-amber-600', bg: 'bg-green-50', text: 'text-amber-600' },
-          { label: 'Staff members', value: sCount || 0, icon: Users, color: 'from-navy to-navy-darker', bg: 'bg-gray-100', text: 'text-navy' }
-       ])
-       setLoading(false)
+       try {
+         const [ {count: stCount}, {count: nCount}, {count: sCount}, {count: aCount} ] = await Promise.all([
+            supabase.from('class_students').select('*', { count: 'exact', head: true }),
+            supabase.from('school_notices').select('*', { count: 'exact', head: true }),
+            supabase.from('school_staff').select('*', { count: 'exact', head: true }),
+            supabase.from('school_articles').select('*', { count: 'exact', head: true })
+         ])
+         setStats([
+            { label: 'Total Students', value: stCount || 0, icon: GraduationCap, color: 'from-blue-500 to-indigo-600', trend: 'Live Database' },
+            { label: 'Published Notices', value: nCount || 0, icon: Bell, color: 'from-amber-400 to-orange-600', trend: 'Active' },
+            { label: 'Staff Directory', value: sCount || 0, icon: Users, color: 'from-emerald-500 to-teal-600', trend: 'Verified' },
+            { label: 'School Articles', value: aCount || 0, icon: FileText, color: 'from-purple-500 to-pink-600', trend: 'Public' }
+         ])
+       } catch (err) {
+         console.error("Dashboard Stats Error:", err)
+       } finally {
+         setLoading(false)
+       }
     }
     fetchStats()
   }, [])
 
+  const quickActions = [
+    { label: 'Add Student', icon: Plus, tab: 'students', color: 'bg-blue-500' },
+    { label: 'Post Notice', icon: Bell, tab: 'notices', color: 'bg-amber-500' },
+    { label: 'Upload Event', icon: Calendar, tab: 'calendar', color: 'bg-emerald-500' },
+    { label: 'New Article', icon: FileText, tab: 'articles', color: 'bg-purple-500' },
+  ]
+
   return (
-    <div className="space-y-6">
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        {stats.map(({ label, value, icon: Icon, color, bg, text }) => (
-          <div key={label} className={`${bg} rounded-2xl p-5 border border-white shadow-sm hover:shadow-card transition-all card-hover`}>
-            <div className={`inline-flex p-2.5 rounded-xl bg-gradient-to-br ${color} mb-3`}>
-              <Icon className="h-5 w-5 text-white" />
+    <div className="space-y-8 animate-fade-in">
+      {/* Welcome Section */}
+      <div className="relative overflow-hidden bg-navy-darker rounded-3xl p-6 sm:p-8 text-white shadow-2xl">
+         <div className="absolute top-0 right-0 -translate-y-12 translate-x-12 w-64 h-64 bg-gold/10 rounded-full blur-3xl"></div>
+         <div className="relative z-10">
+            <h2 className="text-2xl sm:text-3xl font-display font-bold mb-2">Welcome Back, Admin</h2>
+            <p className="text-blue-100/70 text-sm sm:text-base max-w-lg leading-relaxed">Everything at Shanti Varsha School is running smoothly. Here's a quick look at your school's current standing.</p>
+         </div>
+      </div>
+
+      {/* Stats Grid */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
+        {loading ? Array(4).fill(0).map((_, i) => (
+          <div key={i} className="h-32 bg-gray-100 rounded-3xl animate-pulse"></div>
+        )) : stats.map(({ label, value, icon: Icon, color, trend }) => (
+          <div key={label} className="bg-white rounded-3xl p-6 border border-gray-100 shadow-sm hover:shadow-xl transition-all duration-300 group overflow-hidden relative">
+            <div className={`absolute top-0 right-0 w-24 h-24 bg-gradient-to-br ${color} opacity-[0.03] group-hover:opacity-[0.1] -translate-y-8 translate-x-8 rounded-full transition-all duration-500`}></div>
+            <div className={`w-12 h-12 rounded-2xl bg-gradient-to-br ${color} flex items-center justify-center text-white shadow-lg mb-4 group-hover:scale-110 transition-transform duration-300`}>
+              <Icon className="h-6 w-6" />
             </div>
-            <div className={`text-3xl font-display font-bold ${text}`}>{value}</div>
-            <div className="text-gray-500 text-xs mt-0.5 font-medium">{label}</div>
+            <div className="text-3xl font-display font-extrabold text-navy leading-none mb-1">{value}</div>
+            <div className="text-gray-400 text-xs font-bold uppercase tracking-wider mb-2">{label}</div>
+            <div className="flex items-center gap-1.5 text-[10px] font-bold text-emerald-500 bg-emerald-50 px-2 py-0.5 rounded-full w-fit">
+               <div className="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-pulse"></div>
+               {trend}
+            </div>
           </div>
         ))}
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <div className="bg-white rounded-2xl border border-gray-100 shadow-card p-6">
-          <h3 className="font-display font-bold text-navy text-base mb-4 flex items-center gap-2"><Bell className="h-4 w-4 text-gold" />Overview</h3>
-          <p className="text-sm text-gray-500">Welcome to the Admin Command Center. All data is now live on Supabase.</p>
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        {/* Quick Actions */}
+        <div className="lg:col-span-2 space-y-4">
+          <h3 className="text-lg font-display font-bold text-navy flex items-center gap-2">
+            <TrendingUp className="w-5 h-5 text-gold" />
+            Quick Management
+          </h3>
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+             {quickActions.map((action) => (
+               <button 
+                 key={action.label} 
+                 onClick={() => setActiveTab(action.tab)}
+                 className="flex flex-col items-center justify-center gap-3 p-4 sm:p-6 bg-white border border-gray-100 rounded-3xl hover:border-gold/30 hover:shadow-premium group transition-all duration-300"
+               >
+                 <div className={`w-10 h-10 sm:w-12 sm:h-12 rounded-2xl ${action.color} flex items-center justify-center text-white shadow-md group-hover:scale-110 transition-transform`}>
+                    <action.icon className="w-5 h-5 sm:w-6 sm:h-6" />
+                 </div>
+                 <span className="text-xs sm:text-sm font-bold text-navy text-center">{action.label}</span>
+               </button>
+             ))}
+          </div>
+
+          <div className="bg-gradient-to-br from-gray-50 to-white rounded-3xl border border-gray-100 p-6 sm:p-8 mt-6">
+            <h4 className="font-display font-bold text-navy mb-4">System Overview</h4>
+            <ul className="space-y-4">
+               {[
+                 { label: 'Database Status', val: 'Operational', color: 'text-emerald-500' },
+                 { label: 'Auth Service', val: 'Active', color: 'text-emerald-500' },
+                 { label: 'Storage Usage', val: '12% Used', color: 'text-blue-500' },
+               ].map((item, idx) => (
+                 <li key={idx} className="flex items-center justify-between py-3 border-b border-gray-100 last:border-0">
+                    <span className="text-sm font-medium text-gray-500">{item.label}</span>
+                    <span className={`text-sm font-bold ${item.color}`}>{item.val}</span>
+                 </li>
+               ))}
+            </ul>
+          </div>
+        </div>
+
+        {/* Calendar Preview / Feed */}
+        <div className="space-y-4">
+           <h3 className="text-lg font-display font-bold text-navy flex items-center gap-2">
+             <Calendar className="w-5 h-5 text-gold" />
+             At a Glance
+           </h3>
+           <div className="bg-white rounded-3xl border border-gray-100 p-6 shadow-sm min-h-[300px]">
+              <div className="flex flex-col items-center justify-center py-10 text-center space-y-3">
+                 <div className="bg-gray-50 p-4 rounded-full">
+                    <Search className="w-8 h-8 text-gray-300" />
+                 </div>
+                 <div>
+                    <p className="text-sm font-bold text-navy">No Upcoming Deadlines</p>
+                    <p className="text-xs text-gray-400 mt-1">All academic schedules are currently up to date.</p>
+                 </div>
+                 <button onClick={() => setActiveTab('calendar')} className="text-gold text-xs font-bold hover:underline">View School Calendar</button>
+              </div>
+           </div>
         </div>
       </div>
     </div>
@@ -899,7 +1013,7 @@ function StudentsTab({ toast }) {
            <SectionIcon icon={GraduationCap} />
            <h3 className="font-display font-bold text-navy text-xl">{editing ? 'Edit Student Details' : 'Enroll New Student'}</h3>
         </div>
-        <form onSubmit={save} className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <form onSubmit={save} className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
            <div>
              <label className="label-modern">Student ID *</label>
              <input className="input-modern" placeholder="e.g. SVS-2081-0045" value={form.id} onChange={e => setForm({...form, id: e.target.value})} disabled={!!editing} required />
@@ -929,13 +1043,13 @@ function StudentsTab({ toast }) {
              <label className="label-modern">Parent Contact</label>
              <input className="input-modern" placeholder="e.g. +977-98..." value={form.parentContact} onChange={e => setForm({...form, parentContact: e.target.value})} />
            </div>
-           <div className="md:col-span-2">
+           <div className="sm:col-span-2 md:col-span-2">
              <label className="label-modern">Address</label>
              <input className="input-modern" placeholder="e.g. Vyas-4" value={form.address} onChange={e => setForm({...form, address: e.target.value})} />
            </div>
-           <div className="md:col-span-3 flex justify-end gap-3 mt-2">
-             {editing && <button type="button" onClick={cancel} className="btn-secondary">Cancel</button>}
-             <button type="submit" className="btn-gold">{editing ? 'Save Changes' : 'Enroll Student'}</button>
+           <div className="sm:col-span-2 md:col-span-3 flex flex-col sm:flex-row justify-end gap-3 mt-2">
+             {editing && <button type="button" onClick={cancel} className="btn-secondary w-full sm:w-auto">Cancel</button>}
+             <button type="submit" className="btn-gold w-full sm:w-auto">{editing ? 'Save Changes' : 'Enroll Student'}</button>
            </div>
         </form>
       </div>
@@ -1071,12 +1185,11 @@ function Admin() {
   const currentTab = tabs.find(t => t.id === activeTab)
 
   return (
-    <div className="min-h-screen bg-slate-50 flex">
+    <div className="min-h-screen bg-slate-50 flex flex-col lg:flex-row overflow-hidden">
       <Toast msg={toast} />
 
-      {/* Sidebar */}
-      <aside className="hidden lg:flex lg:flex-col w-64 bg-gradient-to-b from-navy-darker to-navy min-h-screen sticky top-0 shadow-2xl">
-        {/* Logo */}
+      {/* Sidebar - Desktop Only */}
+      <aside className="hidden lg:flex lg:flex-col w-64 bg-gradient-to-b from-navy-darker to-navy h-full sticky top-0 shadow-xl z-40">
         <div className="px-6 py-6 border-b border-white/10">
           <div className="flex items-center gap-3">
             <div className="bg-white p-1 rounded-lg">
@@ -1089,8 +1202,7 @@ function Admin() {
           </div>
         </div>
 
-        {/* Nav */}
-        <nav className="flex-1 px-4 py-4 space-y-1">
+        <nav className="flex-1 px-4 py-4 space-y-1 overflow-y-auto scrollbar-hide">
           {tabs.map(({ id, label, icon: Icon }) => (
             <button key={id} onClick={() => setActiveTab(id)} className={`admin-sidebar-link ${activeTab === id ? 'active' : ''}`}>
               <Icon className="h-5 w-5 flex-shrink-0" />
@@ -1099,7 +1211,6 @@ function Admin() {
           ))}
         </nav>
 
-        {/* Logout */}
         <div className="px-4 py-4 border-t border-white/10">
           <button onClick={handleLogout} className="admin-sidebar-link text-red-400 hover:bg-red-500/20 hover:text-red-300 w-full">
             <LogOut className="h-5 w-5" /> Logout
@@ -1107,47 +1218,83 @@ function Admin() {
         </div>
       </aside>
 
-      {/* Main content */}
-      <div className="flex-1 min-w-0">
-        {/* Top bar */}
-        <header className="bg-white border-b border-gray-100 sticky top-0 z-10 px-6 py-4 flex items-center justify-between shadow-sm">
-          <div className="flex items-center gap-3">
-            {currentTab && <currentTab.icon className="h-5 w-5 text-gold" />}
-            <h1 className="font-display font-bold text-navy text-xl">{currentTab?.label || 'Admin'}</h1>
+      {/* Mobile Top Header */}
+      <header className="lg:hidden bg-white border-b border-gray-200 sticky top-0 z-[70] px-4 py-3 flex items-center justify-between shadow-md">
+        <div className="flex items-center gap-2">
+          <div className="bg-navy p-1 rounded-lg">
+            <img src="/logos/SVS logo.png" alt="Logo" className="h-5 w-5 object-contain" />
           </div>
+          <h1 className="font-display font-bold text-navy text-base truncate">{currentTab?.label || 'Admin'}</h1>
+        </div>
+        <button onClick={handleLogout} className="p-2 text-red-500 hover:bg-red-50 rounded-lg transition-colors">
+          <LogOut className="h-5 w-5" />
+        </button>
+      </header>
 
-          {/* Mobile tab switcher */}
-          <div className="lg:hidden">
-            <select
-              className="input-modern py-1.5 text-sm"
-              value={activeTab}
-              onChange={e => setActiveTab(e.target.value)}
-            >
-              {tabs.map(t => <option key={t.id} value={t.id}>{t.label}</option>)}
-            </select>
-          </div>
-
-          <button onClick={handleLogout} className="hidden lg:flex items-center gap-2 text-sm text-gray-500 hover:text-red-600 transition-colors px-3 py-2 rounded-xl hover:bg-red-50">
-            <LogOut className="h-4 w-4" /> Logout
-          </button>
+      {/* Main Content Area */}
+      <div className="flex-1 min-w-0 flex flex-col h-full overflow-hidden relative z-0">
+        {/* Desktop Header */}
+        <header className="hidden lg:flex bg-white border-b border-gray-200 sticky top-0 z-[70] px-8 py-4 items-center justify-between shadow-md backdrop-blur-md bg-white/95">
+           <div className="flex items-center gap-3">
+              {currentTab && <currentTab.icon className="h-5 w-5 text-gold" />}
+              <h1 className="font-display font-bold text-navy text-xl">{currentTab?.label || 'Admin Portal'}</h1>
+           </div>
+           <div className="text-xs font-semibold text-gray-400 bg-gray-50 px-3 py-1.5 rounded-full border border-gray-100">
+             Welcome, Administrator
+           </div>
         </header>
 
-        {/* Content */}
-        <main className="p-6 max-w-5xl">
-          {activeTab === 'dashboard' && <DashboardTab />}
-          {activeTab === 'students' && <StudentsTab toast={showToast} />}
-          {activeTab === 'notices' && <NoticesTab toast={showToast} />}
-          {activeTab === 'news' && <NewsTab toast={showToast} />}
-          {activeTab === 'results' && <ResultsTab />}
-          {activeTab === 'articles' && <ArticlesTab toast={showToast} />}
-          {activeTab === 'calendar' && <CalendarTab toast={showToast} />}
-          {activeTab === 'staff' && <StaffTab toast={showToast} />}
-          {activeTab === 'gallery' && <GalleryTab toast={showToast} />}
-          {activeTab === 'settings' && <SettingsTab toast={showToast} />}
+        {/* Content Container */}
+        <main className="flex-1 overflow-y-auto p-4 md:p-8 pb-24 lg:pb-8">
+          <div className="max-w-6xl mx-auto space-y-6">
+            {activeTab === 'dashboard' && <DashboardTab setActiveTab={setActiveTab} />}
+            {activeTab === 'students' && <StudentsTab toast={showToast} />}
+            {activeTab === 'notices' && <NoticesTab toast={showToast} />}
+            {activeTab === 'news' && <NewsTab toast={showToast} />}
+            {activeTab === 'results' && <ResultsTab />}
+            {activeTab === 'articles' && <ArticlesTab toast={showToast} />}
+            {activeTab === 'calendar' && <CalendarTab toast={showToast} />}
+            {activeTab === 'staff' && <StaffTab toast={showToast} />}
+            {activeTab === 'gallery' && <GalleryTab toast={showToast} />}
+            {activeTab === 'settings' && <SettingsTab toast={showToast} />}
+          </div>
         </main>
       </div>
+
+      {/* Mobile Bottom Navigation */}
+      <nav className="lg:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-gray-100 px-1 py-1 flex items-center justify-around z-50 shadow-[0_-4px_16px_rgba(0,0,0,0.06)] pb-safe">
+        {tabs.slice(0, 4).map(({ id, label, icon: Icon }) => (
+          <button
+            key={id}
+            onClick={() => setActiveTab(id)}
+            className={`flex flex-col items-center justify-center py-2 px-1 rounded-xl transition-all flex-1 ${activeTab === id ? 'text-gold' : 'text-gray-400'}`}
+          >
+            <Icon className={`h-5 w-5 ${activeTab === id ? 'animate-pulse-slow' : ''}`} />
+            <span className="text-[10px] mt-1 font-bold truncate w-full text-center">{label}</span>
+          </button>
+        ))}
+        {/* Mobile Menu Toggle/Cycle */}
+        <button
+           onClick={() => {
+             const others = tabs.slice(4)
+             const currentIdx = others.findIndex(t => t.id === activeTab)
+             if (currentIdx === -1) setActiveTab(others[0].id)
+             else setActiveTab(others[(currentIdx + 1) % others.length].id)
+           }}
+           className={`flex flex-col items-center justify-center py-2 px-1 rounded-xl transition-all flex-1 ${tabs.slice(4).some(t => t.id === activeTab) ? 'text-gold' : 'text-gray-400'}`}
+        >
+          <div className="relative">
+            <LayoutDashboard className="h-5 w-5" />
+            <div className="absolute -top-1 -right-1 w-2 h-2 bg-gold rounded-full border-2 border-white shadow-sm" />
+          </div>
+          <span className="text-[10px] mt-1 font-bold truncate w-full text-center">
+            {tabs.slice(4).some(t => t.id === activeTab) ? currentTab?.label : 'More'}
+          </span>
+        </button>
+      </nav>
     </div>
   )
 }
+
 
 export default Admin

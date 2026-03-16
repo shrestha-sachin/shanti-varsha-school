@@ -20,6 +20,10 @@ function StaffPortal() {
     const [students, setStudents] = useState([])
     const [grades, setGrades] = useState({})
     const [editingStudent, setEditingStudent] = useState(null)
+    const [notices, setNotices] = useState([])
+    const [events, setEvents] = useState([])
+    const [news, setNews] = useState([])
+    const [allStaff, setAllStaff] = useState([])
 
     const fetchDB = async () => {
         const { data: sData } = await supabase.from('class_students').select('*').order('id')
@@ -31,6 +35,18 @@ function StaffPortal() {
             gData.forEach(g => gMap[g.student_id] = g)
             setGrades(gMap)
         }
+
+        const { data: nData } = await supabase.from('school_notices').select('*').order('date', { ascending: false }).limit(5)
+        if (nData) setNotices(nData)
+
+        const { data: eData } = await supabase.from('school_events').select('*').gte('date', new Date().toISOString().split('T')[0]).order('date', { ascending: true }).limit(5)
+        if (eData) setEvents(eData)
+
+        const { data: newsData } = await supabase.from('school_news').select('*').eq('published', true).order('date', { ascending: false }).limit(3)
+        if (newsData) setNews(newsData)
+
+        const { data: staffData } = await supabase.from('school_staff').select('*').order('name')
+        if (staffData) setAllStaff(staffData)
     }
 
     useEffect(() => {
@@ -72,35 +88,30 @@ function StaffPortal() {
         setError('')
     }
 
-    // Dashboard data
-    const notices = JSON.parse(localStorage.getItem('schoolNotices') || '[]').sort((a, b) => new Date(b.date) - new Date(a.date)).slice(0, 5)
-    const events = JSON.parse(localStorage.getItem('schoolCalendarEvents') || '[]').filter(e => new Date(e.date) >= new Date()).sort((a, b) => new Date(a.date) - new Date(b.date)).slice(0, 5)
-    const news = JSON.parse(localStorage.getItem('schoolNews') || '[]').filter(n => n.published !== false).sort((a, b) => new Date(b.date) - new Date(a.date)).slice(0, 3)
-    const allStaff = JSON.parse(localStorage.getItem('schoolStaff') || '[]')
 
     if (!loggedIn) {
         return (
             <div className="min-h-screen bg-slate-50 flex items-center justify-center px-4 py-20 animate-fade-in">
                 <div className="w-full max-w-md">
                     {/* Card */}
-                    <div className="bg-white rounded-3xl shadow-premium border border-gray-100 overflow-hidden">
+                    <div className="bg-white rounded-3xl shadow-premium border border-gray-100 overflow-hidden animate-scale-in">
                         {/* Header */}
-                        <div className="bg-gradient-to-br from-navy-darker to-navy p-8 text-white text-center relative overflow-hidden">
+                        <div className="bg-gradient-to-br from-navy-darker to-navy p-6 sm:p-8 text-white text-center relative overflow-hidden">
                             <div className="absolute inset-0 opacity-10">
                                 <div className="absolute top-0 right-0 w-40 h-40 bg-gold rounded-full blur-3xl" />
                             </div>
                             <div className="relative z-10">
-                                <div className="bg-white/20 w-20 h-20 rounded-2xl flex items-center justify-center mx-auto mb-4 backdrop-blur-sm">
-                                    <Users className="h-10 w-10 text-white" />
+                                <div className="bg-white/20 w-16 h-16 sm:w-20 sm:h-20 rounded-2xl flex items-center justify-center mx-auto mb-4 backdrop-blur-sm">
+                                    <Users className="h-8 w-8 sm:h-10 sm:w-10 text-white" />
                                 </div>
-                                <h1 className="font-display font-bold text-2xl mb-1">Staff Portal</h1>
-                                <p className="text-gold-light text-sm">Shanti Varsha Angreji Ma. Vi.</p>
+                                <h1 className="font-display font-bold text-xl sm:text-2xl mb-1">Staff Portal</h1>
+                                <p className="text-gold-light text-xs sm:text-sm">Shanti Varsha Angreji Ma. Vi.</p>
                             </div>
                         </div>
 
                         {/* Form */}
-                        <div className="p-8">
-                            <p className="text-gray-500 text-sm mb-6 text-center">Enter your registered name and PIN to access the portal.</p>
+                        <div className="p-6 sm:p-8">
+                            <p className="text-gray-500 text-xs sm:text-sm mb-6 text-center">Enter your registered name and PIN to access the portal.</p>
                             <form onSubmit={handleLogin} className="space-y-4">
                                 <div>
                                     <label className="label-modern">Full Name</label>
@@ -108,11 +119,10 @@ function StaffPortal() {
                                         <User className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
                                         <input
                                             className="input-modern pl-10"
-                                            placeholder="Enter your registered name"
+                                            placeholder="Enter your name"
                                             value={nameInput}
                                             onChange={e => setNameInput(e.target.value)}
                                             required
-                                            autoComplete="name"
                                         />
                                     </div>
                                 </div>
@@ -123,21 +133,20 @@ function StaffPortal() {
                                         <input
                                             type="password"
                                             className="input-modern pl-10"
-                                            placeholder="Enter your PIN"
+                                            placeholder="Enter PIN"
                                             value={pinInput}
                                             onChange={e => setPinInput(e.target.value)}
                                             required
                                             maxLength={6}
-                                            autoComplete="current-password"
                                         />
                                     </div>
                                 </div>
                                 {error && (
-                                    <div className="bg-danger-light border border-danger/30 text-red-700 text-sm px-4 py-3 rounded-xl animate-fade-in">
+                                    <div className="bg-danger-light border border-danger/30 text-red-700 text-xs px-4 py-3 rounded-xl animate-fade-in font-medium">
                                         {error}
                                     </div>
                                 )}
-                                <button type="submit" disabled={loading} className="btn-gold w-full mt-2 py-3 text-base">
+                                <button type="submit" disabled={loading} className="btn-gold w-full mt-2 py-3.5 text-base">
                                     {loading ? (
                                         <span className="flex items-center gap-2"><span className="w-4 h-4 border-2 border-white/40 border-t-white rounded-full animate-spin" />Signing in...</span>
                                     ) : (
@@ -145,9 +154,6 @@ function StaffPortal() {
                                     )}
                                 </button>
                             </form>
-                            <p className="text-gray-400 text-xs text-center mt-5">
-                                Don't have access? Contact the school administrator.
-                            </p>
                         </div>
                     </div>
                 </div>
@@ -158,32 +164,32 @@ function StaffPortal() {
     return (
         <div className="min-h-screen bg-slate-50 animate-fade-in pb-12">
             {/* Banner */}
-            <section className="bg-gradient-to-br from-navy-darker to-navy py-12 text-white border-b border-white/10 shadow-md">
+            <section className="bg-gradient-to-br from-navy-darker to-navy py-8 md:py-12 text-white border-b border-white/10 shadow-md">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row md:items-center justify-between gap-6">
                     <div className="flex items-center gap-4 animate-fade-in-up">
-                        <div className="bg-white/10 p-3.5 rounded-2xl backdrop-blur-md flex-shrink-0 border border-white/20 shadow-inner">
-                            <Users className="h-8 w-8 text-white drop-shadow-md" />
+                        <div className="bg-white/10 p-3 rounded-2xl backdrop-blur-md flex-shrink-0 border border-white/20 shadow-inner">
+                            <Users className="h-7 w-7 text-white drop-shadow-md" />
                         </div>
-                        <div>
-                            <h1 className="font-display font-bold text-2xl md:text-3xl tracking-tight">Welcome, {staffMember?.name}!</h1>
-                            <p className="text-gold-light text-sm mt-1 font-medium bg-gold/10 inline-block px-3 py-1 rounded-full border border-gold/20">{staffMember?.role}{staffMember?.subject ? ` · ${staffMember.subject}` : ''}</p>
+                        <div className="min-w-0">
+                            <h1 className="font-display font-bold text-xl md:text-3xl tracking-tight truncate">Welcome, {staffMember?.name}!</h1>
+                            <p className="text-gold-light text-[10px] sm:text-xs mt-1 font-bold bg-gold/10 inline-block px-3 py-1 rounded-full border border-gold/20 uppercase tracking-wider">{staffMember?.role}{staffMember?.subject ? ` · ${staffMember.subject}` : ''}</p>
                         </div>
                     </div>
                     <div className="flex items-center gap-3">
-                        <button onClick={handleLogout} className="flex items-center gap-2 bg-red-500/10 hover:bg-red-500/20 backdrop-blur-sm border border-red-500/30 text-red-100 px-4 py-2.5 rounded-xl text-sm font-semibold transition-all shadow-sm">
+                        <button onClick={handleLogout} className="flex items-center gap-2 bg-red-500/10 hover:bg-red-500/20 backdrop-blur-sm border border-red-500/30 text-red-100 px-4 py-2 rounded-xl text-xs font-bold transition-all shadow-sm">
                             <LogOut className="h-4 w-4" /> Logout
                         </button>
                     </div>
                 </div>
                 
                 {/* Tab Navigation */}
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-10">
-                    <div className="flex items-center gap-2 overflow-x-auto pb-2 scrollbar-hide">
-                        <button onClick={() => setActiveTab('dashboard')} className={`flex items-center gap-2 px-5 py-2.5 rounded-t-xl text-sm font-semibold transition-all border-b-2 ${activeTab === 'dashboard' ? 'bg-white text-navy border-gold' : 'bg-white/5 text-gray-300 border-transparent hover:bg-white/10'}`}>
-                            <LayoutDashboard className="w-4 h-4" /> Dashboard Overview
+                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-6">
+                    <div className="flex items-center gap-2 overflow-x-auto pb-2 scrollbar-hide no-scrollbar">
+                        <button onClick={() => setActiveTab('dashboard')} className={`flex items-center gap-2 px-5 py-3 rounded-t-xl text-xs font-bold transition-all border-b-2 whitespace-nowrap ${activeTab === 'dashboard' ? 'bg-white text-navy border-gold' : 'bg-white/5 text-white/60 border-transparent hover:bg-white/10'}`}>
+                            <LayoutDashboard className="w-4 h-4" /> Dashboard
                         </button>
-                        <button onClick={() => setActiveTab('myClass')} className={`flex items-center gap-2 px-5 py-2.5 rounded-t-xl text-sm font-semibold transition-all border-b-2 ${activeTab === 'myClass' ? 'bg-white text-navy border-gold' : 'bg-white/5 text-gray-300 border-transparent hover:bg-white/10'}`}>
-                            <GraduationCap className="w-4 h-4" /> My Class Operations
+                        <button onClick={() => setActiveTab('myClass')} className={`flex items-center gap-2 px-5 py-3 rounded-t-xl text-xs font-bold transition-all border-b-2 whitespace-nowrap ${activeTab === 'myClass' ? 'bg-white text-navy border-gold' : 'bg-white/5 text-white/60 border-transparent hover:bg-white/10'}`}>
+                            <GraduationCap className="w-4 h-4" /> Class Ops
                         </button>
                     </div>
                 </div>

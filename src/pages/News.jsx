@@ -67,14 +67,14 @@ function News() {
                             onChange={e => setSearch(e.target.value)}
                         />
                     </div>
-                    <div className="flex items-center gap-2 flex-wrap">
+                    <div className="flex items-center gap-2 overflow-x-auto pb-3 scrollbar-hide no-scrollbar -mx-4 px-4 sm:mx-0 sm:px-0 animate-fade-in-up">
                         {categories.map(cat => (
                             <button
                                 key={cat}
                                 onClick={() => setActiveCategory(cat)}
-                                className={`px-4 py-2 rounded-xl text-sm font-medium transition-all duration-300 ${activeCategory === cat
+                                className={`px-5 py-2.5 rounded-full text-xs sm:text-sm font-bold transition-all duration-300 whitespace-nowrap ${activeCategory === cat
                                         ? 'bg-gradient-to-r from-navy to-gold text-white shadow-md'
-                                        : 'bg-white text-gray-600 border border-gray-200 hover:border-gold/50 hover:text-navy'
+                                        : 'bg-white text-gray-500 border border-gray-200 hover:border-gold/50 hover:text-navy translate-y-0 active:scale-95'
                                     }`}
                             >
                                 {cat}
