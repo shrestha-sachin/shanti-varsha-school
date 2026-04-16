@@ -14,53 +14,55 @@ import Contact from './pages/Contact'
 import Login from './pages/Login'
 import Admin from './pages/Admin'
 import StaffPortal from './pages/StaffPortal'
-import StudentPortal from './pages/StudentPortal'
+
+import { useLocation } from 'react-router-dom'
+
+function AppContent() {
+  const location = useLocation()
+  const isDashboard = location.pathname.startsWith('/admin') || location.pathname.startsWith('/staff')
+
+  return (
+    <div className="min-h-screen flex flex-col">
+      {!isDashboard && <Navbar />}
+      <main className="flex-grow">
+        <Routes>
+          <Route path="/" element={<Home />} />
+          <Route path="/about" element={<About />} />
+          <Route path="/notices" element={<Notices />} />
+          <Route path="/news" element={<News />} />
+          <Route path="/news/:id" element={<NewsDetail />} />
+          <Route path="/calendar" element={<Calendar />} />
+          <Route path="/gallery" element={<Gallery />} />
+          <Route path="/contact" element={<Contact />} />
+          <Route path="/login" element={<Login />} />
+          <Route
+            path="/staff"
+            element={
+              <ProtectedRoute allowedRoles={['admin', 'teacher']}>
+                <StaffPortal />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/admin"
+            element={
+              <ProtectedRoute allowedRoles={['admin']}>
+                <Admin />
+              </ProtectedRoute>
+            }
+          />
+        </Routes>
+      </main>
+      {!isDashboard && <Footer />}
+    </div>
+  )
+}
 
 function App() {
   return (
     <Router>
       <ScrollToTop />
-      <div className="min-h-screen flex flex-col">
-        <Navbar />
-        <main className="flex-grow">
-          <Routes>
-            <Route path="/" element={<Home />} />
-            <Route path="/about" element={<About />} />
-            <Route path="/notices" element={<Notices />} />
-            <Route path="/news" element={<News />} />
-            <Route path="/news/:id" element={<NewsDetail />} />
-            <Route path="/calendar" element={<Calendar />} />
-            <Route path="/gallery" element={<Gallery />} />
-            <Route path="/contact" element={<Contact />} />
-            <Route path="/login" element={<Login />} />
-            <Route
-              path="/staff"
-              element={
-                <ProtectedRoute allowedRoles={['admin', 'teacher']}>
-                  <StaffPortal />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/student"
-              element={
-                <ProtectedRoute allowedRoles={['admin', 'student']}>
-                  <StudentPortal />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/admin"
-              element={
-                <ProtectedRoute allowedRoles={['admin']}>
-                  <Admin />
-                </ProtectedRoute>
-              }
-            />
-          </Routes>
-        </main>
-        <Footer />
-      </div>
+      <AppContent />
     </Router>
   )
 }

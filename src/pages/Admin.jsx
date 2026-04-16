@@ -1,9 +1,10 @@
-import { useState, useEffect } from 'react'
+import React, { useState, useEffect } from 'react'
+import { createPortal } from 'react-dom'
+
 import { useNavigate } from 'react-router-dom'
 import {
   Bell, Calendar, LogOut, Edit, Trash2, Plus, X, CheckCircle, AlertCircle,
-  LayoutDashboard, Newspaper, FileText, Users, Image, Settings, ChevronRight,
-  Pin, Eye, EyeOff, TrendingUp, BookOpen, Search, Award, GraduationCap, Phone, MapPin, Upload, Download
+  Pin, Eye, EyeOff, TrendingUp, BookOpen, Search, Users as UsersIcon, GraduationCap, Phone, MapPin, Upload, Download, School, Settings, FileText, LayoutDashboard, Newspaper, Image, Loader2, Award, User, Quote
 } from 'lucide-react'
 import { supabase } from '../supabaseClient'
 
@@ -43,6 +44,329 @@ function SectionIcon({ icon: Icon, className = '' }) {
   return (
     <div className={`bg-gradient-to-br from-gold/20 to-gold/10 p-3 rounded-xl flex-shrink-0 ${className}`}>
       <Icon className="h-6 w-6 text-gold" />
+    </div>
+  )
+}
+
+function AdminModal({ isOpen, onClose, title, children, icon: Icon }) {
+  if (!isOpen) return null
+  return (
+    <div className="fixed inset-0 z-[100] bg-navy/60 backdrop-blur-sm flex items-center justify-center p-4 animate-fade-in">
+      <div className="bg-white w-full max-w-2xl rounded-3xl shadow-2xl overflow-hidden animate-scale-in">
+        <div className="px-6 py-5 border-b border-gray-100 flex items-center justify-between bg-gray-50/50">
+          <div className="flex items-center gap-3">
+            {Icon && <div className="p-2 bg-gold/10 rounded-lg"><Icon className="h-5 w-5 text-gold" /></div>}
+            <h3 className="font-display font-bold text-navy text-xl">{title}</h3>
+          </div>
+          <button onClick={onClose} className="p-2 hover:bg-gray-100 rounded-full transition-all text-gray-400 hover:text-navy"><X className="h-5 w-5" /></button>
+        </div>
+        <div className="p-6 overflow-y-auto max-h-[80vh]">
+          {children}
+        </div>
+      </div>
+    </div>
+  )
+}
+
+// ── Crop helper ───────────────────────────────────────────────────────────────
+function CropModal({ src, onDone, onCancel }) {
+  const wrapRef = React.useRef(null)
+  const imgRef = React.useRef(null)
+  const [imgReady, setImgReady] = useState(false)
+  const [ratio, setRatio] = useState(null) // null = free, 1 = square, etc.
+  const [box, setBox] = useState({ left: 0.1, top: 0.1, width: 0.8, height: 0.8 }) // fractions 0–1 of rendered image
+  const [drag, setDrag] = useState(null)
+
+  // Whenever ratio changes, conform box to new aspect ratio mathematically
+  useEffect(() => {
+    if (ratio && imgReady && imgRef.current) {
+      const r = imgRef.current.getBoundingClientRect()
+      const wPx = box.width * r.width
+      const targetHPx = wPx / ratio
+      setBox(b => ({ ...b, height: Math.min(targetHPx / r.height, 1 - b.top) }))
+    }
+  }, [ratio, imgReady])
+
+  // Get the bounding rect of the rendered image inside the container
+  const getImgRect = () => {
+    const img = imgRef.current
+    if (!img) return null
+    return img.getBoundingClientRect()
+  }
+
+  const toFrac = (clientX, clientY) => {
+    const r = getImgRect()
+    if (!r) return { fx: 0, fy: 0 }
+    return {
+      fx: Math.max(0, Math.min(1, (clientX - r.left) / r.width)),
+      fy: Math.max(0, Math.min(1, (clientY - r.top) / r.height))
+    }
+  }
+
+  const onDown = (e, targetMode = 'move') => {
+    e.preventDefault()
+    e.stopPropagation()
+    const cx = e.touches ? e.touches[0].clientX : e.clientX
+    const cy = e.touches ? e.touches[0].clientY : e.clientY
+    const { fx, fy } = toFrac(cx, cy)
+
+    if (targetMode === 'resize') {
+      setDrag({ mode: 'resize', anchorFx: box.left, anchorFy: box.top })
+    } else {
+      if (fx >= box.left && fx <= box.left + box.width && fy >= box.top && fy <= box.top + box.height) {
+        setDrag({ mode: 'move', startFx: fx - box.left, startFy: fy - box.top })
+      }
+    }
+  }
+
+  const onMove = (e) => {
+    if (!drag) return
+    e.preventDefault()
+    const cx = e.touches ? e.touches[0].clientX : e.clientX
+    const cy = e.touches ? e.touches[0].clientY : e.clientY
+    const { fx, fy } = toFrac(cx, cy)
+    const r = getImgRect()
+    if (!r) return
+    
+    if (drag.mode === 'move') {
+      const newLeft = Math.max(0, Math.min(1 - box.width, fx - drag.startFx))
+      const newTop = Math.max(0, Math.min(1 - box.height, fy - drag.startFy))
+      setBox(b => ({ ...b, left: newLeft, top: newTop }))
+    } else if (drag.mode === 'resize') {
+      let newW = fx - drag.anchorFx
+      let newH = fy - drag.anchorFy
+
+      if (ratio) {
+        const maxDeltaPx = Math.max(newW * r.width, (newH * r.height) * ratio)
+        newW = maxDeltaPx / r.width
+        newH = (maxDeltaPx / ratio) / r.height
+        if (newW > 1 - drag.anchorFx) {
+          newW = 1 - drag.anchorFx
+          newH = (newW * r.width / ratio) / r.height
+        }
+        if (newH > 1 - drag.anchorFy) {
+          newH = 1 - drag.anchorFy
+          newW = (newH * r.height * ratio) / r.width
+        }
+      }
+      newW = Math.max(0.05, newW)
+      newH = Math.max(0.05, newH)
+      setBox(b => ({ ...b, width: newW, height: newH }))
+    }
+  }
+
+  const onUp = () => setDrag(null)
+
+  const applyCrop = () => {
+    const img = imgRef.current
+    if (!img) { onDone(null); return }
+
+    // Map fractional crop box → natural image pixels
+    const sx = box.left * img.naturalWidth
+    const sy = box.top * img.naturalHeight
+    const sw = box.width * img.naturalWidth
+    const sh = box.height * img.naturalHeight
+
+    const outW = 800
+    const outH = ratio ? (800 / ratio) : (800 * (sh / sw))
+    
+    const canvas = document.createElement('canvas')
+    canvas.width = outW
+    canvas.height = outH
+    const ctx = canvas.getContext('2d')
+    ctx.drawImage(img, sx, sy, sw, sh, 0, 0, outW, outH)
+
+    const result = canvas.toDataURL('image/jpeg', 0.92)
+    onDone(result)
+  }
+
+  const cropStyle = {
+    position: 'absolute',
+    left: `${box.left * 100}%`,
+    top: `${box.top * 100}%`,
+    width: `${box.width * 100}%`,
+    height: `${box.height * 100}%`,
+    border: '3px solid white',
+    boxShadow: '0 0 0 9999px rgba(0,0,0,0.6)',
+    cursor: 'move',
+    zIndex: 10
+  }
+
+  const modalContent = (
+    <div className="fixed inset-0 z-[200] bg-navy/80 backdrop-blur-sm overflow-y-auto p-4 md:p-10 flex">
+      <div className="bg-white w-full max-w-2xl rounded-3xl overflow-hidden shadow-2xl m-auto shrink-0 animate-scale-in">
+        <div className="px-5 py-4 border-b border-gray-100 flex items-center justify-between overflow-x-auto gap-4 custom-scrollbar">
+          <h3 className="font-display font-bold text-navy text-lg whitespace-nowrap hidden sm:block">Editor</h3>
+          <div className="flex gap-2 shrink-0">
+            <button type="button" onClick={() => setRatio(null)} className={`px-4 py-1.5 rounded-full text-xs font-bold transition-colors ${ratio===null?'bg-navy text-white shadow-md':'bg-gray-100 text-gray-500 hover:bg-gray-200'}`}>Free</button>
+            <button type="button" onClick={() => setRatio(1)} className={`px-4 py-1.5 rounded-full text-xs font-bold transition-colors ${ratio===1?'bg-navy text-white shadow-md':'bg-gray-100 text-gray-500 hover:bg-gray-200'}`}>1:1 Square</button>
+            <button type="button" onClick={() => setRatio(4/3)} className={`px-4 py-1.5 rounded-full text-xs font-bold transition-colors ${ratio===4/3?'bg-navy text-white shadow-md':'bg-gray-100 text-gray-500 hover:bg-gray-200'}`}>4:3</button>
+            <button type="button" onClick={() => setRatio(16/9)} className={`px-4 py-1.5 rounded-full text-xs font-bold transition-colors ${ratio===16/9?'bg-navy text-white shadow-md':'bg-gray-100 text-gray-500 hover:bg-gray-200'}`}>16:9</button>
+          </div>
+          <button type="button" onClick={onCancel} className="p-2 hover:bg-red-50 hover:text-red-500 rounded-full shrink-0 transition-colors"><X className="h-5 w-5" /></button>
+        </div>
+
+        <div
+          className="relative bg-gray-900 overflow-hidden select-none flex items-center justify-center p-4"
+          style={{ minHeight: 320 }}
+          onMouseMove={onMove}
+          onMouseUp={onUp}
+          onMouseLeave={onUp}
+          onTouchMove={onMove}
+          onTouchEnd={onUp}
+        >
+          {!imgReady && (
+            <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 text-white/50 bg-gray-900 z-20">
+              <Loader2 className="h-8 w-8 animate-spin" />
+              <p className="text-xs">Loading image...</p>
+            </div>
+          )}
+          
+          <div ref={wrapRef} className="relative inline-block leading-none" style={{ fontSize: 0 }}>
+            <img
+              ref={imgRef}
+              src={src}
+              alt="crop preview"
+              onLoad={() => {
+                console.log('[CropModal] Image loaded:', imgRef.current.naturalWidth, 'x', imgRef.current.naturalHeight)
+                setImgReady(true)
+              }}
+              onError={(e) => {
+                console.error('[CropModal] Image failed to load', e)
+                alert('Failed to load image for cropping. This link may be broken or restricted.')
+                onCancel()
+              }}
+              className={`block w-auto h-auto max-w-full max-h-[400px] object-contain transition-opacity duration-300 ${imgReady ? 'opacity-100' : 'opacity-0'}`}
+              draggable={false}
+            />
+
+            {imgReady && (
+              <div
+                style={cropStyle}
+                onMouseDown={(e) => onDown(e, 'move')}
+                onTouchStart={(e) => onDown(e, 'move')}
+              >
+                {/* Rule-of-thirds grid */}
+                <div style={{ position: 'absolute', inset: 0, display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gridTemplateRows: '1fr 1fr 1fr', pointerEvents: 'none' }}>
+                  {[...Array(9)].map((_, i) => <div key={i} style={{ border: '1px solid rgba(255,255,255,0.4)', borderRight: i % 3 === 2 ? 'none' : '1px solid rgba(255,255,255,0.4)', borderBottom: i > 5 ? 'none' : '1px solid rgba(255,255,255,0.4)' }} />)}
+                </div>
+                {/* Resize Handle */}
+                <div 
+                  style={{ position: 'absolute', bottom: -6, right: -6, width: 20, height: 20, backgroundColor: 'white', borderRadius: '50%', cursor: 'se-resize', boxShadow: '0 2px 4px rgba(0,0,0,0.4)', pointerEvents: 'auto', border: '2px solid #072f6e', zIndex: 50 }}
+                  onMouseDown={(e) => onDown(e, 'resize')}
+                  onTouchStart={(e) => onDown(e, 'resize')}
+                />
+              </div>
+            )}
+          </div>
+        </div>
+
+        <div className="p-5">
+          {imgReady && <p className="text-xs text-gray-500 mb-4 text-center">Drag edges to frame your photo or choose an aspect ratio above</p>}
+          <div className="flex flex-col sm:flex-row gap-3">
+            <button 
+              type="button"
+              onClick={applyCrop} 
+              disabled={!imgReady}
+              className={`btn-gold flex-1 py-3 font-bold transition-all ${!imgReady ? 'opacity-50 cursor-not-allowed' : 'hover:scale-[1.02] active:scale-95'}`}
+            >
+              Upload Cropped
+            </button>
+            <button 
+              type="button"
+              onClick={() => onDone(src)} 
+              disabled={!imgReady}
+              className={`flex-1 py-3 bg-navy hover:bg-navy-dark text-white rounded-2xl font-bold transition-all shadow-md ${!imgReady ? 'opacity-50 cursor-not-allowed' : 'hover:scale-[1.02] active:scale-95'}`}
+            >
+              Upload Original
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  )
+  
+  return createPortal(modalContent, document.body)
+}
+
+// ── File Uploader ─────────────────────────────────────────────────────────────
+function FileUploader({ onUpload, currentUrl, label = "Upload Image", folder = "profile" }) {
+  const [uploading, setUploading] = useState(false)
+  const [preview, setPreview] = useState(currentUrl)
+  const [error, setError] = useState(null)
+  const [success, setSuccess] = useState(false)
+  const [cropSrc, setCropSrc] = useState(null)
+  const uid = `uploader-${(label + folder).replace(/\s+/g, '-').toLowerCase()}`
+
+  useEffect(() => { setPreview(currentUrl) }, [currentUrl])
+
+  const handleChange = (e) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+    e.target.value = ''
+    setError(null)
+    setSuccess(false)
+    const reader = new FileReader()
+    reader.onload = () => setCropSrc(reader.result)
+    reader.readAsDataURL(file)
+  }
+
+  const doUpload = async (dataUrl) => {
+    setCropSrc(null)
+    if (!dataUrl) return
+
+    setPreview(dataUrl) // show cropped version immediately as preview
+    try {
+      setUploading(true)
+      setError(null)
+
+      // Convert dataUrl → blob
+      const res = await fetch(dataUrl)
+      const blob = await res.blob()
+
+      const path = `${folder}/${Date.now()}.jpg`
+      const { error: uploadErr } = await supabase.storage
+        .from('school-assets')
+        .upload(path, blob, { contentType: 'image/jpeg', upsert: true })
+
+      if (uploadErr) throw uploadErr
+
+      const { data: urlData } = supabase.storage.from('school-assets').getPublicUrl(path)
+      setPreview(urlData.publicUrl)
+      setSuccess(true)
+      onUpload(urlData.publicUrl)
+    } catch (err) {
+      setError(err.message)
+      setPreview(currentUrl)
+    } finally {
+      setUploading(false)
+    }
+  }
+
+  return (
+    <div className="space-y-2">
+      <div className="flex items-center gap-4 p-4 border-2 border-dashed border-gray-200 rounded-2xl bg-gray-50/50 hover:bg-gray-50 transition-all">
+        <div className="w-20 h-20 rounded-2xl bg-white border border-gray-200 overflow-hidden flex-shrink-0 flex items-center justify-center shadow-sm">
+          {preview
+            ? <img src={preview} className="w-full h-full object-cover" alt="preview" onError={() => setPreview(null)} />
+            : <Upload className="h-7 w-7 text-gray-300" />}
+        </div>
+        <div className="flex-1 min-w-0">
+          <input type="file" id={uid} accept="image/jpeg,image/png,image/webp" onChange={handleChange} disabled={uploading} className="hidden" />
+          <label htmlFor={uid} className="cursor-pointer inline-flex items-center gap-2 px-4 py-2.5 bg-white border-2 border-gray-200 rounded-xl text-sm font-bold text-navy hover:border-gold hover:text-gold transition-all shadow-sm">
+            {uploading ? <><Loader2 className="h-4 w-4 animate-spin" /> Uploading...</> : <><Plus className="h-4 w-4" /> {preview ? 'Change Photo' : 'Choose Photo'}</>}
+          </label>
+          <p className="text-[10px] text-gray-400 mt-1.5 italic">JPG, PNG, WEBP — tap to crop before uploading</p>
+          {success && !error && <p className="text-[11px] text-green-600 font-bold mt-1">✓ Uploaded! Click Save to apply.</p>}
+          {error && (
+            <div className="mt-2 p-2 bg-red-50 border border-red-200 rounded-lg">
+              <p className="text-[11px] text-red-700 font-bold">✗ Upload failed</p>
+              <p className="text-[10px] text-red-500 mt-0.5">{error}</p>
+            </div>
+          )}
+        </div>
+      </div>
+      {cropSrc && <CropModal src={cropSrc} onDone={doUpload} onCancel={() => setCropSrc(null)} />}
     </div>
   )
 }
@@ -129,14 +453,21 @@ function NoticesTab({ toast }) {
         {loading ? <EmptyState message="Loading..." /> : notices.length === 0 ? <EmptyState message="Zero notices in database." /> : (
           <div className="space-y-3">
             {notices.map(n => (
-              <div key={n.id} className="flex items-center justify-between p-4 rounded-xl border border-gray-100">
-                <div>
-                   <p className="font-semibold text-navy text-sm">{n.title}</p>
-                   <p className="text-xs text-gray-400">{n.date}</p>
+              <div key={n.id} className="flex items-center justify-between p-4 rounded-xl border border-gray-100 hover:border-gold/30 hover:bg-gray-50 transition-all">
+                <div className="flex-1 min-w-0">
+                   <div className="flex items-center gap-2 mb-1">
+                     <span className={`badge ${n.category === 'Urgent' ? 'badge-urgent' : 'badge-general'} text-[11px]`}>{n.category}</span>
+                     {n.pinned && <span className="flex items-center gap-1 text-[10px] font-bold text-amber-600 bg-amber-50 px-2 py-0.5 rounded-full"><Pin className="h-2.5 w-2.5" /> Pinned</span>}
+                   </div>
+                   <p className="font-semibold text-navy text-sm truncate">{n.title}</p>
+                   <p className="text-xs text-gray-400 mt-0.5">{n.date}</p>
                 </div>
-                <div className="flex gap-2">
-                   <button onClick={() => startEdit(n)} className="p-2 text-navy hover:bg-gold/10 rounded-lg"><Edit className="h-4 w-4" /></button>
-                   <button onClick={() => del(n.id)} className="p-2 text-danger hover:bg-danger-light rounded-lg"><Trash2 className="h-4 w-4" /></button>
+                <div className="flex items-center gap-1 ml-3">
+                   <button onClick={async () => { await supabase.from('school_notices').update({ pinned: !n.pinned }).eq('id', n.id); fetchNotices() }} className="p-2 text-gray-400 hover:text-gold hover:bg-gold/10 rounded-lg transition-all" title={n.pinned ? 'Unpin' : 'Pin'}>
+                     <Pin className={`h-4 w-4 ${n.pinned ? 'text-gold fill-gold' : ''}`} />
+                   </button>
+                   <button onClick={() => startEdit(n)} className="p-2 text-navy hover:bg-gold/10 hover:text-gold rounded-lg transition-all"><Edit className="h-4 w-4" /></button>
+                   <button onClick={() => del(n.id)} className="p-2 text-danger hover:bg-danger-light rounded-lg transition-all"><Trash2 className="h-4 w-4" /></button>
                 </div>
               </div>
             ))}
@@ -218,8 +549,7 @@ function NewsTab({ toast }) {
             <input type="date" className="input-modern" value={form.date} onChange={e => setForm(p => ({ ...p, date: e.target.value }))} />
           </div>
           <div className="md:col-span-2">
-            <label className="label-modern">Image URL (optional)</label>
-            <input className="input-modern" placeholder="https://example.com/image.jpg" value={form.image_url} onChange={e => setForm(p => ({ ...p, image_url: e.target.value }))} />
+            <FileUploader label="News Cover Image" folder="news" currentUrl={form.image_url} onUpload={(url) => setForm(p => ({ ...p, image_url: url }))} />
           </div>
           <div className="md:col-span-2">
             <label className="label-modern">Content *</label>
@@ -351,11 +681,17 @@ function ArticlesTab({ toast }) {
             {articles.map(a => (
               <div key={a.id} className="flex items-center justify-between p-4 rounded-xl border border-gray-100 hover:border-gold/30 hover:bg-gray-50 transition-all">
                 <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-2 mb-1">
+                    {!a.published && <span className="badge text-[11px] bg-gray-100 text-gray-500">Draft</span>}
+                  </div>
                   <p className="font-semibold text-navy text-sm truncate">{a.title}</p>
                   <p className="text-xs text-gray-400 mt-0.5">{a.author ? `By ${a.author} · ` : ''}{new Date(a.date).toLocaleDateString()}</p>
                   {a.tags && <p className="text-xs text-gold mt-1 truncate">{a.tags}</p>}
                 </div>
                 <div className="flex items-center gap-1 ml-3">
+                  <button onClick={async () => { await supabase.from('school_articles').update({ published: !a.published }).eq('id', a.id); fetchArticles() }} className="p-2 text-gray-400 hover:text-gold hover:bg-gold/10 rounded-lg transition-all" title={a.published ? 'Hide' : 'Publish'}>
+                    {a.published ? <Eye className="h-4 w-4" /> : <EyeOff className="h-4 w-4" />}
+                  </button>
                   <button onClick={() => startEdit(a)} className="p-2 text-navy hover:bg-gold/10 hover:text-gold rounded-lg transition-all"><Edit className="h-4 w-4" /></button>
                   <button onClick={() => del(a.id)} className="p-2 text-danger hover:bg-danger-light rounded-lg transition-all"><Trash2 className="h-4 w-4" /></button>
                 </div>
@@ -476,8 +812,9 @@ function CalendarTab({ toast }) {
 function StaffTab({ toast }) {
   const [staff, setStaff] = useState([])
   const [loading, setLoading] = useState(true)
-  const [form, setForm] = useState({ id: '', name: '', role: 'Teacher', subject: '', photoUrl: '', pin: '' })
+  const [form, setForm] = useState({ id: '', name: '', role: 'Teacher', subject: '', image_url: '', pin: '' })
   const [editing, setEditing] = useState(null)
+  const [showEditor, setShowEditor] = useState(false)
 
   const fetchStaff = async () => {
     setLoading(true)
@@ -485,52 +822,245 @@ function StaffTab({ toast }) {
     if (data) setStaff(data)
     setLoading(false)
   }
-
   useEffect(() => { fetchStaff() }, [])
+
+  const startEdit = (s) => { 
+    setEditing(s)
+    setForm({ id: s.id, name: s.name, role: s.role || 'Teacher', subject: s.subject || '', image_url: s.image_url || s.photo_url || '', pin: s.pin || '' })
+    setShowEditor(true)
+    window.scrollTo({ top: 0, behavior: 'smooth' })
+  }
+
+  const startAdd = () => {
+    setEditing(null)
+    setForm({ id: '', name: '', role: 'Teacher', subject: '', image_url: '', pin: '' })
+    setShowEditor(true)
+    window.scrollTo({ top: 0, behavior: 'smooth' })
+  }
 
   const save = async (e) => {
     e.preventDefault()
     if (!form.name || !form.id) return toast({ type: 'error', text: 'Name and ID required' })
-    
-    const payload = { ...form }
     if (editing) {
-      const { error } = await supabase.from('school_staff').update(payload).eq('id', editing.id)
-      if (!error) toast({ type: 'success', text: 'Staff updated!' })
-      setEditing(null)
+      const { id: _id, ...updatePayload } = form
+      // Send only valid columns for school_staff
+      const payload = { 
+        ...updatePayload, 
+        photo_url: form.image_url 
+      }
+      delete payload.image_url // Remove the temporary JS field before sending to DB
+      const { data: updated, error } = await supabase.from('school_staff').update(payload).eq('id', editing.id).select()
+      if (error) toast({ type: 'error', text: `Update failed: ${error.message}` })
+      else if (!updated || updated.length === 0) toast({ type: 'error', text: 'Update blocked by database policy.' })
+      else { toast({ type: 'success', text: 'Staff updated!' }); setShowEditor(false); fetchStaff() }
     } else {
+      const payload = { 
+        ...form, 
+        photo_url: form.image_url 
+      }
+      delete payload.image_url
       const { error } = await supabase.from('school_staff').insert([payload])
-      if (error) return toast({ type: 'error', text: 'Error adding staff (check ID uniqueness)' })
-      toast({ type: 'success', text: 'Staff added!' })
+      if (error) {
+        if (error.code === '23505') toast({ type: 'error', text: 'This Staff ID already exists.' })
+        else toast({ type: 'error', text: error.message })
+      } else { toast({ type: 'success', text: 'Staff added!' }); setShowEditor(false); fetchStaff() }
     }
-    setForm({ id: '', name: '', role: 'Teacher', subject: '', photoUrl: '', pin: '' })
-    fetchStaff()
   }
 
-  const del = async (id) => { if (confirm('Remove staff?')) { await supabase.from('school_staff').delete().eq('id', id); toast({ type: 'success', text: 'Removed.' }); fetchStaff() } }
+  const del = async (id) => { if (confirm('Remove staff member?')) { await supabase.from('school_staff').delete().eq('id', id); toast({ type: 'success', text: 'Removed.' }); fetchStaff() } }
+
+  if (loading && staff.length === 0) return <div className="flex items-center justify-center py-20"><Loader2 className="h-8 w-8 animate-spin text-gold" /></div>
 
   return (
     <div className="space-y-6">
-      <div className="bg-white rounded-2xl border border-gray-100 shadow-card p-6">
-        <h3 className="font-display font-bold text-navy text-xl mb-5">Manage Staff</h3>
-        <form onSubmit={save} className="grid grid-cols-1 md:grid-cols-2 gap-4">
-           <input className="input-modern" placeholder="Staff ID (e.g. T-001)" value={form.id} onChange={e => setForm({...form, id: e.target.value})} disabled={!!editing} required />
-           <input className="input-modern" placeholder="Full Name" value={form.name} onChange={e => setForm({...form, name: e.target.value})} required />
-           <input className="input-modern" placeholder="Subject" value={form.subject} onChange={e => setForm({...form, subject: e.target.value})} />
-           <input className="input-modern" placeholder="PIN for Login" value={form.pin} onChange={e => setForm({...form, pin: e.target.value})} required />
-           <button type="submit" className="btn-gold md:col-span-2">Save Staff Member</button>
-        </form>
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div className="flex items-center gap-3">
+          <SectionIcon icon={GraduationCap} />
+          <div>
+            <h3 className="font-display font-bold text-navy text-xl">Staff Directory</h3>
+            <p className="text-xs text-navy/60">Manage teachers and administration staff</p>
+          </div>
+        </div>
+        {!showEditor && (
+          <button onClick={startAdd} className="btn-gold px-6 py-3 flex items-center justify-center gap-2 shadow-lg shadow-gold/20">
+            <Plus className="h-5 w-5" /> Add Staff
+          </button>
+        )}
       </div>
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-         {staff.map(s => (
-            <div key={s.id} className="bg-white p-4 rounded-xl border border-gray-100 flex items-center justify-between">
-               <div>
-                  <p className="font-bold text-navy">{s.name}</p>
-                  <p className="text-xs text-gray-500">{s.role} · {s.subject}</p>
-                  <p className="text-[10px] font-mono text-gray-400 mt-1">ID: {s.id} · PIN: {s.pin}</p>
-               </div>
-               <button onClick={() => del(s.id)} className="text-danger p-2 hover:bg-danger/10 rounded-lg"><Trash2 className="h-4 w-4" /></button>
+
+      {showEditor && (
+        <div className="bg-white rounded-3xl border-2 border-gold/30 shadow-2xl overflow-hidden animate-fade-in relative">
+          <div className="p-6 md:p-8 space-y-6">
+            <div className="flex items-center justify-between mb-2">
+               <h4 className="font-display font-bold text-navy text-lg">{editing ? 'Edit Profile' : 'New Staff Profile'}</h4>
+               <button onClick={() => setShowEditor(false)} className="p-2 hover:bg-gray-100 rounded-full text-gray-400 transition-colors"><X className="h-5 w-5" /></button>
             </div>
-         ))}
+            <form onSubmit={save} className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+              <div className="lg:col-span-1 space-y-4">
+                <label className="block text-sm font-bold text-navy">Profile Photo</label>
+                <FileUploader folder="profile" currentUrl={form.image_url} onUpload={url => setForm(p=>({...p, image_url: url}))} />
+                <p className="text-[10px] text-gray-400 italic text-center">Images are automatically optimized for web use.</p>
+              </div>
+              <div className="lg:col-span-2 space-y-5">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div><label className="label-modern">Staff ID (Unique) *</label><input className="input-modern" placeholder="e.g. T-101" value={form.id} onChange={e=>setForm({...form, id: e.target.value})} disabled={!!editing} required /></div>
+                  <div><label className="label-modern">Full Name *</label><input className="input-modern" placeholder="Enter name" value={form.name} onChange={e=>setForm({...form, name: e.target.value})} required /></div>
+                </div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div><label className="label-modern">Role/Position</label><input className="input-modern" placeholder="e.g. Senior Teacher" value={form.role} onChange={e=>setForm({...form, role: e.target.value})} /></div>
+                  <div><label className="label-modern">Subject (if any)</label><input className="input-modern" placeholder="e.g. Mathematics" value={form.subject} onChange={e=>setForm({...form, subject: e.target.value})} /></div>
+                </div>
+                <div><label className="label-modern">Login PIN (4-digits) *</label><input className="input-modern" type="password" maxLength={4} value={form.pin} onChange={e=>setForm({...form, pin: e.target.value})} required /></div>
+                <div className="flex gap-3 pt-4">
+                   <button type="submit" className="btn-gold flex-1 py-4 text-base font-bold shadow-xl shadow-gold/20">Save Profile</button>
+                   <button type="button" onClick={() => setShowEditor(false)} className="px-8 py-4 border-2 border-gray-100 rounded-2xl font-bold text-navy hover:bg-gray-50 transition-all">Cancel</button>
+                </div>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        {staff.map(s => (
+          <div key={s.id} className="bg-white rounded-2xl border border-gray-100 p-4 hover:shadow-xl hover:border-gold/30 transition-all group animate-scale-in">
+            <div className="flex items-start gap-4 mb-4">
+              <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-navy/5 to-gold/10 overflow-hidden flex-shrink-0 border border-gray-100 shadow-inner">
+                <img src={s.image_url ? `${s.image_url}?t=${Date.now()}` : (s.photo_url ? `${s.photo_url}?t=${Date.now()}` : `https://ui-avatars.com/api/?name=${encodeURIComponent(s.name)}&background=f0f2f5&color=072f6e`)} className="w-full h-full object-cover" alt={s.name} onError={e => e.target.src = 'https://ui-avatars.com/api/?name=' + encodeURIComponent(s.name)} />
+              </div>
+              <div className="flex-1 min-w-0">
+                <h4 className="font-bold text-navy truncate leading-tight mb-0.5">{s.name}</h4>
+                <p className="text-xs font-bold text-gold uppercase tracking-wider">{s.role}</p>
+                {s.subject && <p className="text-[11px] text-gray-400 mt-1 line-clamp-1 italic">{s.subject}</p>}
+                <p className="text-[10px] text-gray-300 mt-1 font-mono uppercase tracking-tighter">ID: {s.id}</p>
+              </div>
+            </div>
+            <div className="flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity focus-within:opacity-100">
+              <button onClick={() => startEdit(s)} className="flex-1 py-2 text-xs font-bold text-navy bg-gray-50 hover:bg-gold/10 hover:text-gold rounded-xl border border-gray-100 transition-all flex items-center justify-center gap-2">
+                <Edit className="h-3.5 w-3.5" /> Edit
+              </button>
+              <button onClick={() => del(s.id)} className="w-10 py-2 text-red-500 bg-red-50 hover:bg-red-100 rounded-xl border border-red-100 transition-all flex items-center justify-center">
+                <Trash2 className="h-4 w-4" />
+              </button>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  )
+}
+
+// ── SMC TAB ───────────────────────────────────────────────────────────────────
+function SMCTab({ toast }) {
+  const [smc, setSMC] = useState([])
+  const [loading, setLoading] = useState(true)
+  const [form, setForm] = useState({ name: '', position: 'Member', image_url: '' })
+  const [editing, setEditing] = useState(null)
+  const [showEditor, setShowEditor] = useState(false)
+
+  const fetchSMC = async () => {
+    setLoading(true)
+    const { data } = await supabase.from('school_smc').select('*').order('name')
+    if (data) setSMC(data)
+    setLoading(false)
+  }
+  useEffect(() => { fetchSMC() }, [])
+
+  const startEdit = (m) => { 
+    setEditing(m)
+    setForm({ name: m.name, position: m.position, image_url: m.image_url || m.image || '' })
+    setShowEditor(true)
+    window.scrollTo({ top: 0, behavior: 'smooth' })
+  }
+
+  const startAdd = () => {
+    setEditing(null)
+    setForm({ name: '', position: 'Member', image_url: '' })
+    setShowEditor(true)
+    window.scrollTo({ top: 0, behavior: 'smooth' })
+  }
+
+  const save = async (e) => {
+    e.preventDefault()
+    if (!form.name) return toast({ type: 'error', text: 'Name is required' })
+    const payload = { 
+      ...form, 
+      image: form.image_url
+    }
+    delete payload.image_url
+    const { data: updated, error } = await supabase.from('school_smc').upsert(editing ? { ...payload, id: editing.id } : [payload]).select()
+    if (error) toast({ type: 'error', text: `Error: ${error.message}` })
+    else { toast({ type: 'success', text: editing ? 'Member updated!' : 'Member added!' }); setShowEditor(false); fetchSMC() }
+  }
+
+  const del = async (id) => { if (confirm('Remove committee member?')) { await supabase.from('school_smc').delete().eq('id', id); toast({ type: 'success', text: 'Removed.' }); fetchSMC() } }
+
+  if (loading && smc.length === 0) return <div className="flex items-center justify-center py-20"><Loader2 className="h-8 w-8 animate-spin text-gold" /></div>
+
+  return (
+    <div className="space-y-6">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div className="flex items-center gap-3">
+          <SectionIcon icon={UsersIcon} />
+          <div>
+            <h3 className="font-display font-bold text-navy text-xl">Management Committee</h3>
+            <p className="text-xs text-navy/60">School Management Committee (SMC) members</p>
+          </div>
+        </div>
+        {!showEditor && (
+          <button onClick={startAdd} className="btn-gold px-6 py-3 flex items-center justify-center gap-2 shadow-lg shadow-gold/20">
+            <Plus className="h-5 w-5" /> Add Member
+          </button>
+        )}
+      </div>
+
+      {showEditor && (
+        <div className="bg-white rounded-3xl border-2 border-gold/30 shadow-2xl overflow-hidden animate-fade-in relative">
+          <div className="p-6 md:p-8 space-y-6">
+            <div className="flex items-center justify-between mb-2">
+               <h4 className="font-display font-bold text-navy text-lg">{editing ? 'Edit Member' : 'New Committee Member'}</h4>
+               <button onClick={() => setShowEditor(false)} className="p-2 hover:bg-gray-100 rounded-full text-gray-400 transition-colors"><X className="h-5 w-5" /></button>
+            </div>
+            <form onSubmit={save} className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+              <div className="lg:col-span-1 space-y-4">
+                <label className="block text-sm font-bold text-navy">Member Photo</label>
+                <FileUploader folder="profile" currentUrl={form.image_url} onUpload={url => setForm(p=>({...p, image_url: url}))} />
+              </div>
+              <div className="lg:col-span-2 space-y-5">
+                <div><label className="label-modern">Full Name *</label><input className="input-modern" placeholder="Enter name" value={form.name} onChange={e=>setForm({...form, name: e.target.value})} required /></div>
+                <div><label className="label-modern">Position *</label><input className="input-modern" placeholder="e.g. Chairperson" value={form.position} onChange={e=>setForm({...form, position: e.target.value})} required /></div>
+                <div className="flex gap-3 pt-4">
+                   <button type="submit" className="btn-gold flex-1 py-4 text-base font-bold shadow-xl shadow-gold/20">Save Member</button>
+                   <button type="button" onClick={() => setShowEditor(false)} className="px-8 py-4 border-2 border-gray-100 rounded-2xl font-bold text-navy hover:bg-gray-50 transition-all">Cancel</button>
+                </div>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        {smc.map(m => (
+          <div key={m.id} className="bg-white rounded-2xl border border-gray-100 p-4 hover:shadow-xl hover:border-gold/30 transition-all group animate-scale-in">
+            <div className="flex items-start gap-4 mb-4">
+              <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-gold/10 to-transparent overflow-hidden flex-shrink-0 border border-gold/10">
+                <img src={m.image_url ? `${m.image_url}?t=${Date.now()}` : (m.image ? `${m.image}?t=${Date.now()}` : `https://ui-avatars.com/api/?name=${encodeURIComponent(m.name)}&background=fdf8e6&color=b45309`)} className="w-full h-full object-cover" alt={m.name} onError={e => e.target.src = 'https://ui-avatars.com/api/?name=' + encodeURIComponent(m.name)} />
+              </div>
+              <div className="flex-1 min-w-0">
+                <h4 className="font-bold text-navy truncate leading-tight mb-1">{m.name}</h4>
+                <p className="text-[11px] font-bold text-gold-dark uppercase tracking-widest">{m.position}</p>
+              </div>
+            </div>
+            <div className="flex gap-2">
+              <button onClick={() => startEdit(m)} className="flex-1 py-2 text-xs font-bold text-navy bg-gray-50 hover:bg-gold/10 hover:text-gold rounded-xl border border-gray-100 transition-all flex items-center justify-center gap-2">
+                <Edit className="h-4 w-4" /> Edit
+              </button>
+              <button onClick={() => del(m.id)} className="w-11 py-2 text-red-500 bg-red-50 hover:bg-red-100 rounded-xl border border-red-100 transition-all flex items-center justify-center">
+                <Trash2 className="h-4 w-4" />
+              </button>
+            </div>
+          </div>
+        ))}
       </div>
     </div>
   )
@@ -562,8 +1092,11 @@ function GalleryTab({ toast }) {
 
   const save = async (e) => {
     e.preventDefault()
-    if (!form.image_url.trim()) return toast({ type: 'error', text: 'Image URL is required.' })
-    const { error } = await supabase.from('school_gallery').upsert(editing ? { ...form, id: editing.id } : [form])
+    const payload = { 
+      ...form, 
+      image_url: form.image_url
+    }
+    const { error } = await supabase.from('school_gallery').upsert(editing ? { ...payload, id: editing.id } : [payload])
     
     if (error) {
       toast({ type: 'error', text: `Failed: ${error.message}` })
@@ -594,8 +1127,7 @@ function GalleryTab({ toast }) {
         </div>
         <form onSubmit={save} className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div className="md:col-span-2">
-            <label className="label-modern">Image URL *</label>
-            <input className="input-modern" placeholder="https://example.com/photo.jpg" value={form.image_url} onChange={e => setForm(p => ({ ...p, image_url: e.target.value }))} required />
+            <FileUploader label="Gallery Image" folder="gallery" currentUrl={form.image_url} onUpload={(url) => setForm(p => ({ ...p, image_url: url }))} />
           </div>
           <div>
             <label className="label-modern">Album</label>
@@ -660,40 +1192,93 @@ function SettingsTab({ toast }) {
     instagram: '#',
     youtube: '#',
     established: '2065',
+    principal_name: 'Sachin Shrestha',
+    principal_message: 'Welcome to Shanti Varsha. We are committed to excellence in education.',
+    principal_photo: '',
   })
 
-  const save = (e) => {
+  const save = async (e) => {
     e.preventDefault()
     setSettings({ ...settings })
-    toast({ type: 'success', text: 'Settings saved!' })
+    
+    try {
+      const { error } = await supabase.from('school_settings').upsert({ id: 1, ...settings })
+      if (error) console.error("Supabase school_settings error:", error)
+    } catch (err) {
+      console.warn("Supabase school_settings table not found.")
+    }
+
+    toast({ type: 'success', text: 'Settings updated! Your profile and message are now live.' })
+    window.dispatchEvent(new Event('schoolSettingsUpdated'))
   }
 
   return (
-    <div className="bg-white rounded-2xl border border-gray-100 shadow-card p-6">
-      <div className="flex items-center gap-3 mb-5">
-        <SectionIcon icon={Settings} />
-        <h3 className="font-display font-bold text-navy text-xl">School Settings</h3>
-      </div>
-      <form onSubmit={save} className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        {[
-          ['School Name', 'name', 'Shanti Varsha Angreji Ma. Vi.'],
-          ['Address', 'address', 'Vyas-5, Chapaghat, Damauli'],
-          ['Phone', 'phone', '+977-XXXXXXXX'],
-          ['Email', 'email', 'info@shantivarsha.edu.np'],
-          ['Established Year', 'established', '2065'],
-          ['Facebook URL', 'facebook', 'https://facebook.com/...'],
-          ['Instagram URL', 'instagram', 'https://instagram.com/...'],
-          ['YouTube URL', 'youtube', 'https://youtube.com/...'],
-        ].map(([label, field, placeholder]) => (
-          <div key={field}>
-            <label className="label-modern">{label}</label>
-            <input className="input-modern" placeholder={placeholder} value={settings[field] || ''} onChange={e => setSettings(p => ({ ...p, [field]: e.target.value }))} />
-          </div>
-        ))}
-        <div className="md:col-span-2 mt-2">
-          <button type="submit" className="btn-gold w-full sm:w-auto px-10">Save Settings</button>
+    <div className="space-y-6 animate-fade-in">
+      {/* General Information Card */}
+      <div className="bg-white rounded-3xl border border-gray-100 shadow-xl overflow-hidden">
+        <div className="px-6 py-5 bg-navy text-white flex items-center gap-3">
+          <SectionIcon icon={Settings} />
+          <h3 className="font-display font-bold text-lg">General School Information</h3>
         </div>
-      </form>
+        <form onSubmit={save} className="p-8 space-y-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {[
+              ['School Name', 'name', 'Shanti Varsha Angreji Ma. Vi.'],
+              ['Address', 'address', 'Vyas-5, Chapaghat, Damauli'],
+              ['Phone Number', 'phone', '+977-XXXXXXXX'],
+              ['Email Address', 'email', 'info@shantivarsha.edu.np'],
+              ['Established Year', 'established', '2065'],
+              ['Facebook Link', 'facebook', 'https://facebook.com/...'],
+            ].map(([label, field, placeholder]) => (
+              <div key={field}>
+                <label className="label-modern font-bold text-navy mb-2 block">{label}</label>
+                <input className="input-modern bg-gray-50/50" placeholder={placeholder} value={settings[field] || ''} onChange={e => setSettings(p => ({ ...p, [field]: e.target.value }))} />
+              </div>
+            ))}
+          </div>
+
+          <div className="h-px bg-gray-100" />
+
+          {/* Principal's Message Section */}
+          <div className="space-y-6">
+            <h4 className="font-bold text-navy flex items-center gap-2">
+               <User className="h-5 w-5 text-gold" /> Principal's Profile & Message
+            </h4>
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
+               <div className="lg:col-span-1">
+                 <label className="label-modern font-bold text-navy mb-3 block">Official Photo</label>
+                 <FileUploader 
+                   label="Principal Portrait" 
+                   folder="settings" 
+                   currentUrl={settings.principal_photo} 
+                   onUpload={url => setSettings(p => ({ ...p, principal_photo: url }))} 
+                 />
+               </div>
+               <div className="lg:col-span-2 space-y-5">
+                 <div>
+                   <label className="label-modern font-bold text-navy mb-2 block">Principal's Full Name</label>
+                   <input className="input-modern" placeholder="Enter name" value={settings.principal_name || ''} onChange={e => setSettings(p => ({ ...p, principal_name: e.target.value }))} />
+                 </div>
+                 <div>
+                   <label className="label-modern font-bold text-navy mb-2 block">Official Message to Parents/Students</label>
+                   <textarea 
+                     className="input-modern min-h-[160px] leading-relaxed resize-none" 
+                     placeholder="Type official message here..." 
+                     value={settings.principal_message || ''} 
+                     onChange={e => setSettings(p => ({ ...p, principal_message: e.target.value }))} 
+                   />
+                 </div>
+               </div>
+            </div>
+          </div>
+
+          <div className="pt-6 border-t border-gray-100">
+            <button type="submit" className="btn-gold w-full py-4 text-base font-bold shadow-xl shadow-gold/20 hover:scale-[1.01] transition-all">
+              Save All Changes
+            </button>
+          </div>
+        </form>
+      </div>
     </div>
   )
 }
@@ -706,17 +1291,17 @@ function DashboardTab({ setActiveTab }) {
   useEffect(() => {
     const fetchStats = async () => {
        try {
-         const [ {count: stCount}, {count: nCount}, {count: sCount}, {count: aCount} ] = await Promise.all([
-            supabase.from('class_students').select('*', { count: 'exact', head: true }),
+         const [ {count: smcCount}, {count: nCount}, {count: sCount}, {count: aCount} ] = await Promise.all([
+            supabase.from('school_smc').select('*', { count: 'exact', head: true }),
             supabase.from('school_notices').select('*', { count: 'exact', head: true }),
             supabase.from('school_staff').select('*', { count: 'exact', head: true }),
             supabase.from('school_articles').select('*', { count: 'exact', head: true })
          ])
          setStats([
-            { label: 'Total Students', value: stCount || 0, icon: GraduationCap, color: 'from-blue-500 to-indigo-600', trend: 'Live Database' },
-            { label: 'Published Notices', value: nCount || 0, icon: Bell, color: 'from-amber-400 to-orange-600', trend: 'Active' },
-            { label: 'Staff Directory', value: sCount || 0, icon: Users, color: 'from-emerald-500 to-teal-600', trend: 'Verified' },
-            { label: 'School Articles', value: aCount || 0, icon: FileText, color: 'from-purple-500 to-pink-600', trend: 'Public' }
+            { label: 'SMC Members', value: smcCount || 0, icon: UsersIcon, color: 'from-blue-500 to-indigo-600' },
+            { label: 'Published Notices', value: nCount || 0, icon: Bell, color: 'from-amber-400 to-orange-600' },
+            { label: 'Staff Directory', value: sCount || 0, icon: GraduationCap, color: 'from-emerald-500 to-teal-600' },
+            { label: 'School Articles', value: aCount || 0, icon: FileText, color: 'from-purple-500 to-pink-600' }
          ])
        } catch (err) {
          console.error("Dashboard Stats Error:", err)
@@ -728,38 +1313,37 @@ function DashboardTab({ setActiveTab }) {
   }, [])
 
   const quickActions = [
-    { label: 'Add Student', icon: Plus, tab: 'students', color: 'bg-blue-500' },
+    { label: 'Manage SMC', icon: UsersIcon, tab: 'smc', color: 'bg-blue-500' },
     { label: 'Post Notice', icon: Bell, tab: 'notices', color: 'bg-amber-500' },
-    { label: 'Upload Event', icon: Calendar, tab: 'calendar', color: 'bg-emerald-500' },
-    { label: 'New Article', icon: FileText, tab: 'articles', color: 'bg-purple-500' },
+    { label: 'Manage Staff', icon: GraduationCap, tab: 'staff', color: 'bg-emerald-500' },
+    { label: 'School Info', icon: Settings, tab: 'settings', color: 'bg-purple-500' },
   ]
 
   return (
     <div className="space-y-8 animate-fade-in">
       {/* Welcome Section */}
-      <div className="relative overflow-hidden bg-navy-darker rounded-3xl p-6 sm:p-8 text-white shadow-2xl">
-         <div className="absolute top-0 right-0 -translate-y-12 translate-x-12 w-64 h-64 bg-gold/10 rounded-full blur-3xl"></div>
-         <div className="relative z-10">
-            <h2 className="text-2xl sm:text-3xl font-display font-bold mb-2">Welcome Back, Admin</h2>
-            <p className="text-blue-100/70 text-sm sm:text-base max-w-lg leading-relaxed">Everything at Shanti Varsha School is running smoothly. Here's a quick look at your school's current standing.</p>
+      <div className="relative overflow-hidden bg-gradient-to-r from-navy to-navy-dark rounded-2xl p-5 sm:p-6 text-white shadow-lg flex flex-col justify-center">
+         <div className="absolute top-0 right-0 -translate-y-12 translate-x-12 w-64 h-64 bg-white/5 rounded-full blur-3xl"></div>
+         <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-4">
+            <div>
+              <h2 className="text-xl sm:text-2xl font-display font-bold">Welcome Back, Admin</h2>
+              <p className="text-blue-100/80 text-sm mt-1">Here's a snapshot of the school's current metrics today.</p>
+            </div>
          </div>
       </div>
 
       {/* Stats Grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         {loading ? Array(4).fill(0).map((_, i) => (
-          <div key={i} className="h-32 bg-gray-100 rounded-3xl animate-pulse"></div>
-        )) : stats.map(({ label, value, icon: Icon, color, trend }) => (
-          <div key={label} className="bg-white rounded-3xl p-6 border border-gray-100 shadow-sm hover:shadow-xl transition-all duration-300 group overflow-hidden relative">
-            <div className={`absolute top-0 right-0 w-24 h-24 bg-gradient-to-br ${color} opacity-[0.03] group-hover:opacity-[0.1] -translate-y-8 translate-x-8 rounded-full transition-all duration-500`}></div>
-            <div className={`w-12 h-12 rounded-2xl bg-gradient-to-br ${color} flex items-center justify-center text-white shadow-lg mb-4 group-hover:scale-110 transition-transform duration-300`}>
-              <Icon className="h-6 w-6" />
+          <div key={i} className="h-24 bg-gray-100 rounded-2xl animate-pulse"></div>
+        )) : stats.map(({ label, value, icon: Icon, color }) => (
+          <div key={label} className="bg-white rounded-2xl p-5 border border-gray-100 shadow-sm hover:shadow-md transition-all group overflow-hidden flex items-center justify-between">
+            <div>
+              <div className="text-gray-400 text-[10px] font-bold uppercase tracking-widest mb-1">{label}</div>
+              <div className="text-2xl sm:text-3xl font-display font-extrabold text-navy leading-none">{value}</div>
             </div>
-            <div className="text-3xl font-display font-extrabold text-navy leading-none mb-1">{value}</div>
-            <div className="text-gray-400 text-xs font-bold uppercase tracking-wider mb-2">{label}</div>
-            <div className="flex items-center gap-1.5 text-[10px] font-bold text-emerald-500 bg-emerald-50 px-2 py-0.5 rounded-full w-fit">
-               <div className="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-pulse"></div>
-               {trend}
+            <div className={`w-12 h-12 rounded-xl bg-gradient-to-br ${color} flex items-center justify-center text-white shadow-md group-hover:scale-110 group-hover:-rotate-3 transition-all duration-300`}>
+              <Icon className="h-5 w-5" />
             </div>
           </div>
         ))}
@@ -786,369 +1370,163 @@ function DashboardTab({ setActiveTab }) {
                </button>
              ))}
           </div>
-
-          <div className="bg-gradient-to-br from-gray-50 to-white rounded-3xl border border-gray-100 p-6 sm:p-8 mt-6">
-            <h4 className="font-display font-bold text-navy mb-4">System Overview</h4>
-            <ul className="space-y-4">
-               {[
-                 { label: 'Database Status', val: 'Operational', color: 'text-emerald-500' },
-                 { label: 'Auth Service', val: 'Active', color: 'text-emerald-500' },
-                 { label: 'Storage Usage', val: '12% Used', color: 'text-blue-500' },
-               ].map((item, idx) => (
-                 <li key={idx} className="flex items-center justify-between py-3 border-b border-gray-100 last:border-0">
-                    <span className="text-sm font-medium text-gray-500">{item.label}</span>
-                    <span className={`text-sm font-bold ${item.color}`}>{item.val}</span>
-                 </li>
-               ))}
-            </ul>
-          </div>
-        </div>
-
-        {/* Calendar Preview / Feed */}
-        <div className="space-y-4">
-           <h3 className="text-lg font-display font-bold text-navy flex items-center gap-2">
-             <Calendar className="w-5 h-5 text-gold" />
-             At a Glance
-           </h3>
-           <div className="bg-white rounded-3xl border border-gray-100 p-6 shadow-sm min-h-[300px]">
-              <div className="flex flex-col items-center justify-center py-10 text-center space-y-3">
-                 <div className="bg-gray-50 p-4 rounded-full">
-                    <Search className="w-8 h-8 text-gray-300" />
-                 </div>
-                 <div>
-                    <p className="text-sm font-bold text-navy">No Upcoming Deadlines</p>
-                    <p className="text-xs text-gray-400 mt-1">All academic schedules are currently up to date.</p>
-                 </div>
-                 <button onClick={() => setActiveTab('calendar')} className="text-gold text-xs font-bold hover:underline">View School Calendar</button>
-              </div>
-           </div>
         </div>
       </div>
     </div>
   )
 }
-
-// ── MAIN ADMIN COMPONENT ──────────────────────────────────────────────────────
-// ── RESULTS TAB ──────────────────────────────────────────────────────────────
-function ResultsTab() {
-  const publishedResults = JSON.parse(localStorage.getItem('publishedResults') || 'null')
-
-  const resetResults = () => {
-    if (confirm("Are you sure you want to unpublish the class 10 grades?")) {
-      localStorage.removeItem('publishedResults')
-      window.dispatchEvent(new Event('publishedResultsUpdated'))
-    }
-  }
-
-  return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h2 className="text-xl font-bold text-navy">Class Results Management</h2>
-          <p className="text-sm text-gray-500">Monitor grade publication statuses by teachers.</p>
-        </div>
-      </div>
-      <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
-        <h3 className="font-semibold text-lg text-navy mb-4">Class 10 Status (Mr. Hari Sharma)</h3>
-        {publishedResults ? (
-          <div className="bg-green-50 border border-green-200 p-4 rounded-xl flex items-center justify-between">
-            <div>
-              <p className="font-semibold text-green-800">Results Published for {publishedResults.term}!</p>
-              <p className="text-sm text-green-700">All students can now view and download their NEB gradesheets.</p>
-            </div>
-            <button onClick={resetResults} className="text-red-600 font-medium text-sm hover:underline">Revoke Publish</button>
-          </div>
-        ) : (
-          <div className="bg-orange-50 border border-orange-200 p-4 rounded-xl">
-            <p className="font-semibold text-orange-800">Pending Publish</p>
-            <p className="text-sm text-orange-700">Class teacher is currently working on grades finalizing.</p>
-          </div>
-        )}
-      </div>
-    </div>
-  )
-}
-
-// ── STUDENTS TAB ─────────────────────────────────────────────────────────────
-function StudentsTab({ toast }) {
-  const [students, setStudents] = useState([])
-  const [loading, setLoading] = useState(true)
+// ── TOPPERS TAB ──────────────────────────────────────────────────────────────
+function ToppersTab({ toast }) {
+  const [toppers, setToppers] = useState([])
+  const [form, setForm] = useState({ name: '', batch: '', score: '', badge: '', note: '', photo_url: '' })
   const [editing, setEditing] = useState(null)
-  const [form, setForm] = useState({ id: '', name: '', rollNo: '', dob: '', address: '', parentContact: '', grade: '', parentName: '' })
-  const [searchQuery, setSearchQuery] = useState('')
-  const [filterGrade, setFilterGrade] = useState('All')
+  const [loading, setLoading] = useState(true)
+  const [showEditor, setShowEditor] = useState(false)
 
-  const fetchStudents = async () => {
+  const fetchToppers = async () => {
     setLoading(true)
-    const { data, error } = await supabase.from('class_students').select('*').order('id')
-    if (error) toast({ type: 'error', text: 'Error fetching students' })
-    else setStudents(data.map(s => ({
-       id: s.id, name: s.name, rollNo: s.roll_no, dob: s.dob, address: s.address, parentContact: s.parent_contact, 
-       username: s.username, password: s.password, grade: s.grade || '', parentName: s.parent_name || ''
-    })))
+    const { data, error } = await supabase.from('school_toppers').select('*').order('batch', { ascending: false })
+    if (data) setToppers(data)
     setLoading(false)
   }
+  useEffect(() => { fetchToppers() }, [])
 
-  useEffect(() => {
-    fetchStudents()
-  }, [])
+  const startEdit = (t) => { 
+    setEditing(t)
+    setForm(t)
+    setShowEditor(true)
+    window.scrollTo({ top: 0, behavior: 'smooth' })
+  }
 
-  const startEdit = (s) => { setEditing(s); setForm(s); }
-  const cancel = () => { setEditing(null); setForm({ id: '', name: '', rollNo: '', dob: '', address: '', parentContact: '', grade: '', parentName: '' }); }
-  
+  const startAdd = () => {
+    setEditing(null)
+    setForm({ name: '', batch: '', score: '', badge: '', note: '', photo_url: '' })
+    setShowEditor(true)
+    window.scrollTo({ top: 0, behavior: 'smooth' })
+  }
+
   const save = async (e) => {
     e.preventDefault()
-    if (!form.name || !form.id) return toast({ type: 'error', text: 'Name and ID required' })
-    
-    const generateCreds = (name, id) => {
-      const username = name.trim().toLowerCase().replace(/\s+/g, '.')
-      const pass = Math.random().toString(36).slice(-8)
-      return { username, pass }
-    }
-
-    const payload = {
-       id: form.id,
-       name: form.name,
-       roll_no: form.rollNo,
-       dob: form.dob,
-       address: form.address,
-       parent_contact: form.parentContact,
-       grade: form.grade,
-       parent_name: form.parentName
-    }
-
-    if (!editing) {
-       const { username, pass } = generateCreds(form.name, form.id)
-       payload.username = username
-       payload.password = pass
-    }
-
     if (editing) {
-      const { error } = await supabase.from('class_students').update(payload).eq('id', editing.id)
-      if (error) {
-         console.error('Supabase Update Error:', error)
-         return toast({ type: 'error', text: `Failed to update: ${error.message}` })
-      }
-      toast({ type: 'success', text: 'Student updated!' })
+      const payload = { 
+        ...form,
+        photo_url: form.photo_url || form.image_url
+      }; 
+      delete payload.image_url
+      delete payload.id
+      const { error } = await supabase.from('school_toppers').update(payload).eq('id', editing.id)
+      if (error) toast({ type: 'error', text: error.message })
+      else { toast({ type: 'success', text: 'Topper updated!' }); setShowEditor(false); fetchToppers() }
     } else {
-      const { error } = await supabase.from('class_students').insert([payload])
-      if (error) {
-         console.error('Supabase Insert Error:', error)
-         if (error.code === '23505') return toast({ type: 'error', text: 'Student ID already exists' })
-         return toast({ type: 'error', text: `Failed: ${error.message}` })
-      }
-      toast({ type: 'success', text: 'Student enrolled!' })
-    }
-    cancel()
-    fetchStudents()
-  }
-
-  const del = async (id) => {
-    if (confirm("Remove this student completely?")) {
-      const { error } = await supabase.from('class_students').delete().eq('id', id)
-      if (error) return toast({ type: 'error', text: 'Failed to delete student' })
-      toast({ type: 'success', text: 'Student removed' })
-      fetchStudents()
+      const payload = { 
+        ...form,
+        photo_url: form.photo_url || form.image_url
+      };
+      delete payload.image_url
+      const { error } = await supabase.from('school_toppers').insert([payload])
+      if (error) toast({ type: 'error', text: error.message })
+      else { toast({ type: 'success', text: 'Topper added!' }); setShowEditor(false); fetchToppers() }
     }
   }
 
-  const downloadTemplate = () => {
-    const headers = "Student ID,Full Name,Roll No,DOB,Parent Contact,Address\nSVS-2081-XXXX,Template Name,10,2065-01-01 B.S.,+977-9800000000,Vyas-1"
-    const blob = new Blob([headers], { type: 'text/csv' })
-    const url = window.URL.createObjectURL(blob)
-    const a = document.createElement('a')
-    a.href = url
-    a.download = "students_upload_template.csv"
-    a.click()
-    window.URL.revokeObjectURL(url)
-    toast({ type: 'success', text: 'Template downloaded successfully' })
-  }
+  const del = async (id) => { if (confirm('Remove topper?')) { await supabase.from('school_toppers').delete().eq('id', id); toast({ type: 'success', text: 'Removed.' }); fetchToppers() } }
 
-  const handleFileUpload = (e) => {
-    const file = e.target.files[0]
-    if (!file) return
-    toast({ type: 'success', text: `Processing file: ${file.name}...` })
-    
-    const reader = new FileReader()
-    reader.onload = async (event) => {
-       const text = event.target.result
-       // super basic CSV parser for demo purposes
-       const rows = text.split('\n').map(row => row.split(','))
-       const payload = []
-       // skip headers safely by starting at i=1
-       for (let i = 1; i < rows.length; i++) {
-          const cols = rows[i]
-          if (cols.length >= 2 && cols[0].trim()) {
-             payload.push({
-                id: cols[0].trim(),
-                name: cols[1]?.trim() || 'Unknown',
-                roll_no: cols[2]?.trim() || '',
-                dob: cols[3]?.trim() || '',
-                parent_contact: cols[4]?.trim() || '',
-                address: cols[5]?.trim() || ''
-             })
-          }
-       }
-       if (payload.length > 0) {
-          const { error } = await supabase.from('class_students').upsert(payload, { onConflict: 'id' })
-          if (error) {
-              toast({ type: 'error', text: 'Database error importing students.' })
-          } else {
-              toast({ type: 'success', text: `Successfully imported ${payload.length} students!` })
-              fetchStudents()
-          }
-       } else {
-          toast({ type: 'error', text: 'No valid rows found in file.' })
-       }
-    }
-    reader.readAsText(file)
-    e.target.value = '' // reset
-  }
+  if (loading && toppers.length === 0) return <div className="flex items-center justify-center py-20"><Loader2 className="h-8 w-8 animate-spin text-gold" /></div>
 
   return (
     <div className="space-y-6">
-      {/* Form */}
-      <div className="bg-white rounded-2xl border border-gray-100 shadow-card p-6">
-        <div className="flex items-center gap-3 mb-5">
-           <SectionIcon icon={GraduationCap} />
-           <h3 className="font-display font-bold text-navy text-xl">{editing ? 'Edit Student Details' : 'Enroll New Student'}</h3>
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div className="flex items-center gap-3">
+          <SectionIcon icon={Award} />
+          <div>
+            <h3 className="font-display font-bold text-navy text-xl">Academic Toppers</h3>
+            <p className="text-xs text-navy/60">High achievers and academic excellence</p>
+          </div>
         </div>
-        <form onSubmit={save} className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-           <div>
-             <label className="label-modern">Student ID *</label>
-             <input className="input-modern" placeholder="e.g. SVS-2081-0045" value={form.id} onChange={e => setForm({...form, id: e.target.value})} disabled={!!editing} required />
-           </div>
-           <div>
-             <label className="label-modern">Full Name *</label>
-             <input className="input-modern" placeholder="e.g. Ramesh Kumar" value={form.name} onChange={e => setForm({...form, name: e.target.value})} required />
-           </div>
-           <div>
-             <label className="label-modern">Roll No</label>
-             <input className="input-modern" placeholder="e.g. 18" value={form.rollNo} onChange={e => setForm({...form, rollNo: e.target.value})} />
-           </div>
-           <div>
-             <label className="label-modern">Grade / Class</label>
-             <select className="input-modern" value={form.grade} onChange={e => setForm({...form, grade: e.target.value})}>
-                <option value="">Select Grade</option>
-                {['Nursery', 'L.K.G', 'U.K.G', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12'].map(g => (
-                   <option key={g} value={g}>Class {g}</option>
-                ))}
-             </select>
-           </div>
-           <div>
-             <label className="label-modern">Parent's Name</label>
-             <input className="input-modern" placeholder="e.g. Hari Prasad" value={form.parentName} onChange={e => setForm({...form, parentName: e.target.value})} />
-           </div>
-           <div>
-             <label className="label-modern">Parent Contact</label>
-             <input className="input-modern" placeholder="e.g. +977-98..." value={form.parentContact} onChange={e => setForm({...form, parentContact: e.target.value})} />
-           </div>
-           <div className="sm:col-span-2 md:col-span-2">
-             <label className="label-modern">Address</label>
-             <input className="input-modern" placeholder="e.g. Vyas-4" value={form.address} onChange={e => setForm({...form, address: e.target.value})} />
-           </div>
-           <div className="sm:col-span-2 md:col-span-3 flex flex-col sm:flex-row justify-end gap-3 mt-2">
-             {editing && <button type="button" onClick={cancel} className="btn-secondary w-full sm:w-auto">Cancel</button>}
-             <button type="submit" className="btn-gold w-full sm:w-auto">{editing ? 'Save Changes' : 'Enroll Student'}</button>
-           </div>
-        </form>
+        {!showEditor && (
+          <button onClick={startAdd} className="btn-gold px-6 py-3 flex items-center justify-center gap-2 shadow-lg shadow-gold/20">
+            <Plus className="h-5 w-5" /> Add Topper
+          </button>
+        )}
       </div>
 
-      {/* Bulk Options */}
-      <div className="bg-white rounded-2xl border border-gray-100 shadow-card p-6 flex flex-col md:flex-row items-center justify-between gap-4">
-         <div>
-            <h3 className="font-display font-bold text-navy text-lg mb-1">Bulk Operations</h3>
-            <p className="text-sm text-gray-500">Upload multiple students via Excel/CSV spreadsheet format.</p>
-         </div>
-         <div className="flex flex-wrap items-center gap-3 w-full md:w-auto">
-            <button onClick={downloadTemplate} className="btn-secondary whitespace-nowrap">
-               <Download className="w-4 h-4 mr-2" /> Download Template
-            </button>
-            <label className="btn-gold cursor-pointer whitespace-nowrap">
-               <Upload className="w-4 h-4 mr-2" /> Upload Excel File
-               <input type="file" accept=".csv, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel" className="hidden" onChange={handleFileUpload} />
-            </label>
-         </div>
-      </div>
+      {showEditor && (
+        <div className="bg-white rounded-3xl border-2 border-gold/30 shadow-2xl overflow-hidden animate-fade-in relative">
+          <div className="p-6 md:p-8 space-y-6">
+            <div className="flex items-center justify-between mb-2">
+               <h4 className="font-display font-bold text-navy text-lg">{editing ? 'Edit Topper Details' : 'New Academic Topper'}</h4>
+               <button onClick={() => setShowEditor(false)} className="p-2 hover:bg-gray-100 rounded-full text-gray-400 transition-colors"><X className="h-5 w-5" /></button>
+            </div>
+            <form onSubmit={save} className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+              <div className="lg:col-span-1 space-y-4">
+                <label className="block text-sm font-bold text-navy">Student Photo</label>
+                <FileUploader folder="toppers" currentUrl={form.photo_url} onUpload={url => setForm(p=>({...p, photo_url: url}))} />
+              </div>
+              <div className="lg:col-span-2 space-y-5">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div><label className="label-modern">Full Name *</label><input className="input-modern" placeholder="Enter student name" value={form.name} onChange={e=>setForm({...form, name: e.target.value})} required /></div>
+                  <div><label className="label-modern">Batch (Year) *</label><input className="input-modern" placeholder="e.g. 2080" value={form.batch} onChange={e=>setForm({...form, batch: e.target.value})} required /></div>
+                </div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div><label className="label-modern">Score/Result *</label><input className="input-modern" placeholder="e.g. 4.0 GPA / 95%" value={form.score} onChange={e=>setForm({...form, score: e.target.value})} required /></div>
+                  <div><label className="label-modern">Badge/Position</label><input className="input-modern" placeholder="e.g. District Topper" value={form.badge} onChange={e=>setForm({...form, badge: e.target.value})} /></div>
+                </div>
+                <div><label className="label-modern">Note/Highlight</label><textarea className="input-modern min-h-[100px]" placeholder="e.g. Outstanding performance in Science..." value={form.note} onChange={e=>setForm({...form, note: e.target.value})} /></div>
+                <div className="flex gap-3 pt-4">
+                   <button type="submit" className="btn-gold flex-1 py-4 text-base font-bold shadow-xl shadow-gold/20">Save Achievement</button>
+                   <button type="button" onClick={() => setShowEditor(false)} className="px-8 py-4 border-2 border-gray-100 rounded-2xl font-bold text-navy hover:bg-gray-50 transition-all">Cancel</button>
+                </div>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
 
-      {/* List */}
-      <div className="bg-white rounded-2xl border border-gray-100 shadow-card overflow-hidden">
-         <div className="p-6 border-b border-gray-100 flex flex-col md:flex-row md:items-center justify-between gap-4">
-            <div className="flex items-center gap-4">
-               <h3 className="font-display font-bold text-navy text-lg">Student Roster</h3>
-               <span className="text-xs font-bold bg-navy/10 text-navy px-3 py-1 rounded-full">{loading ? 'Loading...' : `${students.length} Total`}</span>
+      {toppers.length === 0 ? (
+        <div className="text-center py-20 bg-white rounded-3xl border-2 border-dashed border-gray-100 italic text-gray-400">
+           No toppers listed. Start by adding a new record.
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+          {toppers.map(t => (
+            <div key={t.id} className="bg-white rounded-3xl border border-gray-100 p-5 hover:shadow-2xl hover:border-gold/30 transition-all group animate-scale-in flex flex-col justify-between">
+              <div>
+                <div className="flex items-center gap-4 mb-4">
+                  <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-amber-50 to-gold/20 overflow-hidden flex-shrink-0 border border-gold/10 shadow-inner">
+                    <img 
+                      src={t.photo_url ? `${t.photo_url}?t=${Date.now()}` : `https://ui-avatars.com/api/?name=${encodeURIComponent(t.name)}&background=fffbea&color=b45309`} 
+                      className="w-full h-full object-cover" 
+                      alt={t.name}
+                      onError={e => e.target.src = 'https://ui-avatars.com/api/?name=' + encodeURIComponent(t.name)}
+                    />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <h4 className="font-bold text-navy truncate leading-tight mb-0.5">{t.name}</h4>
+                    <p className="text-xs font-bold text-gold-dark uppercase tracking-widest">{t.batch} Batch</p>
+                    <div className="flex items-center gap-2 mt-1">
+                       <span className="text-[10px] font-bold bg-navy text-white px-2 py-0.5 rounded-full uppercase tracking-tighter">{t.score}</span>
+                       {t.badge && <span className="text-[10px] font-bold bg-gold/10 text-gold-dark px-2 py-0.5 rounded-full border border-gold/20">{t.badge}</span>}
+                    </div>
+                  </div>
+                </div>
+                {t.note && <p className="text-xs text-gray-500 line-clamp-2 italic mb-4">"{t.note}"</p>}
+              </div>
+              <div className="flex gap-2">
+                <button onClick={() => startEdit(t)} className="flex-1 py-2.5 text-xs font-bold text-navy bg-gray-50 hover:bg-gold/10 hover:text-gold rounded-xl border border-gray-100 transition-all flex items-center justify-center gap-2">
+                  <Edit className="h-3.5 w-3.5" /> Edit
+                </button>
+                <button onClick={() => del(t.id)} className="w-11 py-2.5 text-red-500 bg-red-50 hover:bg-red-100 rounded-xl border border-red-100 transition-all flex items-center justify-center">
+                  <Trash2 className="h-4 w-4" />
+                </button>
+              </div>
             </div>
-            
-            {/* Search and Filters */}
-            <div className="flex flex-wrap items-center gap-3">
-               <div className="relative">
-                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-                  <input 
-                    type="text" 
-                    placeholder="Search by name or ID..." 
-                    className="pl-9 pr-4 py-2 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-gold focus:border-gold outline-none w-64"
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                  />
-               </div>
-               <select 
-                 className="px-4 py-2 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-gold focus:border-gold outline-none"
-                 value={filterGrade}
-                 onChange={(e) => setFilterGrade(e.target.value)}
-               >
-                  <option value="All">All Classes</option>
-                  {['Nursery', 'L.K.G', 'U.K.G', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12'].map(g => (
-                    <option key={g} value={g}>Class {g}</option>
-                  ))}
-               </select>
-            </div>
-         </div>
-         {loading ? <div className="p-10 text-center text-gray-400">Loading safely from Supabase Database...</div> : students.length === 0 ? <EmptyState message="No students enrolled yet." /> : (
-            <div className="overflow-x-auto">
-               <table className="w-full text-left text-sm text-gray-600">
-                  <thead className="bg-gray-50 border-b border-gray-100">
-                     <tr>
-                        <th className="px-6 py-3 font-semibold text-gray-700">Student Info</th>
-                        <th className="px-6 py-3 font-semibold text-gray-700">Parent Details</th>
-                        <th className="px-6 py-3 font-semibold text-gray-700 text-right">Actions</th>
-                     </tr>
-                  </thead>
-                  <tbody className="divide-y divide-gray-100">
-                     {students
-                       .filter(s => {
-                          const matchesSearch = s.name.toLowerCase().includes(searchQuery.toLowerCase()) || s.id.toLowerCase().includes(searchQuery.toLowerCase())
-                          const matchesGrade = filterGrade === 'All' || s.grade === filterGrade
-                          return matchesSearch && matchesGrade
-                       })
-                       .map(s => (
-                        <tr key={s.id} className="hover:bg-gray-50/50">
-                           <td className="px-6 py-4">
-                              <p className="font-bold text-navy">{s.name}</p>
-                              <div className="flex items-center gap-2 mt-0.5">
-                                 <span className="text-[10px] font-bold bg-gold/10 text-gold-dark px-1.5 py-0.5 rounded">Class {s.grade || 'N/A'}</span>
-                                 <span className="text-xs text-gray-500">ID: {s.id} | Roll: {s.rollNo}</span>
-                              </div>
-                           </td>
-                           <td className="px-6 py-4">
-                              <p className="text-xs font-semibold text-gray-700">{s.parentName || 'Unknown Parent'}</p>
-                              <p className="text-xs text-gray-500 mt-0.5 flex items-center gap-1"><Phone className="w-3 h-3 text-gray-400"/> {s.parentContact}</p>
-                           </td>
-                           <td className="px-6 py-4 text-right space-x-2">
-                              <button onClick={() => startEdit(s)} className="p-1.5 text-blue-600 hover:bg-blue-50 rounded-lg"><Edit className="h-4 w-4" /></button>
-                              <button onClick={() => del(s.id)} className="p-1.5 text-red-600 hover:bg-red-50 rounded-lg"><Trash2 className="h-4 w-4" /></button>
-                           </td>
-                        </tr>
-                     ))}
-                  </tbody>
-               </table>
-            </div>
-         )}
-      </div>
+          ))}
+        </div>
+      )}
     </div>
   )
 }
 
-// ── MAIN ADMIN PORTAL ────────────────────────────────────────────────────────
 function Admin() {
   const navigate = useNavigate()
   const [activeTab, setActiveTab] = useState('dashboard')
@@ -1171,25 +1549,26 @@ function Admin() {
 
   const tabs = [
     { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
-    { id: 'students', label: 'Students', icon: GraduationCap },
     { id: 'notices', label: 'Notices', icon: Bell },
     { id: 'news', label: 'News', icon: Newspaper },
-    { id: 'results', label: 'Results', icon: Award },
     { id: 'articles', label: 'Articles', icon: FileText },
     { id: 'calendar', label: 'Calendar', icon: Calendar },
-    { id: 'staff', label: 'Staff', icon: Users },
+    { id: 'toppers', label: 'Toppers', icon: Award },
+    { id: 'staff', label: 'Teachers', icon: GraduationCap },
+    { id: 'smc', label: 'SMC', icon: UsersIcon },
+    { id: 'testimonials', label: 'Messages', icon: Quote },
     { id: 'gallery', label: 'Gallery', icon: Image },
-    { id: 'settings', label: 'Settings', icon: Settings },
+    { id: 'settings', label: 'School Info', icon: Settings },
   ]
 
   const currentTab = tabs.find(t => t.id === activeTab)
 
   return (
-    <div className="min-h-screen bg-slate-50 flex flex-col lg:flex-row overflow-hidden">
+    <div className="h-[100dvh] w-full bg-slate-50 flex flex-col lg:flex-row overflow-hidden">
       <Toast msg={toast} />
 
       {/* Sidebar - Desktop Only */}
-      <aside className="hidden lg:flex lg:flex-col w-64 bg-gradient-to-b from-navy-darker to-navy h-full sticky top-0 shadow-xl z-40">
+      <aside className="hidden lg:flex lg:flex-col w-64 bg-navy h-full sticky top-0 shadow-xl z-40">
         <div className="px-6 py-6 border-b border-white/10">
           <div className="flex items-center gap-3">
             <div className="bg-white p-1 rounded-lg">
@@ -1248,13 +1627,14 @@ function Admin() {
         <main className="flex-1 overflow-y-auto p-4 md:p-8 pb-24 lg:pb-8">
           <div className="max-w-6xl mx-auto space-y-6">
             {activeTab === 'dashboard' && <DashboardTab setActiveTab={setActiveTab} />}
-            {activeTab === 'students' && <StudentsTab toast={showToast} />}
             {activeTab === 'notices' && <NoticesTab toast={showToast} />}
             {activeTab === 'news' && <NewsTab toast={showToast} />}
-            {activeTab === 'results' && <ResultsTab />}
             {activeTab === 'articles' && <ArticlesTab toast={showToast} />}
             {activeTab === 'calendar' && <CalendarTab toast={showToast} />}
+            {activeTab === 'toppers' && <ToppersTab toast={showToast} />}
             {activeTab === 'staff' && <StaffTab toast={showToast} />}
+            {activeTab === 'smc' && <SMCTab toast={showToast} />}
+            {activeTab === 'testimonials' && <TestimonialsTab toast={showToast} />}
             {activeTab === 'gallery' && <GalleryTab toast={showToast} />}
             {activeTab === 'settings' && <SettingsTab toast={showToast} />}
           </div>
@@ -1275,13 +1655,13 @@ function Admin() {
         ))}
         {/* Mobile Menu Toggle/Cycle */}
         <button
-           onClick={() => {
-             const others = tabs.slice(4)
-             const currentIdx = others.findIndex(t => t.id === activeTab)
-             if (currentIdx === -1) setActiveTab(others[0].id)
-             else setActiveTab(others[(currentIdx + 1) % others.length].id)
-           }}
-           className={`flex flex-col items-center justify-center py-2 px-1 rounded-xl transition-all flex-1 ${tabs.slice(4).some(t => t.id === activeTab) ? 'text-gold' : 'text-gray-400'}`}
+          onClick={() => {
+            const others = tabs.slice(4)
+            const currentIdx = others.findIndex(t => t.id === activeTab)
+            if (currentIdx === -1) setActiveTab(others[0].id)
+            else setActiveTab(others[(currentIdx + 1) % others.length].id)
+          }}
+          className={`flex flex-col items-center justify-center py-2 px-1 rounded-xl transition-all flex-1 ${tabs.slice(4).some(t => t.id === activeTab) ? 'text-gold' : 'text-gray-400'}`}
         >
           <div className="relative">
             <LayoutDashboard className="h-5 w-5" />
@@ -1296,5 +1676,117 @@ function Admin() {
   )
 }
 
+function TestimonialsTab({ toast }) {
+  const [testimonials, setTestimonials] = useLocalStorage('schoolTestimonials', [])
+  const [editing, setEditing] = useState(null)
+  const [form, setForm] = useState({ name: '', role: '', message: '' })
+  const [showEditor, setShowEditor] = useState(false)
+
+  const startAdd = () => {
+    setEditing(null)
+    setForm({ name: '', role: '', message: '' })
+    setShowEditor(true)
+    window.scrollTo({ top: 0, behavior: 'smooth' })
+  }
+
+  const startEdit = (t) => {
+    setEditing(t)
+    setForm(t)
+    setShowEditor(true)
+    window.scrollTo({ top: 0, behavior: 'smooth' })
+  }
+
+  const save = (e) => {
+    e.preventDefault()
+    if (!form.name || !form.message) return toast({ type: 'error', text: 'Name and message are required.' })
+    if (editing) {
+      setTestimonials(testimonials.map(t => t.id === editing.id ? { ...form, id: editing.id } : t))
+      toast({ type: 'success', text: 'Message updated!' })
+    } else {
+      setTestimonials([...testimonials, { ...form, id: Date.now() }])
+      toast({ type: 'success', text: 'Message added!' })
+    }
+    setShowEditor(false)
+  }
+
+  const del = (id) => {
+    if (confirm('Delete this message?')) {
+      setTestimonials(testimonials.filter(t => t.id !== id))
+      toast({ type: 'success', text: 'Deleted.' })
+    }
+  }
+
+  return (
+    <div className="space-y-6 animate-fade-in">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div className="flex items-center gap-3">
+          <SectionIcon icon={Quote} />
+          <div>
+            <h3 className="font-display font-bold text-navy text-xl">Stakeholders & Parents</h3>
+            <p className="text-xs text-navy/60">Community feedback and testimonials</p>
+          </div>
+        </div>
+        {!showEditor && (
+          <button onClick={startAdd} className="btn-gold px-6 py-3 flex items-center justify-center gap-2 shadow-lg shadow-gold/20">
+            <Plus className="h-5 w-5" /> Add Message
+          </button>
+        )}
+      </div>
+
+      {showEditor && (
+        <div className="bg-white rounded-3xl border-2 border-gold/30 shadow-2xl overflow-hidden animate-fade-in relative z-50">
+          <div className="p-6 md:p-8 space-y-6">
+            <div className="flex items-center justify-between mb-2">
+               <h4 className="font-display font-bold text-navy text-lg">{editing ? 'Edit Message' : 'New Message'}</h4>
+               <button onClick={() => setShowEditor(false)} className="p-2 hover:bg-gray-100 rounded-full text-gray-400 transition-colors"><X className="h-5 w-5" /></button>
+            </div>
+            <form onSubmit={save} className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div><label className="label-modern">Full Name *</label><input className="input-modern" placeholder="Enter name" value={form.name} onChange={e=>setForm({...form, name: e.target.value})} required /></div>
+              <div><label className="label-modern">Role / Relation *</label><input className="input-modern" placeholder="e.g. Parent of Grade 10" value={form.role} onChange={e=>setForm({...form, role: e.target.value})} required /></div>
+              <div className="md:col-span-2"><label className="label-modern">Message *</label><textarea className="input-modern min-h-[140px]" placeholder="Write message..." value={form.message} onChange={e=>setForm({...form, message: e.target.value})} required /></div>
+              <div className="md:col-span-2 flex gap-3 pt-4">
+                 <button type="submit" className="btn-gold flex-1 py-4 text-base font-bold shadow-xl shadow-gold/20">Save Message</button>
+                 <button type="button" onClick={() => setShowEditor(false)} className="px-8 py-4 border-2 border-gray-100 rounded-2xl font-bold text-navy hover:bg-gray-50 transition-all">Cancel</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {testimonials.length === 0 ? (
+           <div className="col-span-full border-2 border-dashed border-gray-200 rounded-3xl p-12 text-center">
+             <div className="inline-flex p-4 bg-gray-50 rounded-full mb-4">
+                <Quote className="h-8 w-8 text-gray-400" />
+             </div>
+             <p className="text-gray-500 font-medium">No messages yet. Add one to display on the About page.</p>
+           </div>
+        ) : testimonials.map(m => (
+          <div key={m.id} className="bg-gradient-to-br from-white to-gray-50 border border-gray-100 rounded-3xl p-6 shadow-[0_8px_30px_rgba(0,0,0,0.04)] hover:shadow-[0_8px_30px_rgba(212,175,55,0.15)] hover:border-gold/30 transition-all duration-300 relative group flex flex-col justify-between h-full group">
+            <Quote className="h-10 w-10 text-gold/10 absolute right-6 top-6 transition-transform group-hover:scale-110 group-hover:text-gold/20 duration-500" />
+            <div className="mb-6 relative z-10">
+              <p className="text-sm font-medium text-gray-700 italic leading-relaxed whitespace-pre-wrap">"{m.message}"</p>
+            </div>
+            
+            <div className="flex flex-col gap-4 relative z-10">
+              <div className="pt-4 border-t border-gray-100">
+                <h4 className="font-display font-bold text-navy truncate">{m.name}</h4>
+                <p className="text-[10px] font-extrabold text-gold-dark uppercase tracking-widest">{m.role}</p>
+              </div>
+              <div className="flex gap-2">
+                <button onClick={() => startEdit(m)} className="flex-1 py-2 text-xs font-bold text-navy bg-white hover:bg-navy hover:text-white rounded-xl border border-gray-200 hover:border-navy transition-all flex items-center justify-center gap-2">
+                  <Edit className="h-3.5 w-3.5" /> Edit
+                </button>
+                <button onClick={() => del(m.id)} className="w-12 py-2 text-red-500 bg-white hover:bg-red-50 rounded-xl border border-gray-200 transition-all flex items-center justify-center hover:border-red-500/20 hover:text-red-600">
+                  <Trash2 className="h-4 w-4" />
+                </button>
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  )
+}
 
 export default Admin

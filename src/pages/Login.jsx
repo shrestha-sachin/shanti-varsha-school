@@ -15,20 +15,16 @@ function Login() {
     ? location.state.role.charAt(0).toUpperCase() + location.state.role.slice(1) + ' Login' 
     : 'Login Portal'
 
-  // Hardcoded admin login (change this in your Supabase 'school_staff' table later for full security)
+  // Credentials managed via secure environment variables (.env)
   const CREDENTIALS = {
-    admin: { username: 'admin', password: 'admin123', role: 'admin' },
+    admin: { 
+      username: import.meta.env.VITE_ADMIN_USER || 'admin', 
+      password: import.meta.env.VITE_ADMIN_PASSWORD, 
+      role: 'admin' 
+    },
   }
 
-  useEffect(() => {
-    if (location.state?.role) {
-      const selectedRole = location.state.role
-      if (CREDENTIALS[selectedRole]) {
-        setUsername(CREDENTIALS[selectedRole].username)
-        setPassword(CREDENTIALS[selectedRole].password)
-      }
-    }
-  }, [location.state?.role])
+  // Auto-fill disabled for security. User must manually input credentials.
 
   const handleSubmit = async (e) => {
     e.preventDefault()
@@ -40,20 +36,6 @@ function Login() {
     }
 
     setLoading(true)
-    // 1. Check Supabase for Student
-    const { data: sData } = await supabase.from('class_students').select('*').eq('username', username.trim()).eq('password', password.trim()).maybeSingle()
-    
-    if (sData) {
-      localStorage.setItem('isLoggedIn', 'true')
-      localStorage.setItem('studentId', sData.id)
-      localStorage.setItem('username', sData.username)
-      localStorage.setItem('userRole', 'student')
-      localStorage.setItem('mustChangePassword', sData.password_changed ? 'false' : 'true')
-      setLoading(false)
-      navigate('/student', { replace: true })
-      return
-    }
-
     // 2. Fallback to hardcoded roles for Demo/Admin
     const userRoleKey = Object.keys(CREDENTIALS).find(
       key => CREDENTIALS[key].username === username && CREDENTIALS[key].password === password

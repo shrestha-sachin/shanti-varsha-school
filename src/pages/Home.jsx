@@ -7,6 +7,7 @@ import {
 } from 'lucide-react'
 import NoticeBoard from '../components/NoticeBoard'
 import { supabase } from '../supabaseClient'
+import { useSchoolSettings } from '../hooks/useSchoolSettings'
 
 function useScrollReveal() {
   useEffect(() => {
@@ -54,12 +55,7 @@ const toppers = [
   { name: 'Kripa Shahi', batch: '2078', score: '4.0 GPA', badge: '4.0 GPA', img: '/images/toppers/kripa-shahi.png', note: 'Exemplary achievement with perfect 4.0 GPA in SEE', delay: '0.4s' },
 ]
 
-const stats = [
-  { icon: Users, label: 'Active Students', value: 500, suffix: '+', color: 'from-navy-light to-navy' },
-  { icon: GraduationCap, label: 'Qualified Teachers', value: 25, suffix: '+', color: 'from-gold to-gold-dark' },
-  { icon: Calendar, label: 'Years of Excellence', value: 15, suffix: '+', color: 'from-navy-light to-navy' },
-  { icon: Award, label: 'Awards & Achievements', value: 50, suffix: '+', color: 'from-gold to-gold-dark' },
-]
+
 
 const features = [
   { icon: BookOpen, title: 'Quality Education', desc: 'Comprehensive curriculum with modern teaching methodologies tailored to equip students with skills for the future.', color: 'from-navy-light to-navy' },
@@ -70,27 +66,61 @@ const features = [
 function Home() {
   const [imgErrors, setImgErrors] = useState({})
   const [latestNews, setLatestNews] = useState([])
+  const [liveToppers, setLiveToppers] = useState([])
+  const [liveStats, setLiveStats] = useState([
+    { icon: Users, label: 'Active Learners', value: 500, suffix: '+', color: 'from-navy-light to-navy' },
+    { icon: GraduationCap, label: 'Qualified Staff', value: 25, suffix: '+', color: 'from-gold to-gold-dark' },
+    { icon: Calendar, label: 'Years of Service', value: 15, suffix: '+', color: 'from-navy-light to-navy' },
+    { icon: Award, label: 'Academic Awards', value: 50, suffix: '+', color: 'from-gold to-gold-dark' },
+  ])
+  const settings = useSchoolSettings()
 
   useScrollReveal()
 
   useEffect(() => {
-    const fetchLatestNews = async () => {
-      const { data } = await supabase.from('school_news')
+    const fetchData = async () => {
+      // Fetch news
+      const { data: newsData } = await supabase.from('school_news')
         .select('*')
         .eq('published', true)
         .order('date', { ascending: false })
         .limit(3)
-      if (data) setLatestNews(data)
+      if (newsData) setLatestNews(newsData)
+      
+      // Fetch toppers
+      const { data: toppersData } = await supabase.from('school_toppers').select('*').order('batch', { ascending: false })
+      if (toppersData && toppersData.length > 0) setLiveToppers(toppersData)
+
+      // Fetch dynamic stats
+      try {
+        const [ {count: sCount}, {count: smcCount} ] = await Promise.all([
+          supabase.from('school_staff').select('*', { count: 'exact', head: true }),
+          supabase.from('school_smc').select('*', { count: 'exact', head: true })
+        ])
+        
+        setLiveStats(prev => {
+          const established = parseInt(settings.established) || 2043;
+          const years = Math.max(0, new Date().getFullYear() - established);
+          return [
+            { ...prev[0], value: 500 },
+            { ...prev[1], value: (sCount || 0) + (smcCount || 0) },
+            { ...prev[2], value: years },
+            { ...prev[3], value: 50 }
+          ]
+        })
+      } catch (err) {
+        console.error("Home stats fetch error:", err)
+      }
     }
-    fetchLatestNews()
-  }, [])
+    fetchData()
+  }, [settings.established])
 
   const imgError = (key) => setImgErrors(p => ({ ...p, [key]: true }))
 
   return (
     <div>
       {/* ── HERO ── */}
-      <section className="relative min-h-[680px] md:min-h-[760px] flex items-center justify-center text-white overflow-hidden particle-bg">
+      <section className="relative min-h-[600px] h-[calc(100svh-68px)] md:h-[calc(100svh-88px)] flex items-center justify-center text-white overflow-hidden particle-bg">
         <div
           className="absolute inset-0 bg-center bg-cover bg-no-repeat animate-fade-in-zoom"
           style={{ backgroundImage: 'url(/images/school.webp)', backgroundSize: '120%', backgroundPosition: 'center', transition: 'background-size 12s ease-in-out' }}
@@ -103,18 +133,18 @@ function Home() {
         <div className="absolute bottom-16 right-12 w-48 h-48 bg-gold/10 rounded-full blur-3xl animate-float animate-morph z-[2]" style={{ animationDelay: '2s' }} />
         <div className="absolute top-1/3 right-1/4 w-28 h-28 bg-white/5 rounded-full blur-2xl animate-float z-[2]" style={{ animationDelay: '4s' }} />
 
-        <div className="relative z-10 text-center px-4 max-w-5xl mx-auto">
+        <div className="relative z-10 text-center px-4 max-w-5xl mx-auto -mt-10">
           <div className="inline-flex items-center gap-2 bg-white/15 backdrop-blur-sm border border-white/20 rounded-full px-5 py-2 text-sm font-medium mb-6 animate-fade-in-up" style={{ animationDelay: '0.1s', animationFillMode: 'both' }}>
             <Star className="h-4 w-4 text-gold-light fill-gold-light" />
             Quality Education is our Destination
           </div>
           <h1 className="font-display font-extrabold text-5xl md:text-7xl lg:text-8xl mb-5 leading-none drop-shadow-2xl animate-fade-in-up" style={{ animationDelay: '0.2s', animationFillMode: 'both' }}>
             <span className="block bg-gradient-to-r from-white via-gold-light to-white bg-clip-text text-transparent">Welcome to</span>
-            <span className="block text-3xl md:text-5xl lg:text-6xl mt-2 text-white/95">Shanti Varsha Angreji Ma. Vi.</span>
+            <span className="block text-3xl md:text-5xl lg:text-5xl mt-2 text-white/95">{settings.name}</span>
           </h1>
           <div className="w-24 h-1 bg-gradient-to-r from-transparent via-gold to-transparent mx-auto mb-7 animate-fade-in-up" style={{ animationDelay: '0.3s', animationFillMode: 'both' }} />
           <p className="text-lg md:text-xl text-gray-100 mb-10 font-light max-w-2xl mx-auto leading-relaxed animate-fade-in-up" style={{ animationDelay: '0.35s', animationFillMode: 'both' }}>
-            Nurturing minds, building characters, and inspiring excellence in the heart of Damauli, Tanahun since 2043 B.S.
+            Nurturing minds, building characters, and inspiring excellence in the heart of {settings.address} since {settings.established} B.S.
           </p>
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4 animate-fade-in-up" style={{ animationDelay: '0.45s', animationFillMode: 'both' }}>
             <Link to="/about" className="btn-modern group inline-flex items-center gap-3 bg-gradient-to-r from-gold to-gold-light text-white px-7 py-3.5 rounded-2xl font-bold text-base shadow-2xl shadow-gold/40 hover:shadow-gold/60 hover:scale-[1.04] transition-all duration-400">
@@ -128,31 +158,36 @@ function Home() {
           </div>
         </div>
 
-        {/* Scroll indicator */}
-        <div className="absolute bottom-8 left-1/2 -translate-x-1/2 z-10 animate-bounce-slow">
-          <div className="w-6 h-10 border-2 border-white/40 rounded-full flex justify-center">
-            <div className="w-1.5 h-3 bg-gold rounded-full mt-2 animate-pulse-slow" />
+        {/* Scroll indicator - Moved slightly up to give space for the stats dashboard */}
+        <div className="absolute bottom-[110px] sm:bottom-[130px] md:bottom-[110px] left-1/2 -translate-x-1/2 z-10 animate-bounce-slow">
+          <div className="w-5 h-8 border-2 border-white/40 rounded-full flex justify-center">
+            <div className="w-1 h-2 bg-gold rounded-full mt-1.5 animate-pulse-slow" />
           </div>
         </div>
-      </section>
 
-      {/* ── STATS BAND (directly below hero, no gap) ── */}
-      <section className="bg-gradient-hero py-4 md:py-0 border-y border-white/10">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 md:divide-x divide-white/10">
-            {stats.map(({ icon: Icon, label, value, suffix }, i) => (
-              <div key={label} className={`flex items-center gap-4 px-6 py-6 sm:py-7 hover:bg-white/10 transition-all duration-300 group ${i > 1 ? 'hidden sm:flex' : 'flex'} lg:flex`}>
-                <div className="flex-shrink-0 w-12 h-12 rounded-xl bg-white/15 backdrop-blur-sm flex items-center justify-center shadow-lg group-hover:scale-110 group-hover:bg-white/25 transition-all duration-300 border border-white/10">
-                  <Icon className="h-6 w-6 text-white" />
-                </div>
-                <div>
-                  <div className="text-2xl sm:text-3xl font-display font-extrabold text-white leading-none drop-shadow-sm">
-                    <AnimatedCounter target={value} />{suffix}
+        {/* ── STATS BAND (Vibrant Brand Gradient Interface) ── */}
+        <div className="absolute bottom-0 left-0 right-0 overflow-hidden z-20 group border-t-2 border-white/20 shadow-[0_-10px_40px_rgba(6,182,212,0.3)]">
+          {/* Vibrant High-Contrast Brand Gradient Background */}
+          <div className="absolute inset-0 bg-gradient-to-r from-gold-darker via-gold-dark to-gold-darker" />
+          <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-1000 bg-[linear-gradient(90deg,transparent,rgba(255,255,255,0.15),transparent)] animate-shimmer" />
+
+          <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 md:divide-x divide-white/20">
+              {liveStats.map(({ icon: Icon, label, value, suffix }, i) => (
+                <div key={label} className={`flex items-center gap-5 px-6 py-5 sm:py-7 hover:bg-white/10 transition-all duration-500 hover:-translate-y-1 ${i > 1 ? 'hidden sm:flex' : 'flex'} lg:flex`}>
+                  <div className="relative flex-shrink-0 w-12 h-12 sm:w-14 sm:h-14 rounded-2xl bg-white/10 backdrop-blur-sm flex items-center justify-center shadow-[0_4px_20px_rgba(255,255,255,0.1)] group-hover:shadow-[0_8px_25px_rgba(255,255,255,0.3)] border border-white/20 group-hover:border-white/50 transition-all duration-500 overflow-hidden">
+                    <div className="absolute inset-0 opacity-0 group-hover:opacity-100 bg-white/20 transition-opacity duration-500" />
+                    <Icon className="h-6 w-6 sm:h-7 sm:w-7 text-white group-hover:text-white group-hover:scale-110 transition-all duration-500 relative z-10" />
                   </div>
-                  <div className="text-white/70 text-[10px] sm:text-xs mt-1 font-bold uppercase tracking-wider">{label}</div>
+                  <div className="relative z-10">
+                    <div className="text-2xl sm:text-3xl md:text-4xl font-display font-extrabold text-white leading-none drop-shadow-md group-hover:scale-105 transition-all duration-500 origin-left">
+                      <AnimatedCounter target={value} />{suffix}
+                    </div>
+                    <div className="text-white/80 group-hover:text-white text-[10px] md:text-[11px] mt-1.5 font-bold uppercase tracking-[0.2em] transition-colors duration-500">{label}</div>
+                  </div>
                 </div>
-              </div>
-            ))}
+              ))}
+            </div>
           </div>
         </div>
       </section>
@@ -170,7 +205,6 @@ function Home() {
                 A School Built on Excellence
               </h2>
               <p className="text-gray-600 leading-relaxed text-base mb-5">
-                Shanti Varsha Angreji Ma. Vi. has been at the heart of quality education in Tanahun for over fifteen years.
                 We blend academic rigor with extracurricular opportunity, helping every student discover their potential
                 and build a strong foundation for life.
               </p>
@@ -194,7 +228,7 @@ function Home() {
                 { icon: GraduationCap, label: 'NEB Affiliated', desc: 'Officially affiliated with the National Examination Board of Nepal', color: 'bg-navy/5 text-navy border-navy/20' },
                 { icon: Trophy, label: 'District Topper', desc: 'Multiple district and national rank holders from our school', color: 'bg-gold/10 text-gold-dark border-gold/20' },
                 { icon: BookOpen, label: 'English Medium', desc: 'English-medium instruction from Grade 1 through Grade 10', color: 'bg-navy/5 text-navy border-navy/20' },
-                { icon: Clock, label: 'Since 2043 B.S.', desc: 'Over three decades of trusted education in the Tanahun community', color: 'bg-gold/10 text-gold-dark border-gold/20' },
+                { icon: Clock, label: `Since ${settings.established} B.S.`, desc: `Over decades of trusted education in the ${(settings.address || '').split(',').slice(-2, -1).join('').trim() || 'local'} community`, color: 'bg-gold/10 text-gold-dark border-gold/20' },
               ].map(({ icon: Icon, label, desc, color }) => (
                 <div key={label} className={`p-5 rounded-2xl border ${color} card-hover`}>
                   <Icon className="h-7 w-7 mb-3 opacity-80" />
@@ -245,20 +279,31 @@ function Home() {
             </p>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            {toppers.map((t) => (
+          {(() => {
+            const displayToppers = liveToppers.length > 0 ? liveToppers : toppers;
+            const lgCols = displayToppers.length === 1 ? 'lg:grid-cols-1 max-w-sm mx-auto' : 
+                           displayToppers.length === 2 ? 'lg:grid-cols-2 max-w-3xl mx-auto' : 
+                           displayToppers.length === 3 ? 'lg:grid-cols-3 max-w-5xl mx-auto' : 
+                           'lg:grid-cols-4';
+            return (
+              <div className={`grid grid-cols-1 sm:grid-cols-2 ${lgCols} gap-6`}>
+                {displayToppers.map((t, idx) => (
               <div
                 key={t.name}
                 className="group bg-white rounded-2xl shadow-card border border-gray-100 p-6 text-center glow-border card-hover relative overflow-hidden reveal-scale"
-                style={{ transitionDelay: t.delay }}
+                style={{ transitionDelay: t.delay || `${idx * 0.1}s` }}
               >
                 <div className="absolute top-0 right-0 bg-gradient-to-br from-gold to-gold-dark text-white px-3 py-1 rounded-bl-2xl rounded-tr-2xl text-xs font-bold shadow-md group-hover:scale-105 transition-transform z-10">
                   {t.badge}
                 </div>
                 <div className="mb-5">
                   <div className="w-32 h-32 mx-auto rounded-full bg-gradient-to-br from-gold/30 to-navy/20 flex items-center justify-center overflow-hidden border-4 border-gold/30 group-hover:border-gold/60 shadow-xl transition-all duration-500 group-hover:shadow-gold/30">
-                    {!imgErrors[t.name] ? (
-                      <img src={t.img} alt={t.name} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" onError={() => imgError(t.name)} />
+                    {(t.photo_url || t.image_url || t.image || t.img) ? (
+                      <img 
+                        src={`${t.photo_url || t.image_url || t.image || t.img}?t=${Date.now()}`} 
+                        alt={t.name} 
+                        className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" 
+                      />
                     ) : (
                       <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-navy to-navy-dark text-white">
                         <GraduationCap className="h-16 w-16 opacity-70" />
@@ -275,7 +320,9 @@ function Home() {
                 <p className="text-xs text-gray-500 leading-relaxed">{t.note}</p>
               </div>
             ))}
-          </div>
+              </div>
+            )
+          })()}
         </div>
       </section>
 
@@ -302,15 +349,28 @@ function Home() {
                 <Link 
                   to={`/news/${n.id}`} 
                   key={n.id} 
-                  className="group bg-white rounded-2xl p-5 border border-gray-100 hover:border-gold/30 card-hover block reveal" 
+                  className="group bg-white rounded-2xl overflow-hidden border border-gray-100 hover:border-gold/30 shadow-sm hover:shadow-xl transition-all duration-500 block reveal" 
                   style={{ transitionDelay: `${i * 0.1}s` }}
                 >
-                  <span className="badge badge-news text-[11px] mb-3 inline-block">{n.category}</span>
-                  <h3 className="font-display font-bold text-navy text-base mb-2 leading-snug group-hover:text-gold transition-colors line-clamp-2">{n.title}</h3>
-                  <p className="text-gray-500 text-sm leading-relaxed line-clamp-2">{n.content}</p>
-                  <div className="mt-3 flex items-center gap-2 text-xs text-gray-400">
-                    <Calendar className="h-3.5 w-3.5" />
-                    {new Date(n.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+                  <div className="h-44 overflow-hidden relative">
+                    {(n.image_url || n.photo_url || n.image) ? (
+                      <img src={`${n.image_url || n.photo_url || n.image}?t=${Date.now()}`} alt={n.title} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" />
+                    ) : (
+                      <div className="w-full h-full bg-gradient-to-br from-navy/10 to-gold/10 flex items-center justify-center">
+                        <Newspaper className="h-12 w-12 text-navy/20" />
+                      </div>
+                    )}
+                    <div className="absolute top-4 left-4">
+                       <span className="bg-white/90 backdrop-blur-md text-navy text-[10px] font-black px-3 py-1 rounded-full uppercase tracking-widest shadow-sm">{n.category}</span>
+                    </div>
+                  </div>
+                  <div className="p-5">
+                    <h3 className="font-display font-bold text-navy text-base mb-2 leading-snug group-hover:text-gold transition-colors line-clamp-2">{n.title}</h3>
+                    <p className="text-gray-500 text-sm leading-relaxed line-clamp-2 mb-4">{n.content}</p>
+                    <div className="flex items-center gap-2 text-xs text-gray-400 pt-3 border-t border-gray-50">
+                      <Calendar className="h-3.5 w-3.5" />
+                      {new Date(n.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+                    </div>
                   </div>
                 </Link>
               ))}

@@ -26,9 +26,6 @@ function StaffPortal() {
     const [allStaff, setAllStaff] = useState([])
 
     const fetchDB = async () => {
-        const { data: sData } = await supabase.from('class_students').select('*').order('id')
-        if (sData) setStudents(sData.map(s => ({ id: s.id, name: s.name, rollNo: s.roll_no, dob: s.dob, address: s.address, parentContact: s.parent_contact })))
-        
         const { data: gData } = await supabase.from('student_grades').select('*')
         if (gData) {
             const gMap = {}
@@ -188,9 +185,6 @@ function StaffPortal() {
                         <button onClick={() => setActiveTab('dashboard')} className={`flex items-center gap-2 px-5 py-3 rounded-t-xl text-xs font-bold transition-all border-b-2 whitespace-nowrap ${activeTab === 'dashboard' ? 'bg-white text-navy border-gold' : 'bg-white/5 text-white/60 border-transparent hover:bg-white/10'}`}>
                             <LayoutDashboard className="w-4 h-4" /> Dashboard
                         </button>
-                        <button onClick={() => setActiveTab('myClass')} className={`flex items-center gap-2 px-5 py-3 rounded-t-xl text-xs font-bold transition-all border-b-2 whitespace-nowrap ${activeTab === 'myClass' ? 'bg-white text-navy border-gold' : 'bg-white/5 text-white/60 border-transparent hover:bg-white/10'}`}>
-                            <GraduationCap className="w-4 h-4" /> Class Ops
-                        </button>
                     </div>
                 </div>
             </section>
@@ -263,101 +257,7 @@ function StaffPortal() {
                     </div>
                 </div>
 
-                {/* Teacher Admin Panel for Results */}
-                <div className="bg-white rounded-2xl shadow-card border border-gold/30 p-6 mt-6 animate-fade-in-up">
-                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-5">
-                        <div className="flex items-center gap-3">
-                            <div className="bg-gradient-to-br from-gold/20 to-gold/10 p-2.5 rounded-xl border border-gold/20">
-                                <Award className="h-5 w-5 text-gold" />
-                            </div>
-                            <div>
-                                <h2 className="font-display font-bold text-navy text-lg">Results Publisher Module</h2>
-                                <p className="text-xs text-gray-500">Manage internal grades and publish to student portals</p>
-                            </div>
-                        </div>
-                    </div>
 
-                    <div className="bg-slate-50 border border-gray-100 rounded-xl p-5 mb-4">
-                        <div className="flex items-center justify-between mb-4">
-                            <h3 className="font-semibold text-sm text-navy">Enter Student Data - Mid-Term Results</h3>
-                            <span className="text-xs font-bold text-gray-600 bg-gray-200 px-2 py-1 rounded">Draft Mode</span>
-                        </div>
-                        
-                        <div className="grid grid-cols-1 md:grid-cols-5 gap-4 mb-4">
-                            <div className="col-span-1 border-r border-gray-200 pr-4">
-                                <label className="label-modern text-xs">Student ID</label>
-                                <input className="input-modern py-2 text-sm" value={studentId} onChange={e => setStudentId(e.target.value)} placeholder="e.g. SVS-123" />
-                            </div>
-                            <div className="col-span-1">
-                                <label className="label-modern text-xs">Mathematics /100</label>
-                                <input type="number" className="input-modern py-2 text-sm" value={marks.math} onChange={e => setMarks({...marks, math: e.target.value})} placeholder="e.g. 92" />
-                            </div>
-                            <div className="col-span-1">
-                                <label className="label-modern text-xs">Science /100</label>
-                                <input type="number" className="input-modern py-2 text-sm" value={marks.science} onChange={e => setMarks({...marks, science: e.target.value})} placeholder="e.g. 88" />
-                            </div>
-                            <div className="col-span-1">
-                                <label className="label-modern text-xs">English /100</label>
-                                <input type="number" className="input-modern py-2 text-sm" value={marks.english} onChange={e => setMarks({...marks, english: e.target.value})} placeholder="e.g. 85" />
-                            </div>
-                            <div className="col-span-1">
-                                <label className="label-modern text-xs">Nepali /100</label>
-                                <input type="number" className="input-modern py-2 text-sm" value={marks.nepali} onChange={e => setMarks({...marks, nepali: e.target.value})} placeholder="e.g. 90" />
-                            </div>
-                        </div>
-                        
-                        <button 
-                            onClick={() => {
-                                setPublishStatus('Publishing...')
-                                setTimeout(() => {
-                                    // Simulated calculation logic
-                                    const m = parseInt(marks.math) || 92;
-                                    const s = parseInt(marks.science) || 88;
-                                    const e = parseInt(marks.english) || 85;
-                                    const n = parseInt(marks.nepali) || 90;
-
-                                    const getGrade = (val) => val >= 90 ? 'A+' : val >= 80 ? 'A' : val >= 70 ? 'B+' : val >= 60 ? 'B' : val >= 50 ? 'C+' : val >= 40 ? 'C' : 'D';
-
-                                    const mockResults = [
-                                        { subject: 'Mathematics', marks: `${m}/100`, grade: getGrade(m) },
-                                        { subject: 'Science', marks: `${s}/100`, grade: getGrade(s) },
-                                        { subject: 'English', marks: `${e}/100`, grade: getGrade(e) },
-                                        { subject: 'Nepali', marks: `${n}/100`, grade: getGrade(n) }
-                                    ]
-
-                                    // Assign results directly to specific student ID in Supabase
-                                    const pushGrade = async () => {
-                                        const currentAttendance = grades[studentId]?.attendance || null
-                                        await supabase.from('student_grades').upsert({
-                                            student_id: studentId,
-                                            term: 'Mid-Term',
-                                            results: mockResults,
-                                            teacher: staffMember?.name || 'Assigned Teacher',
-                                            attendance: currentAttendance
-                                        }, { onConflict: 'student_id' })
-                                        fetchDB()
-
-                                        // Backwards compatibility for the Admin Tab which looks for 'publishedResults' global existence flag
-                                        localStorage.setItem('publishedResults', JSON.stringify({term: 'Mid-Term', teacher: staffMember?.name || 'Assigned Teacher'}))
-                                        window.dispatchEvent(new Event('publishedResultsUpdated'))
-                                    }
-                                    pushGrade()
-
-                                    setPublishStatus('Published Successfully!')
-                                    setTimeout(() => {
-                                        setPublishStatus('')
-                                        setMarks({ math: '', science: '', english: '', nepali: '' })
-                                    }, 2000)
-                                }, 800)
-                            }}
-                            disabled={publishStatus === 'Publishing...'}
-                            className="w-full sm:w-auto px-6 py-2.5 bg-navy hover:bg-navy-light text-white rounded-xl text-sm font-medium transition-colors shadow-lg flex items-center justify-center gap-2"
-                        >
-                            <BookOpen className="w-4 h-4" />
-                            {publishStatus || 'Publish Grades to Portal'}
-                        </button>
-                    </div>
-                </div>
 
                 {/* Staff directory */}
                 {allStaff.length > 0 && (
@@ -372,7 +272,16 @@ function StaffPortal() {
                             {allStaff.map(s => (
                                 <div key={s.id} className={`p-4 rounded-xl text-center border transition-all ${s.id === staffMember?.id ? 'bg-gold/10 border-gold/30' : 'bg-gray-50 border-gray-100'}`}>
                                     <div className="w-12 h-12 rounded-full bg-gradient-to-br from-navy/20 to-gold/20 flex items-center justify-center mx-auto mb-2 border-2 border-white shadow-sm overflow-hidden">
-                                        {s.photoUrl ? <img src={s.photoUrl} alt={s.name} className="w-full h-full object-cover" onError={e => e.target.style.display = 'none'} /> : <Users className="h-5 w-5 text-navy/50" />}
+                                        {(s.image_url || s.photo_url || s.image) ? (
+                                            <img 
+                                                src={`${s.image_url || s.photo_url || s.image}?t=${Date.now()}`} 
+                                                alt={s.name} 
+                                                className="w-full h-full object-cover" 
+                                                onError={e => e.target.src = 'https://ui-avatars.com/api/?name='+encodeURIComponent(s.name)} 
+                                            />
+                                        ) : (
+                                            <img src={'https://ui-avatars.com/api/?name='+encodeURIComponent(s.name)} alt={s.name} className="w-full h-full object-cover" />
+                                        )}
                                     </div>
                                     <p className="text-xs font-bold text-navy truncate">{s.name}</p>
                                     <p className="text-[10px] text-gray-400 truncate">{s.role}</p>
@@ -385,146 +294,7 @@ function StaffPortal() {
                     </div>
                 )}
 
-                {activeTab === 'myClass' && (
-                    <div className="animate-fade-in-up">
-                        <div className="bg-white rounded-2xl shadow-card border border-gray-100 p-6">
-                            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
-                                <div className="flex items-center gap-3">
-                                    <div className="bg-gradient-to-br from-gold/20 to-gold/10 p-3 rounded-xl border border-gold/20">
-                                        <GraduationCap className="h-6 w-6 text-gold" />
-                                    </div>
-                                    <div>
-                                        <h2 className="font-display font-bold text-navy text-xl">Class 10 Student Database</h2>
-                                        <p className="text-xs text-gray-500 font-medium">Manage student details and academic status</p>
-                                    </div>
-                                </div>
-                                <span className="bg-navy-light/10 text-navy font-bold px-4 py-2 rounded-xl text-sm border border-navy/10">{students.length} Enrolled</span>
-                            </div>
 
-                            <div className="overflow-x-auto rounded-xl border border-gray-200">
-                                <table className="w-full text-left text-sm text-gray-600">
-                                    <thead className="bg-gray-50 border-b border-gray-200">
-                                        <tr>
-                                            <th className="px-5 py-3.5 font-semibold text-gray-700">Roll No</th>
-                                            <th className="px-5 py-3.5 font-semibold text-gray-700">Student Info</th>
-                                            <th className="px-5 py-3.5 font-semibold text-gray-700">Contact</th>
-                                            <th className="px-5 py-3.5 font-semibold text-gray-700 text-center">Today's Attendance</th>
-                                            <th className="px-5 py-3.5 font-semibold text-gray-700 text-right">Actions</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody className="divide-y divide-gray-100">
-                                        {students.map((student) => {
-                                            const isEditing = editingStudent?.id === student.id;
-                                            return (
-                                                <tr key={student.id} className="hover:bg-gray-50/50 transition-colors">
-                                                    <td className="px-5 py-4 font-bold text-navy text-base">{isEditing ? <input className="input-modern py-1 w-16 text-center" value={editingStudent.rollNo} onChange={e => setEditingStudent({...editingStudent, rollNo: e.target.value})} /> : student.rollNo}</td>
-                                                    <td className="px-5 py-4">
-                                                        {isEditing ? (
-                                                            <div className="space-y-2">
-                                                                <input className="input-modern py-1 w-full" value={editingStudent.name} onChange={e => setEditingStudent({...editingStudent, name: e.target.value})} placeholder="Full Name" />
-                                                                <input className="input-modern py-1 w-full text-xs" value={editingStudent.id} disabled />
-                                                                <input className="input-modern py-1 w-full text-xs" value={editingStudent.dob} onChange={e => setEditingStudent({...editingStudent, dob: e.target.value})} placeholder="DOB" />
-                                                            </div>
-                                                        ) : (
-                                                            <div>
-                                                                <p className="font-bold text-navy">{student.name}</p>
-                                                                <p className="text-xs font-medium text-gray-400 font-mono mt-0.5">{student.id}</p>
-                                                                <p className="text-xs mt-1 text-gray-500">DOB: {student.dob}</p>
-                                                            </div>
-                                                        )}
-                                                    </td>
-                                                    <td className="px-5 py-4">
-                                                        {isEditing ? (
-                                                            <div className="space-y-2">
-                                                                <input className="input-modern py-1 w-full text-xs" value={editingStudent.parentContact} onChange={e => setEditingStudent({...editingStudent, parentContact: e.target.value})} placeholder="Parent Phone" />
-                                                                <input className="input-modern py-1 w-full text-xs" value={editingStudent.address} onChange={e => setEditingStudent({...editingStudent, address: e.target.value})} placeholder="Address" />
-                                                            </div>
-                                                        ) : (
-                                                            <div className="space-y-1">
-                                                                <p className="flex items-center gap-1.5 text-xs text-gray-600"><Phone className="w-3.5 h-3.5 text-gray-400" /> {student.parentContact}</p>
-                                                                <p className="flex items-center gap-1.5 text-xs text-gray-600"><MapPin className="w-3.5 h-3.5 text-gray-400" /> {student.address}</p>
-                                                            </div>
-                                                        )}
-                                                    </td>
-                                                    <td className="px-5 py-4 text-center">
-                                                        {isEditing ? (
-                                                            <span className="text-xs text-gray-400">Save to mark</span>
-                                                        ) : (
-                                                            <div className="inline-flex rounded-lg border border-gray-200 p-0.5 bg-gray-50">
-                                                                <button 
-                                                                    onClick={async () => {
-                                                                        const existing = grades[student.id] || {}
-                                                                        await supabase.from('student_grades').upsert({
-                                                                            student_id: student.id,
-                                                                            term: existing.term || 'N/A',
-                                                                            results: existing.results || [],
-                                                                            teacher: existing.teacher || staffMember?.name,
-                                                                            attendance: 'Present'
-                                                                        }, { onConflict: 'student_id' })
-                                                                        fetchDB()
-                                                                    }}
-                                                                    className={`px-3 py-1.5 text-xs font-bold rounded-md transition-colors ${
-                                                                        (grades[student.id]?.attendance === 'Present') 
-                                                                        ? 'bg-green-500 text-white shadow-sm' 
-                                                                        : 'text-gray-500 hover:text-green-600 hover:bg-green-50'
-                                                                    }`}
-                                                                >
-                                                                    Present
-                                                                </button>
-                                                                <button 
-                                                                    onClick={async () => {
-                                                                        const existing = grades[student.id] || {}
-                                                                        await supabase.from('student_grades').upsert({
-                                                                            student_id: student.id,
-                                                                            term: existing.term || 'N/A',
-                                                                            results: existing.results || [],
-                                                                            teacher: existing.teacher || staffMember?.name,
-                                                                            attendance: 'Absent'
-                                                                        }, { onConflict: 'student_id' })
-                                                                        fetchDB()
-                                                                    }}
-                                                                    className={`px-3 py-1.5 text-xs font-bold rounded-md transition-colors ${
-                                                                        (grades[student.id]?.attendance === 'Absent') 
-                                                                        ? 'bg-red-500 text-white shadow-sm' 
-                                                                        : 'text-gray-500 hover:text-red-600 hover:bg-red-50'
-                                                                    }`}
-                                                                >
-                                                                    Absent
-                                                                </button>
-                                                            </div>
-                                                        )}
-                                                    </td>
-                                                    <td className="px-5 py-4 text-right">
-                                                        {isEditing ? (
-                                                            <div className="flex justify-end gap-2">
-                                                                <button onClick={() => setEditingStudent(null)} className="px-3 py-1.5 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg text-xs font-bold transition-colors">Cancel</button>
-                                                                <button onClick={async () => {
-                                                                    await supabase.from('class_students').update({
-                                                                        roll_no: editingStudent.rollNo,
-                                                                        name: editingStudent.name,
-                                                                        dob: editingStudent.dob,
-                                                                        parent_contact: editingStudent.parentContact,
-                                                                        address: editingStudent.address
-                                                                    }).eq('id', editingStudent.id)
-                                                                    fetchDB()
-                                                                    setEditingStudent(null)
-                                                                }} className="px-3 py-1.5 bg-green-500 hover:bg-green-600 text-white rounded-lg text-xs font-bold transition-colors flex items-center gap-1"><Save className="w-3.5 h-3.5"/> Save</button>
-                                                            </div>
-                                                        ) : (
-                                                            <button onClick={() => setEditingStudent(student)} className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-gold/10 hover:bg-gold/20 text-gold-dark rounded-lg text-xs font-bold transition-colors border border-gold/20">
-                                                                <Edit className="w-3.5 h-3.5" /> Edit Profile
-                                                            </button>
-                                                        )}
-                                                    </td>
-                                                </tr>
-                                            )
-                                        })}
-                                    </tbody>
-                                </table>
-                            </div>
-                        </div>
-                    </div>
-                )}
             </div>
         </div>
     )

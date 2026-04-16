@@ -50,7 +50,7 @@ function NewsDetail() {
             {/* Standard Article Header */}
             <div className="relative h-[40vh] md:h-[60vh] bg-navy overflow-hidden">
             {article.image_url ? (
-                    <img src={article.image_url} alt={article.title} className="w-full h-full object-cover opacity-60" />
+                    <img src={`${article.image_url}?t=${Date.now()}`} alt={article.title} className="w-full h-full object-cover opacity-60" />
                 ) : (
                     <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-navy to-navy-darker">
                         <Newspaper className="h-24 w-24 text-white/10" />
@@ -83,7 +83,21 @@ function NewsDetail() {
                         {/* Article Footer */}
                         <div className="mt-16 pt-8 border-t border-gray-100 flex flex-wrap items-center justify-between gap-6">
                             <div className="flex items-center gap-4">
-                                <button className="flex items-center gap-2 text-gray-400 hover:text-navy transition-colors text-sm font-medium">
+                                <button 
+                                    onClick={() => {
+                                        if (navigator.share) {
+                                            navigator.share({
+                                                title: article.title,
+                                                text: 'Check out this news from Shanti Varsha School!',
+                                                url: window.location.href,
+                                            }).catch(console.error)
+                                        } else {
+                                            navigator.clipboard.writeText(window.location.href)
+                                            alert("Article link copied to clipboard!")
+                                        }
+                                    }}
+                                    className="flex items-center gap-2 text-gray-400 hover:text-navy transition-colors text-sm font-medium"
+                                >
                                     <Share2 className="h-4 w-4" /> Share Article
                                 </button>
                                 <div className="h-4 w-px bg-gray-200" />

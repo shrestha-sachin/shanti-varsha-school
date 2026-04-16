@@ -24,7 +24,7 @@ function Lightbox({ images, index, onClose, onPrev, onNext }) {
 
       <div className="w-full max-w-4xl max-h-[85vh] flex flex-col items-center px-4 sm:px-16">
         <img
-          src={img.image_url}
+          src={`${img.image_url || img.photo_url || img.image}?t=${Date.now()}`}
           alt={img.caption || 'Gallery image'}
           className="max-h-[70vh] sm:max-h-[75vh] w-full object-contain rounded-2xl shadow-2xl animate-scale-in"
         />
@@ -126,7 +126,7 @@ function Gallery() {
               >
                 {!imgErrors[img.id] ? (
                   <img
-                    src={img.image_url}
+                    src={`${img.image_url || img.photo_url || img.image}?t=${Date.now()}`}
                     alt={img.caption || 'Gallery'}
                     className="w-full h-auto object-cover group-hover:scale-105 transition-transform duration-500"
                     onError={() => setImgErrors(p => ({ ...p, [img.id]: true }))}

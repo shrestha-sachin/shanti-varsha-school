@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { Facebook, Instagram, Youtube, Mail, Phone, MapPin, GraduationCap, ArrowRight } from 'lucide-react'
+import { useSchoolSettings } from '../hooks/useSchoolSettings'
 
 function Footer() {
   const [email, setEmail] = useState('')
@@ -29,16 +30,18 @@ function Footer() {
     { path: '/contact', label: 'Contact Us' },
   ]
 
+  const settings = useSchoolSettings()
+
   const contactInfo = [
-    { icon: MapPin, text: 'Vyas-5, Chapaghat, Damauli, Tanahun, Nepal' },
-    { icon: Phone, text: '+977-XXXXXXXX' },
-    { icon: Mail, text: 'info@shantivarsha.edu.np' },
+    { icon: MapPin, text: settings.address },
+    { icon: Phone, text: settings.phone },
+    { icon: Mail, text: settings.email },
   ]
 
   const socials = [
-    { icon: Facebook, href: '#', label: 'Facebook', color: 'hover:text-gold' },
-    { icon: Instagram, href: '#', label: 'Instagram', color: 'hover:text-gold' },
-    { icon: Youtube, href: '#', label: 'YouTube', color: 'hover:text-gold' },
+    { icon: Facebook, href: settings.facebook, label: 'Facebook', color: 'hover:text-gold' },
+    { icon: Instagram, href: settings.instagram, label: 'Instagram', color: 'hover:text-gold' },
+    { icon: Youtube, href: settings.youtube, label: 'YouTube', color: 'hover:text-gold' },
   ]
 
   return (
@@ -58,8 +61,8 @@ function Footer() {
                 <GraduationCap className="h-7 w-7 text-navy" />
               </div>
               <div>
-                <p className="font-display font-bold text-white text-sm leading-tight">Shanti Varsha</p>
-                <p className="text-gold text-xs">Angreji Ma. Vi.</p>
+                <p className="font-display font-bold text-white text-sm leading-tight">{settings.name ? settings.name.split(' ').slice(0, 2).join(' ') : 'Shanti Varsha'}</p>
+                <p className="text-gold text-xs">{settings.name ? settings.name.split(' ').slice(2).join(' ') : 'Angreji Ma. Vi.'}</p>
               </div>
             </div>
             <p className="text-gray-400 text-sm leading-relaxed mb-5">
@@ -154,7 +157,7 @@ function Footer() {
 
         <div className="border-t border-white/10 pt-8 text-center">
           <p className="text-gray-500 text-sm">
-            © {new Date().getFullYear()} Shanti Varsha Angreji Ma. Vi. All rights reserved.
+            © {new Date().getFullYear()} {settings.name}. All rights reserved.
           </p>
         </div>
       </div>

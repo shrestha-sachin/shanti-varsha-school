@@ -1,7 +1,8 @@
 import { useState, useEffect, useRef } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
-import { Menu, X, GraduationCap, LogOut, Bell, ChevronDown } from 'lucide-react'
+import { Menu, X, GraduationCap, LogOut, Bell, ChevronDown, Phone, Mail, MapPin } from 'lucide-react'
 import { supabase } from '../supabaseClient'
+import { useSchoolSettings } from '../hooks/useSchoolSettings'
 
 function Navbar() {
   const [isOpen, setIsOpen] = useState(false)
@@ -9,6 +10,7 @@ function Navbar() {
   const [isLoggedIn, setIsLoggedIn] = useState(false)
   const [userRole, setUserRole] = useState('')
   const [scrolled, setScrolled] = useState(false)
+  const settings = useSchoolSettings()
   const [noticeCount, setNoticeCount] = useState(0)
   const location = useLocation()
   const navigate = useNavigate()
@@ -97,10 +99,10 @@ function Navbar() {
             )}
             <div className="flex flex-col min-w-0">
               <span className="text-sm md:text-base lg:text-lg font-bold text-white whitespace-nowrap group-hover:text-gold transition-colors duration-300 leading-tight font-display">
-                Shanti Varsha Angreji Ma. Vi.
+                {settings.name}
               </span>
               <span className="text-[10px] sm:text-xs text-white/70 leading-tight truncate">
-                Vyas-5, Chapaghat, Damauli, Tanahun
+                {settings.address}
               </span>
             </div>
           </Link>
@@ -129,8 +131,8 @@ function Navbar() {
             {isLoggedIn ? (
               <>
                 <Link
-                  to={userRole === 'admin' ? '/admin' : userRole === 'teacher' ? '/staff' : '/student'}
-                  className={`px-3 xl:px-4 py-2 rounded-xl text-sm font-medium transition-all duration-300 ${isActive('/admin') || isActive('/staff') || isActive('/student')
+                  to={userRole === 'admin' ? '/admin' : '/staff'}
+                  className={`px-3 xl:px-4 py-2 rounded-xl text-sm font-medium transition-all duration-300 ${isActive('/admin') || isActive('/staff')
                     ? 'bg-gold text-white shadow-lg shadow-gold/30'
                     : 'text-gold hover:text-white hover:bg-gold/20 border border-gold/30'
                     }`}
@@ -156,7 +158,6 @@ function Navbar() {
                   Login <ChevronDown className="h-4 w-4 transition-transform duration-300 group-hover:-rotate-180" />
                 </button>
                 <div className="absolute right-0 mt-2 w-48 py-2 bg-white rounded-xl shadow-xl border border-gray-100 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 transform origin-top-right scale-95 group-hover:scale-100 z-50">
-                  <Link to="/login" state={{ role: 'student' }} className="block px-4 py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-50 hover:text-gold transition-colors">Student Login</Link>
                   <Link to="/login" state={{ role: 'teacher' }} className="block px-4 py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-50 hover:text-gold transition-colors">Teacher Login</Link>
                   <div className="border-t border-gray-100 my-1"></div>
                   <Link to="/login" state={{ role: 'admin' }} className="block px-4 py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-50 hover:text-gold transition-colors">Admin Login</Link>
@@ -205,8 +206,8 @@ function Navbar() {
               {isLoggedIn ? (
                 <>
                   <Link
-                    to={userRole === 'admin' ? '/admin' : userRole === 'teacher' ? '/staff' : '/student'}
-                    className={`flex items-center px-4 py-3 rounded-xl text-sm font-medium mb-1.5 transition-all duration-300 ${isActive('/admin') || isActive('/staff') || isActive('/student') ? 'bg-gold text-white' : 'text-gold hover:bg-gold/20'
+                    to={userRole === 'admin' ? '/admin' : '/staff'}
+                    className={`flex items-center px-4 py-3 rounded-xl text-sm font-medium mb-1.5 transition-all duration-300 ${isActive('/admin') || isActive('/staff') ? 'bg-gold text-white' : 'text-gold hover:bg-gold/20'
                       }`}
                   >
                     Dashboard
@@ -221,9 +222,6 @@ function Navbar() {
               ) : (
                 <div className="space-y-1 bg-white/5 rounded-xl border border-white/10 p-2">
                   <div className="text-[10px] font-bold text-gray-400 px-3 uppercase tracking-wider mb-2 mt-1">Select Login Module</div>
-                  <Link to="/login" state={{ role: 'student' }} onClick={() => setIsOpen(false)} className="flex items-center justify-between px-3 py-2.5 rounded-lg text-sm font-medium text-gray-300 hover:bg-white/10 hover:text-gold transition-colors">
-                    Student Login <ChevronDown className="h-3.5 w-3.5 -rotate-90" />
-                  </Link>
                   <Link to="/login" state={{ role: 'teacher' }} onClick={() => setIsOpen(false)} className="flex items-center justify-between px-3 py-2.5 rounded-lg text-sm font-medium text-gray-300 hover:bg-white/10 hover:text-gold transition-colors">
                     Teacher Login <ChevronDown className="h-3.5 w-3.5 -rotate-90" />
                   </Link>

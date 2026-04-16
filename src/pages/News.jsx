@@ -100,7 +100,7 @@ function News() {
                             >
                                 {article.image_url ? (
                                     <div className="h-44 overflow-hidden">
-                                        <img src={article.image_url} alt={article.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+                                        <img src={`${article.image_url}?t=${Date.now()}`} alt={article.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
                                     </div>
                                 ) : (
                                     <div className="h-44 bg-gradient-to-br from-navy/10 to-gold/10 flex items-center justify-center">
