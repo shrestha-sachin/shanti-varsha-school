@@ -265,9 +265,9 @@ function Home() {
       </section>
 
       {/* ── TOPPERS ── */}
-      <section className={`bg-white pt-20 ${latestNews.length > 0 ? 'pb-10' : 'pb-4'} overflow-hidden`}>
+      <section className="bg-white pt-20 pb-4 overflow-hidden">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-14 reveal">
+          <div className="text-center mb-10 reveal">
             <div className="flex items-center justify-center gap-4 mb-3">
               <Trophy className="h-10 w-10 text-gold animate-float" />
               <h2 className="font-display font-extrabold text-4xl md:text-5xl section-heading">Our Academic Excellence</h2>
@@ -327,23 +327,34 @@ function Home() {
       </section>
 
       {/* ── LATEST NEWS ── */}
-      {latestNews.length > 0 && (
-        <section className="bg-gradient-to-b from-gray-50 to-white pt-16 pb-10">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="flex items-end justify-between mb-10 reveal">
-              <div>
-                <div className="flex items-center gap-3 mb-2">
-                  <div className="bg-gradient-to-br from-gold/20 to-gold/10 p-2.5 rounded-xl">
-                    <Newspaper className="h-6 w-6 text-gold" />
-                  </div>
-                  <h2 className="font-display font-extrabold text-3xl md:text-4xl section-heading">Latest News</h2>
+      <section className="bg-gradient-to-b from-gray-50 to-white pt-8 pb-10">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex items-end justify-between mb-10 reveal">
+            <div>
+              <div className="flex items-center gap-3 mb-2">
+                <div className="bg-gradient-to-br from-gold/20 to-gold/10 p-2.5 rounded-xl">
+                  <Newspaper className="h-6 w-6 text-gold" />
                 </div>
-                <div className="section-divider ml-0" style={{ margin: '0' }} />
+                <h2 className="font-display font-extrabold text-3xl md:text-4xl section-heading">Latest News</h2>
               </div>
+              <div className="section-divider ml-0" style={{ margin: '0' }} />
+            </div>
+            {latestNews.length > 0 && (
               <Link to="/news" className="hidden sm:flex items-center gap-2 text-gold font-semibold text-sm hover:gap-3 transition-all duration-300">
                 All News <ArrowRight className="h-4 w-4" />
               </Link>
+            )}
+          </div>
+          
+          {latestNews.length === 0 ? (
+            <div className="text-center py-12 px-4 bg-white rounded-3xl border border-gray-100 shadow-sm reveal">
+              <div className="bg-gray-50 w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-4 border border-gray-100">
+                <Newspaper className="h-8 w-8 text-gray-300" />
+              </div>
+              <h3 className="text-lg font-bold text-navy mb-1">Stay Tuned!</h3>
+              <p className="text-gray-500 text-sm max-w-sm mx-auto">We are currently gathering the latest updates and announcements. Check back soon for exciting news.</p>
             </div>
+          ) : (
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               {latestNews.map((n, i) => (
                 <Link 
@@ -375,9 +386,9 @@ function Home() {
                 </Link>
               ))}
             </div>
-          </div>
-        </section>
-      )}
+          )}
+        </div>
+      </section>
 
       {/* ── NOTICE BOARD ── */}
       <section className="bg-white pt-8 pb-20">
