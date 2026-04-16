@@ -9,7 +9,7 @@ const DEFAULT_SETTINGS = {
   facebook: '#',
   instagram: '#',
   youtube: '#',
-  established: '2065',
+  established: '2043',
 }
 
 function safeGet() {

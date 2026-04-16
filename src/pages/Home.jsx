@@ -100,12 +100,15 @@ function Home() {
         
         setLiveStats(prev => {
           const established = parseInt(settings.established) || 2043;
-          const years = Math.max(0, new Date().getFullYear() - established);
+          // Standard conversion: B.S. = A.D. + 57 years roughly
+          const currentBSYear = new Date().getFullYear() + 57;
+          const years = Math.max(0, currentBSYear - established);
+          
           return [
-            { ...prev[0], value: 500 },
+            { ...prev[0], value: 750 }, // Updated for 750+ learners
             { ...prev[1], value: (sCount || 0) + (smcCount || 0) },
             { ...prev[2], value: years },
-            { ...prev[3], value: 50 }
+            { ...prev[3], value: 150 } // Updated for 150+ awards
           ]
         })
       } catch (err) {
@@ -120,70 +123,66 @@ function Home() {
   return (
     <div>
       {/* ── HERO ── */}
-      <section className="relative min-h-[600px] h-[calc(100svh-68px)] md:h-[calc(100svh-88px)] flex items-center justify-center text-white overflow-hidden particle-bg">
+      <section className="relative min-h-[100svh] lg:min-h-[600px] lg:h-[calc(100svh-88px)] flex flex-col lg:items-center lg:justify-center text-white lg:overflow-hidden particle-bg">
         <div
-          className="absolute inset-0 bg-center bg-cover bg-no-repeat animate-fade-in-zoom"
-          style={{ backgroundImage: 'url(/images/school.webp)', backgroundSize: '120%', backgroundPosition: 'center', transition: 'background-size 12s ease-in-out' }}
-        />
+          className="absolute inset-0 bg-top sm:bg-center bg-cover bg-no-repeat"
+          style={{ 
+            backgroundImage: 'url(/images/school.webp)', 
+          }}
+        >
+          {/* Internal overlay for the zoom effect - enabled only on larger screens via CSS if needed, 
+              or just keep it simple and stable for mobile */}
+          <div className="absolute inset-0 bg-cover bg-center hidden lg:block animate-fade-in-zoom" style={{ backgroundImage: 'url(/images/school.webp)' }} />
+        </div>
         <div className="absolute inset-0 z-[1]" style={{ background: 'linear-gradient(135deg, rgba(7,47,110,0.88) 0%, rgba(13,71,161,0.75) 55%, rgba(8,145,178,0.60) 100%)' }} />
         <div className="absolute inset-0 bg-black/10 z-[1]" />
-
+ 
         {/* Floating orbs */}
         <div className="absolute top-16 left-12 w-40 h-40 bg-gold/10 rounded-full blur-3xl animate-float animate-morph z-[2]" />
         <div className="absolute bottom-16 right-12 w-48 h-48 bg-gold/10 rounded-full blur-3xl animate-float animate-morph z-[2]" style={{ animationDelay: '2s' }} />
         <div className="absolute top-1/3 right-1/4 w-28 h-28 bg-white/5 rounded-full blur-2xl animate-float z-[2]" style={{ animationDelay: '4s' }} />
-
-        <div className="relative z-10 text-center px-4 max-w-5xl mx-auto -mt-10">
-          <div className="inline-flex items-center gap-2 bg-white/15 backdrop-blur-sm border border-white/20 rounded-full px-5 py-2 text-sm font-medium mb-6 animate-fade-in-up" style={{ animationDelay: '0.1s', animationFillMode: 'both' }}>
-            <Star className="h-4 w-4 text-gold-light fill-gold-light" />
+ 
+        {/* Hero Content - Tightly packed for mobile 'First Screen' visibility */}
+        <div className="relative z-10 flex-1 flex flex-col items-center justify-center text-center px-4 max-w-5xl mx-auto pt-0 sm:pt-12 pb-0 lg:py-0 -mt-16 lg:-mt-10">
+          <div className="inline-flex items-center gap-2 bg-white/15 backdrop-blur-sm border border-white/20 rounded-full px-3 py-1 text-[9px] sm:text-sm font-medium mb-2 sm:mb-6 animate-fade-in-up" style={{ animationDelay: '0.1s', animationFillMode: 'both' }}>
+            <Star className="h-3 w-3 sm:h-4 sm:w-4 text-gold-light fill-gold-light" />
             Quality Education is our Destination
           </div>
-          <h1 className="font-display font-extrabold text-5xl md:text-7xl lg:text-8xl mb-5 leading-none drop-shadow-2xl animate-fade-in-up" style={{ animationDelay: '0.2s', animationFillMode: 'both' }}>
+          <h1 className="font-display font-extrabold text-3xl sm:text-5xl md:text-7xl lg:text-8xl mb-2 sm:mb-5 leading-tight sm:leading-none drop-shadow-2xl animate-fade-in-up" style={{ animationDelay: '0.2s', animationFillMode: 'both' }}>
             <span className="block bg-gradient-to-r from-white via-gold-light to-white bg-clip-text text-transparent">Welcome to</span>
-            <span className="block text-3xl md:text-5xl lg:text-5xl mt-2 text-white/95">{settings.name}</span>
+            <span className="block text-xl sm:text-3xl md:text-5xl lg:text-5xl mt-0.5 sm:mt-2 text-white/95">{settings.name}</span>
           </h1>
-          <div className="w-24 h-1 bg-gradient-to-r from-transparent via-gold to-transparent mx-auto mb-7 animate-fade-in-up" style={{ animationDelay: '0.3s', animationFillMode: 'both' }} />
-          <p className="text-lg md:text-xl text-gray-100 mb-10 font-light max-w-2xl mx-auto leading-relaxed animate-fade-in-up" style={{ animationDelay: '0.35s', animationFillMode: 'both' }}>
-            Nurturing minds, building characters, and inspiring excellence in the heart of {settings.address} since {settings.established} B.S.
+          <div className="w-12 sm:w-24 h-0.5 sm:h-1 bg-gradient-to-r from-transparent via-gold to-transparent mx-auto mb-4 sm:mb-7 animate-fade-in-up" style={{ animationDelay: '0.3s', animationFillMode: 'both' }} />
+          <p className="text-[12px] sm:text-lg md:text-xl text-gray-100 mb-6 sm:mb-10 font-light max-w-xl mx-auto leading-relaxed animate-fade-in-up" style={{ animationDelay: '0.35s', animationFillMode: 'both' }}>
+            Nurturing minds, building characters, and inspiring excellence in {settings.address}.
           </p>
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-4 animate-fade-in-up" style={{ animationDelay: '0.45s', animationFillMode: 'both' }}>
-            <Link to="/about" className="btn-modern group inline-flex items-center gap-3 bg-gradient-to-r from-gold to-gold-light text-white px-7 py-3.5 rounded-2xl font-bold text-base shadow-2xl shadow-gold/40 hover:shadow-gold/60 hover:scale-[1.04] transition-all duration-400">
-              <span className="relative z-10">Discover Our School</span>
-              <ArrowRight className="h-5 w-5 group-hover:translate-x-1.5 transition-transform relative z-10" />
+          <div className="flex flex-row items-center justify-center gap-2 sm:gap-4 animate-fade-in-up" style={{ animationDelay: '0.45s', animationFillMode: 'both' }}>
+            <Link to="/about" className="btn-modern group inline-flex items-center gap-2 bg-gradient-to-r from-gold to-gold-light text-white px-4 sm:px-7 py-2 sm:py-3.5 rounded-lg sm:rounded-2xl font-bold text-xs sm:text-base shadow-2xl shadow-gold/40 hover:shadow-gold/60 hover:scale-[1.04] transition-all duration-400">
+              <span>About Us</span>
+              <ArrowRight className="h-3 w-3 sm:h-5 sm:w-5 group-hover:translate-x-1.5 transition-transform" />
             </Link>
-            <Link to="/about#contact" className="inline-flex items-center gap-3 bg-white/15 backdrop-blur-sm border border-white/30 text-white px-7 py-3.5 rounded-2xl font-semibold text-base hover:bg-white/25 transition-all duration-300">
-              <Phone className="h-5 w-5" />
-              Get in Touch
+            <Link to="/about#contact" className="inline-flex items-center gap-2 bg-white/15 backdrop-blur-sm border border-white/30 text-white px-4 sm:px-7 py-2 sm:py-3.5 rounded-lg sm:rounded-2xl font-semibold text-xs sm:text-base hover:bg-white/25 transition-all duration-300">
+              <Phone className="h-3 w-3 sm:h-5 sm:w-5" />
+              Contact
             </Link>
           </div>
         </div>
-
-        {/* Scroll indicator - Moved slightly up to give space for the stats dashboard */}
-        <div className="absolute bottom-[110px] sm:bottom-[130px] md:bottom-[110px] left-1/2 -translate-x-1/2 z-10 animate-bounce-slow">
-          <div className="w-5 h-8 border-2 border-white/40 rounded-full flex justify-center">
-            <div className="w-1 h-2 bg-gold rounded-full mt-1.5 animate-pulse-slow" />
-          </div>
-        </div>
-
-        {/* ── STATS BAND (Vibrant Brand Gradient Interface) ── */}
-        <div className="absolute bottom-0 left-0 right-0 overflow-hidden z-20 group border-t-2 border-white/20 shadow-[0_-10px_40px_rgba(6,182,212,0.3)]">
-          {/* Vibrant High-Contrast Brand Gradient Background */}
+ 
+        {/* ── STATS BAND (2x2 on mobile for readability, 1x4 on desktop) ── */}
+        <div className="relative lg:absolute lg:bottom-0 lg:left-0 lg:right-0 overflow-hidden z-20 group border-t border-white/10 shadow-[0_-10px_40px_rgba(6,182,212,0.2)] w-full">
           <div className="absolute inset-0 bg-gradient-to-r from-gold-darker via-gold-dark to-gold-darker" />
-          <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-1000 bg-[linear-gradient(90deg,transparent,rgba(255,255,255,0.15),transparent)] animate-shimmer" />
-
-          <div className="relative max-w-7xl mx-auto px-2 sm:px-6 lg:px-8">
-            <div className="grid grid-cols-2 lg:grid-cols-4 md:divide-x divide-white/20">
+          <div className="relative max-w-7xl mx-auto">
+            <div className="grid grid-cols-2 lg:grid-cols-4 divide-x divide-y lg:divide-y-0 divide-white/10">
               {liveStats.map(({ icon: Icon, label, value, suffix }, i) => (
-                <div key={label} className={`flex flex-col sm:flex-row items-center sm:items-start justify-center text-center sm:text-left gap-2 sm:gap-5 px-3 py-3 sm:px-6 sm:py-7 hover:bg-white/10 transition-all duration-500 hover:-translate-y-1 ${i > 1 ? 'hidden sm:flex' : 'flex'} lg:flex`}>
-                  <div className="relative flex-shrink-0 w-10 h-10 sm:w-14 sm:h-14 rounded-xl sm:rounded-2xl bg-white/10 backdrop-blur-sm flex items-center justify-center shadow-[0_4px_20px_rgba(255,255,255,0.1)] group-hover:shadow-[0_8px_25px_rgba(255,255,255,0.3)] border border-white/20 group-hover:border-white/50 transition-all duration-500 overflow-hidden">
-                    <div className="absolute inset-0 opacity-0 group-hover:opacity-100 bg-white/20 transition-opacity duration-500" />
-                    <Icon className="h-6 w-6 sm:h-7 sm:w-7 text-white group-hover:text-white group-hover:scale-110 transition-all duration-500 relative z-10" />
+                <div key={label} className="flex items-center justify-center gap-3 px-4 py-3 sm:py-7 hover:bg-white/5 transition-all duration-500">
+                  <div className="relative flex-shrink-0 w-8 h-8 sm:w-14 sm:h-14 rounded-lg sm:rounded-2xl bg-white/10 flex items-center justify-center border border-white/20">
+                    <Icon className="h-4 w-4 sm:h-7 sm:w-7 text-white" />
                   </div>
-                  <div className="relative z-10">
-                    <div className="text-2xl sm:text-3xl md:text-4xl font-display font-extrabold text-white leading-none drop-shadow-md group-hover:scale-105 transition-all duration-500 origin-left">
+                  <div className="text-left">
+                    <div className="text-lg sm:text-3xl md:text-4xl font-display font-extrabold text-white leading-none">
                       <AnimatedCounter target={value} />{suffix}
                     </div>
-                    <div className="text-white/80 group-hover:text-white text-[10px] md:text-[11px] mt-1.5 font-bold uppercase tracking-[0.2em] transition-colors duration-500">{label}</div>
+                    <div className="text-[8px] sm:text-[10px] md:text-[11px] text-white/70 font-bold uppercase tracking-wider mt-0.5">{label}</div>
                   </div>
                 </div>
               ))}
