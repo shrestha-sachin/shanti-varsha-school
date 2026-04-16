@@ -1542,8 +1542,12 @@ function Admin() {
   const showToast = (msg) => setToast(msg)
 
   const handleLogout = () => {
+    localStorage.removeItem('isLoggedIn')
+    localStorage.removeItem('username')
+    localStorage.removeItem('userRole')
     localStorage.removeItem('adminLoggedIn')
     localStorage.removeItem('adminUsername')
+    window.dispatchEvent(new Event('storage')) // Force Navbar state sync globally
     navigate('/login')
   }
 

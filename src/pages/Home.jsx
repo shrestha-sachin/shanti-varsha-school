@@ -171,11 +171,11 @@ function Home() {
           <div className="absolute inset-0 bg-gradient-to-r from-gold-darker via-gold-dark to-gold-darker" />
           <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-1000 bg-[linear-gradient(90deg,transparent,rgba(255,255,255,0.15),transparent)] animate-shimmer" />
 
-          <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 md:divide-x divide-white/20">
+          <div className="relative max-w-7xl mx-auto px-2 sm:px-6 lg:px-8">
+            <div className="grid grid-cols-2 lg:grid-cols-4 md:divide-x divide-white/20">
               {liveStats.map(({ icon: Icon, label, value, suffix }, i) => (
-                <div key={label} className={`flex items-center gap-5 px-6 py-5 sm:py-7 hover:bg-white/10 transition-all duration-500 hover:-translate-y-1 ${i > 1 ? 'hidden sm:flex' : 'flex'} lg:flex`}>
-                  <div className="relative flex-shrink-0 w-12 h-12 sm:w-14 sm:h-14 rounded-2xl bg-white/10 backdrop-blur-sm flex items-center justify-center shadow-[0_4px_20px_rgba(255,255,255,0.1)] group-hover:shadow-[0_8px_25px_rgba(255,255,255,0.3)] border border-white/20 group-hover:border-white/50 transition-all duration-500 overflow-hidden">
+                <div key={label} className={`flex flex-col sm:flex-row items-center sm:items-start justify-center text-center sm:text-left gap-2 sm:gap-5 px-3 py-3 sm:px-6 sm:py-7 hover:bg-white/10 transition-all duration-500 hover:-translate-y-1 ${i > 1 ? 'hidden sm:flex' : 'flex'} lg:flex`}>
+                  <div className="relative flex-shrink-0 w-10 h-10 sm:w-14 sm:h-14 rounded-xl sm:rounded-2xl bg-white/10 backdrop-blur-sm flex items-center justify-center shadow-[0_4px_20px_rgba(255,255,255,0.1)] group-hover:shadow-[0_8px_25px_rgba(255,255,255,0.3)] border border-white/20 group-hover:border-white/50 transition-all duration-500 overflow-hidden">
                     <div className="absolute inset-0 opacity-0 group-hover:opacity-100 bg-white/20 transition-opacity duration-500" />
                     <Icon className="h-6 w-6 sm:h-7 sm:w-7 text-white group-hover:text-white group-hover:scale-110 transition-all duration-500 relative z-10" />
                   </div>
