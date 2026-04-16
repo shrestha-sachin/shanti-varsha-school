@@ -14,6 +14,8 @@ import Contact from './pages/Contact'
 import Login from './pages/Login'
 import Admin from './pages/Admin'
 import StaffPortal from './pages/StaffPortal'
+import Articles from './pages/Articles'
+import ArticleDetail from './pages/ArticleDetail'
 
 import { useLocation } from 'react-router-dom'
 
@@ -34,6 +36,8 @@ function AppContent() {
           <Route path="/calendar" element={<Calendar />} />
           <Route path="/gallery" element={<Gallery />} />
           <Route path="/contact" element={<Contact />} />
+          <Route path="/articles" element={<Articles />} />
+          <Route path="/articles/:id" element={<ArticleDetail />} />
           <Route path="/login" element={<Login />} />
           <Route
             path="/staff"

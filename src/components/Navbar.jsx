@@ -67,6 +67,7 @@ function Navbar() {
     { path: '/about', label: 'About Us' },
     { path: '/notices', label: 'Notices', badge: noticeCount > 0 },
     { path: '/news', label: 'News' },
+    { path: '/articles', label: 'Articles' },
     { path: '/calendar', label: 'Calendar' },
     { path: '/gallery', label: 'Gallery' },
     { path: '/contact', label: 'Contact' },
