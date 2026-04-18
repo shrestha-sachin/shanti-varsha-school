@@ -141,21 +141,21 @@ function PopupAd() {
           <X className="h-5 w-5 group-hover:rotate-90 transition-transform duration-300" />
         </button>
 
-        <div className="relative flex-1 overflow-y-auto bg-gray-100 flex items-center justify-center min-h-[30vh]">
+        <div className="relative overflow-y-auto w-full bg-white flex flex-col items-center justify-center">
           {current.link_url ? (
-            <Link to={current.link_url} onClick={() => close()} className="block w-full h-full cursor-pointer group">
+            <Link to={current.link_url} onClick={() => close()} className="relative block w-full group">
                <div className="absolute inset-0 bg-gold/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-10" />
                <img 
                  src={`${current.image_url}?t=${Date.now()}`} 
                  alt="Announcement" 
-                 className="w-full h-auto object-contain max-h-[60vh] sm:max-h-[70vh] group-hover:scale-[1.02] transition-transform duration-700" 
+                 className="w-full h-auto object-contain max-h-[60vh] sm:max-h-[70vh] group-hover:scale-[1.02] transition-transform duration-700 block" 
                />
             </Link>
           ) : (
             <img 
               src={`${current.image_url}?t=${Date.now()}`} 
               alt="Announcement" 
-              className="w-full h-auto object-contain max-h-[60vh] sm:max-h-[70vh]" 
+              className="w-full h-auto object-contain max-h-[60vh] sm:max-h-[70vh] block" 
             />
           )}
         </div>

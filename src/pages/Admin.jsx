@@ -6,7 +6,7 @@ import {
   UsersIcon, Bell, GraduationCap, Settings, Plus, X, Trash2, Edit, Save, 
   Search, Filter, LogOut, ChevronRight, Image, Layout, List, FileText, Newspaper,
   MapPin, Phone, Mail, Globe, Clock, Info, CheckCircle2, AlertCircle, Loader2,
-  Table, Pin, Maximize2, Download, Calendar, BookOpen, TrendingUp, Eye, EyeOff, Award, User, Quote, Upload, GripVertical
+  Table, Pin, Maximize2, Download, Calendar, BookOpen, TrendingUp, Eye, EyeOff, Award, User, Quote, Upload, GripVertical, Menu
 } from 'lucide-react'
 import ReactQuill, { Quill } from 'react-quill'
 import 'react-quill/dist/quill.snow.css'
