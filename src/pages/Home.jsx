@@ -198,6 +198,7 @@ function Home() {
   const [imgErrors, setImgErrors] = useState({})
   const [latestNews, setLatestNews] = useState([])
   const [liveToppers, setLiveToppers] = useState([])
+  const [liveEvents, setLiveEvents] = useState([])
   const [liveStats, setLiveStats] = useState([
     { icon: Users, label: 'Active Learners', value: 500, suffix: '+', color: 'from-navy-light to-navy' },
     { icon: GraduationCap, label: 'Qualified Staff', value: 25, suffix: '+', color: 'from-gold to-gold-dark' },
@@ -206,7 +207,7 @@ function Home() {
   ])
   const settings = useSchoolSettings()
 
-  useScrollReveal([latestNews, liveToppers])
+  useScrollReveal([latestNews, liveToppers, liveEvents])
 
   useEffect(() => {
     const fetchData = async () => {
@@ -220,9 +221,22 @@ function Home() {
       if (newsData) setLatestNews(newsData)
       
       // Fetch toppers
-      const { data: toppersData, error: toppersError } = await supabase.from('school_toppers').select('*').order('batch', { ascending: false })
-      if (toppersError) console.error("Home toppers fetch error:", toppersError)
+      let { data: toppersData, error: toppersError } = await supabase.from('school_toppers').select('*').order('display_order', { ascending: true })
+      if (toppersError) {
+         const fallback = await supabase.from('school_toppers').select('*').order('batch', { ascending: false })
+         toppersData = fallback.data
+      }
       if (toppersData) setLiveToppers(toppersData)
+
+      // Fetch Events
+      const today = new Date().toISOString().split('T')[0]
+      const { data: eventsData, error: eventsError } = await supabase.from('school_events')
+        .select('*')
+        .gte('date', today)
+        .order('date', { ascending: true })
+        .limit(4)
+      if (eventsError) console.error("Home events fetch error:", eventsError)
+      if (eventsData) setLiveEvents(eventsData)
 
       // Fetch dynamic stats
       try {
@@ -455,6 +469,50 @@ function Home() {
           </div>
         </section>
       )}
+
+      {/* ── UPCOMING EVENTS ── */}
+      <section className="bg-white pt-10 pb-8 relative overflow-hidden">
+        <div className="absolute top-0 right-0 w-64 h-64 bg-gold/5 rounded-full blur-3xl -mr-32 -mt-32" />
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+          <div className="flex items-center gap-3 mb-8 reveal">
+            <div className="bg-gradient-to-br from-navy/10 to-navy/5 p-2.5 rounded-xl">
+              <Calendar className="h-6 w-6 text-navy" />
+            </div>
+            <h2 className="font-display font-extrabold text-3xl md:text-4xl text-navy">Upcoming Events</h2>
+          </div>
+
+          {liveEvents.length === 0 ? (
+            <div className="text-center py-8 px-4 bg-slate-50 rounded-3xl border border-gray-100 shadow-inner reveal">
+              <div className="bg-white w-14 h-14 rounded-2xl flex items-center justify-center mx-auto mb-3 shadow-sm border border-gray-100">
+                <Calendar className="h-6 w-6 text-gray-300" />
+              </div>
+              <p className="text-gray-500 text-sm max-w-sm mx-auto italic">Our calendar is currently clear. Please stay tuned for upcoming events and announcements.</p>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+              {liveEvents.map((evt, i) => (
+                <div 
+                  key={evt.id} 
+                  className="group bg-slate-50 rounded-3xl border border-gray-100 p-5 hover:border-gold/30 hover:shadow-xl transition-all duration-300 reveal flex flex-col"
+                  style={{ transitionDelay: `${i * 0.1}s` }}
+                >
+                  <div className="flex items-center gap-3 mb-4">
+                    <div className="w-12 h-12 rounded-2xl bg-white shadow-sm border border-gray-100 flex flex-col items-center justify-center flex-shrink-0 text-navy group-hover:bg-gold group-hover:text-white group-hover:border-gold transition-colors">
+                      <span className="text-[10px] uppercase font-bold tracking-widest">{new Date(evt.date).toLocaleDateString('en-US', { month: 'short' })}</span>
+                      <span className="text-lg font-black leading-none">{new Date(evt.date).getDate()}</span>
+                    </div>
+                    <div>
+                      <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest bg-white px-2 py-0.5 rounded-full border border-gray-100">{evt.type || 'Event'}</span>
+                    </div>
+                  </div>
+                  <h3 className="font-display font-bold text-navy text-lg line-clamp-2 mb-2 group-hover:text-gold transition-colors">{evt.title}</h3>
+                  {evt.description && <p className="text-xs text-gray-500 line-clamp-2 mt-auto leading-relaxed">{evt.description}</p>}
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      </section>
 
       {/* ── LATEST NEWS ── */}
       <section className="bg-gradient-to-b from-gray-50 to-white pt-8 pb-10">

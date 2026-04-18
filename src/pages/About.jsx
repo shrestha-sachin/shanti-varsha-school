@@ -16,12 +16,31 @@ function About() {
     const fetchData = async () => {
       setLoading(true)
       try {
+        // Fallback array handling for missing display_order columns
+        let smcData = []
+        let staffData = []
+
         const [smcRes, staffRes] = await Promise.all([
-          supabase.from('school_smc').select('*').order('name'),
-          supabase.from('school_staff').select('*').order('name')
+          supabase.from('school_smc').select('*').order('display_order', { ascending: true }),
+          supabase.from('school_staff').select('*').order('display_order', { ascending: true })
         ])
-        if (smcRes.data) setCommittee(smcRes.data)
-        if (staffRes.data) setStaff(staffRes.data)
+
+        if (smcRes.error) {
+          const fallback = await supabase.from('school_smc').select('*').order('name')
+          smcData = fallback.data || []
+        } else {
+          smcData = smcRes.data || []
+        }
+
+        if (staffRes.error) {
+          const fallback = await supabase.from('school_staff').select('*').order('name')
+          staffData = fallback.data || []
+        } else {
+          staffData = staffRes.data || []
+        }
+
+        setCommittee(smcData)
+        setStaff(staffData)
       } catch (err) {
         console.error("Error fetching about page data:", err)
       } finally {

@@ -6,7 +6,7 @@ import {
   UsersIcon, Bell, GraduationCap, Settings, Plus, X, Trash2, Edit, Save, 
   Search, Filter, LogOut, ChevronRight, Image, Layout, List, FileText, Newspaper,
   MapPin, Phone, Mail, Globe, Clock, Info, CheckCircle2, AlertCircle, Loader2,
-  Table, Pin, Maximize2, Download, Calendar, BookOpen, TrendingUp, Eye, EyeOff, Award, User, Quote, Upload
+  Table, Pin, Maximize2, Download, Calendar, BookOpen, TrendingUp, Eye, EyeOff, Award, User, Quote, Upload, GripVertical
 } from 'lucide-react'
 import ReactQuill, { Quill } from 'react-quill'
 import 'react-quill/dist/quill.snow.css'
@@ -965,11 +965,62 @@ function StaffTab({ toast }) {
 
   const fetchStaff = async () => {
     setLoading(true)
-    const { data } = await supabase.from('school_staff').select('*').order('name')
+    let { data, error } = await supabase.from('school_staff').select('*').order('display_order', { ascending: true })
+    if (error) {
+      const fallback = await supabase.from('school_staff').select('*').order('name')
+      data = fallback.data
+    }
     if (data) setStaff(data)
     setLoading(false)
   }
   useEffect(() => { fetchStaff() }, [])
+
+  // ── Drag and Drop Logic ───────────────────────────────────────────────────
+  const [draggedIndex, setDraggedIndex] = useState(null)
+
+  const handleDragStart = (e, index) => {
+    setDraggedIndex(index)
+    e.dataTransfer.effectAllowed = 'move'
+    e.target.style.opacity = '0.5'
+  }
+
+  const handleDragEnd = (e) => {
+    e.target.style.opacity = '1'
+    setDraggedIndex(null)
+  }
+
+  const handleDragOver = (e, index) => {
+    e.preventDefault()
+  }
+
+  const handleDrop = async (e, targetIndex) => {
+    e.preventDefault()
+    if (draggedIndex === null || draggedIndex === targetIndex) return
+
+    const newStaff = [...staff]
+    const draggedItem = newStaff.splice(draggedIndex, 1)[0]
+    newStaff.splice(targetIndex, 0, draggedItem)
+
+    setStaff(newStaff)
+
+    try {
+      const updatePromises = newStaff.map((item, idx) => 
+        supabase.from('school_staff').update({ display_order: idx }).eq('id', item.id)
+      )
+      const results = await Promise.all(updatePromises)
+      
+      const errors = results.filter(r => r.error)
+      if (errors.length > 0) {
+        toast({ type: 'error', text: `Failed: ${errors[0].error.message}` })
+        fetchStaff()
+      } else {
+        toast({ type: 'success', text: 'Staff order updated!' })
+      }
+    } catch (err) {
+      toast({ type: 'error', text: `Error: ${err.message}` })
+      fetchStaff()
+    }
+  }
 
   const startEdit = (s) => { 
     setEditing(s)
@@ -1069,9 +1120,22 @@ function StaffTab({ toast }) {
       )}
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-        {staff.map(s => (
-          <div key={s.id} className="bg-white rounded-2xl border border-gray-100 p-4 hover:shadow-xl hover:border-gold/30 transition-all group animate-scale-in">
-            <div className="flex items-start gap-4 mb-4">
+        {staff.map((s, idx) => (
+          <div 
+            key={s.id} 
+            draggable
+            onDragStart={(e) => handleDragStart(e, idx)}
+            onDragEnd={handleDragEnd}
+            onDragOver={(e) => handleDragOver(e, idx)}
+            onDrop={(e) => handleDrop(e, idx)}
+            className={`bg-white rounded-2xl border border-gray-100 p-4 hover:shadow-xl hover:border-gold/30 transition-all group animate-scale-in cursor-move ${draggedIndex === idx ? 'border-gold border-2 dashed scale-95 opacity-50' : ''}`}
+          >
+            <div className="flex items-start gap-3 mb-4">
+              <div className="flex flex-col items-center gap-2 pt-2">
+                 <div className="text-gray-300 group-hover:text-gold transition-colors">
+                    <GripVertical className="h-4 w-4" />
+                 </div>
+              </div>
               <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-navy/5 to-gold/10 overflow-hidden flex-shrink-0 border border-gray-100 shadow-inner">
                 <img src={s.image_url ? `${s.image_url}?t=${Date.now()}` : (s.photo_url ? `${s.photo_url}?t=${Date.now()}` : `https://ui-avatars.com/api/?name=${encodeURIComponent(s.name)}&background=f0f2f5&color=072f6e`)} className="w-full h-full object-cover" alt={s.name} onError={e => e.target.src = 'https://ui-avatars.com/api/?name=' + encodeURIComponent(s.name)} />
               </div>
@@ -1107,11 +1171,65 @@ function SMCTab({ toast }) {
 
   const fetchSMC = async () => {
     setLoading(true)
-    const { data } = await supabase.from('school_smc').select('*').order('name')
+    let { data, error } = await supabase.from('school_smc').select('*').order('display_order', { ascending: true })
+    if (error) {
+      const fallback = await supabase.from('school_smc').select('*').order('name')
+      data = fallback.data
+    }
     if (data) setSMC(data)
     setLoading(false)
   }
   useEffect(() => { fetchSMC() }, [])
+
+  // ── Drag and Drop Logic ───────────────────────────────────────────────────
+  const [draggedIndex, setDraggedIndex] = useState(null)
+
+  const handleDragStart = (e, index) => {
+    setDraggedIndex(index)
+    e.dataTransfer.effectAllowed = 'move'
+    // Optional: add a ghost image/style
+    e.target.style.opacity = '0.5'
+  }
+
+  const handleDragEnd = (e) => {
+    e.target.style.opacity = '1'
+    setDraggedIndex(null)
+  }
+
+  const handleDragOver = (e, index) => {
+    e.preventDefault()
+    if (index === draggedIndex) return
+  }
+
+  const handleDrop = async (e, targetIndex) => {
+    e.preventDefault()
+    if (draggedIndex === null || draggedIndex === targetIndex) return
+
+    const newSMC = [...smc]
+    const draggedItem = newSMC.splice(draggedIndex, 1)[0]
+    newSMC.splice(targetIndex, 0, draggedItem)
+
+    // Update local state immediately for smooth UI
+    setSMC(newSMC)
+
+    try {
+      const updatePromises = newSMC.map((item, idx) => 
+        supabase.from('school_smc').update({ display_order: idx }).eq('id', item.id)
+      )
+      const results = await Promise.all(updatePromises)
+      
+      const errors = results.filter(r => r.error)
+      if (errors.length > 0) {
+        toast({ type: 'error', text: `Failed: ${errors[0].error.message}` })
+        fetchSMC() // Revert
+      } else {
+        toast({ type: 'success', text: 'Order updated!' })
+      }
+    } catch (err) {
+      toast({ type: 'error', text: `Error: ${err.message}` })
+      fetchSMC()
+    }
+  }
 
   const startEdit = (m) => { 
     setEditing(m)
@@ -1187,9 +1305,22 @@ function SMCTab({ toast }) {
       )}
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-        {smc.map(m => (
-          <div key={m.id} className="bg-white rounded-2xl border border-gray-100 p-4 hover:shadow-xl hover:border-gold/30 transition-all group animate-scale-in">
+        {smc.map((m, idx) => (
+          <div 
+            key={m.id} 
+            draggable
+            onDragStart={(e) => handleDragStart(e, idx)}
+            onDragEnd={handleDragEnd}
+            onDragOver={(e) => handleDragOver(e, idx)}
+            onDrop={(e) => handleDrop(e, idx)}
+            className={`bg-white rounded-2xl border border-gray-100 p-4 hover:shadow-xl hover:border-gold/30 transition-all group animate-scale-in cursor-move ${draggedIndex === idx ? 'border-gold border-2 dashed scale-95 opacity-50' : ''}`}
+          >
             <div className="flex items-start gap-4 mb-4">
+              <div className="flex flex-col items-center gap-2">
+                 <div className="w-6 h-6 flex items-center justify-center text-gray-300 group-hover:text-gold transition-colors">
+                    <GripVertical className="h-4 w-4" />
+                 </div>
+              </div>
               <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-gold/10 to-transparent overflow-hidden flex-shrink-0 border border-gold/10">
                 <img src={m.image_url ? `${m.image_url}?t=${Date.now()}` : (m.image ? `${m.image}?t=${Date.now()}` : `https://ui-avatars.com/api/?name=${encodeURIComponent(m.name)}&background=fdf8e6&color=b45309`)} className="w-full h-full object-cover" alt={m.name} onError={e => e.target.src = 'https://ui-avatars.com/api/?name=' + encodeURIComponent(m.name)} />
               </div>
@@ -1532,11 +1663,62 @@ function ToppersTab({ toast }) {
 
   const fetchToppers = async () => {
     setLoading(true)
-    const { data, error } = await supabase.from('school_toppers').select('*').order('batch', { ascending: false })
+    let { data, error } = await supabase.from('school_toppers').select('*').order('display_order', { ascending: true })
+    if (error) {
+      const fallback = await supabase.from('school_toppers').select('*').order('batch', { ascending: false })
+      data = fallback.data
+    }
     if (data) setToppers(data)
     setLoading(false)
   }
   useEffect(() => { fetchToppers() }, [])
+
+  // ── Drag and Drop Logic ───────────────────────────────────────────────────
+  const [draggedIndex, setDraggedIndex] = useState(null)
+
+  const handleDragStart = (e, index) => {
+    setDraggedIndex(index)
+    e.dataTransfer.effectAllowed = 'move'
+    e.target.style.opacity = '0.5'
+  }
+
+  const handleDragEnd = (e) => {
+    e.target.style.opacity = '1'
+    setDraggedIndex(null)
+  }
+
+  const handleDragOver = (e, index) => {
+    e.preventDefault()
+  }
+
+  const handleDrop = async (e, targetIndex) => {
+    e.preventDefault()
+    if (draggedIndex === null || draggedIndex === targetIndex) return
+
+    const newToppers = [...toppers]
+    const draggedItem = newToppers.splice(draggedIndex, 1)[0]
+    newToppers.splice(targetIndex, 0, draggedItem)
+
+    setToppers(newToppers)
+
+    try {
+      const updatePromises = newToppers.map((item, idx) => 
+        supabase.from('school_toppers').update({ display_order: idx }).eq('id', item.id)
+      )
+      const results = await Promise.all(updatePromises)
+      
+      const errors = results.filter(r => r.error)
+      if (errors.length > 0) {
+        toast({ type: 'error', text: `Failed: ${errors[0].error.message}` })
+        fetchToppers()
+      } else {
+        toast({ type: 'success', text: 'Toppers order updated!' })
+      }
+    } catch (err) {
+      toast({ type: 'error', text: `Error: ${err.message}` })
+      fetchToppers()
+    }
+  }
 
   const startEdit = (t) => { 
     setEditing(t)
@@ -1635,10 +1817,23 @@ function ToppersTab({ toast }) {
         </div>
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-          {toppers.map(t => (
-            <div key={t.id} className="bg-white rounded-3xl border border-gray-100 p-5 hover:shadow-2xl hover:border-gold/30 transition-all group animate-scale-in flex flex-col justify-between">
+          {toppers.map((t, idx) => (
+            <div 
+              key={t.id} 
+              draggable
+              onDragStart={(e) => handleDragStart(e, idx)}
+              onDragEnd={handleDragEnd}
+              onDragOver={(e) => handleDragOver(e, idx)}
+              onDrop={(e) => handleDrop(e, idx)}
+              className={`bg-white rounded-3xl border border-gray-100 p-5 hover:shadow-2xl hover:border-gold/30 transition-all group animate-scale-in flex flex-col justify-between cursor-move ${draggedIndex === idx ? 'border-gold border-2 dashed scale-95 opacity-50' : ''}`}
+            >
               <div>
                 <div className="flex items-center gap-4 mb-4">
+                  <div className="flex flex-col items-center gap-2">
+                     <div className="text-gray-300 group-hover:text-gold transition-colors">
+                        <GripVertical className="h-4 w-4" />
+                     </div>
+                  </div>
                   <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-amber-50 to-gold/20 overflow-hidden flex-shrink-0 border border-gold/10 shadow-inner">
                     <img 
                       src={t.photo_url ? `${t.photo_url}?t=${Date.now()}` : `https://ui-avatars.com/api/?name=${encodeURIComponent(t.name)}&background=fffbea&color=b45309`} 
