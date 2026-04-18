@@ -184,7 +184,7 @@ function Navbar() {
 
       {/* Mobile menu */}
       <div
-        className={`lg:hidden overflow-hidden transition-all duration-400 ease-in-out ${isOpen ? 'max-h-[520px] opacity-100' : 'max-h-0 opacity-0'
+        className={`lg:hidden overflow-y-auto transition-all duration-400 ease-in-out scrollbar-hide shadow-xl ${isOpen ? 'max-h-[85vh] opacity-100' : 'max-h-0 opacity-0'
           }`}
       >
         <div className="glass-nav border-t border-gold/20 shadow-2xl">

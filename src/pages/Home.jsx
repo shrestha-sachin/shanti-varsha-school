@@ -130,40 +130,40 @@ function PopupAd() {
     <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 overflow-hidden animate-fade-in" onClick={close}>
       <div className="absolute inset-0 bg-navy/90 backdrop-blur-sm" />
       <div 
-        className="relative bg-white rounded-2xl overflow-hidden shadow-[0_0_50px_rgba(0,0,0,0.5)] w-full max-w-md max-h-[90vh] animate-scale-in border border-white/10 flex flex-col"
+        className="relative bg-white rounded-3xl overflow-hidden shadow-2xl w-[92vw] max-w-sm sm:max-w-md max-h-[85vh] animate-scale-in border border-white/10 flex flex-col mx-auto"
         onClick={e => e.stopPropagation()}
       >
         <button 
           onClick={close} 
-          className="absolute top-3 right-3 z-30 bg-black/50 backdrop-blur-md hover:bg-red-600 text-white p-2 rounded-full shadow-lg transition-all group"
+          className="absolute top-2 right-2 sm:top-3 sm:right-3 z-40 bg-black/50 backdrop-blur-md hover:bg-red-600 text-white p-2 rounded-full shadow-lg transition-all group border border-white/10"
           title="Close"
         >
           <X className="h-5 w-5 group-hover:rotate-90 transition-transform duration-300" />
         </button>
 
-        <div className="relative flex-1 overflow-y-auto bg-gray-100 flex items-center justify-center min-h-[300px]">
+        <div className="relative flex-1 overflow-y-auto bg-gray-100 flex items-center justify-center min-h-[30vh]">
           {current.link_url ? (
             <Link to={current.link_url} onClick={() => close()} className="block w-full h-full cursor-pointer group">
                <div className="absolute inset-0 bg-gold/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-10" />
                <img 
                  src={`${current.image_url}?t=${Date.now()}`} 
                  alt="Announcement" 
-                 className="w-full h-auto object-contain max-h-[70vh] group-hover:scale-[1.02] transition-transform duration-700 sm:max-h-[75vh]" 
+                 className="w-full h-auto object-contain max-h-[60vh] sm:max-h-[70vh] group-hover:scale-[1.02] transition-transform duration-700" 
                />
             </Link>
           ) : (
             <img 
               src={`${current.image_url}?t=${Date.now()}`} 
               alt="Announcement" 
-              className="w-full h-auto object-contain max-h-[70vh] sm:max-h-[75vh]" 
+              className="w-full h-auto object-contain max-h-[60vh] sm:max-h-[70vh]" 
             />
           )}
         </div>
 
-        <div className="p-3 sm:p-4 bg-navy/95 border-t border-white/10 flex flex-row items-center justify-center gap-2 sm:gap-3 flex-shrink-0">
+        <div className="p-3 sm:p-4 bg-navy/95 border-t border-white/10 flex flex-col sm:flex-row gap-2 sm:gap-3 flex-shrink-0 z-20">
           <button 
             onClick={(e) => { e.stopPropagation(); window.open(current.image_url, '_blank') }}
-            className="flex-1 bg-white/10 hover:bg-white/20 text-white border border-white/20 py-2.5 sm:py-3 rounded-xl font-bold text-[10px] sm:text-xs uppercase tracking-widest flex items-center justify-center gap-2 transition-all"
+            className="w-full sm:flex-1 bg-white/10 hover:bg-white/20 text-white border border-white/20 py-3 rounded-xl font-bold text-xs uppercase tracking-widest flex items-center justify-center gap-2 transition-all"
             title="View Full Screen"
           >
             <Maximize2 className="h-4 w-4" /> Full Size
@@ -185,7 +185,7 @@ function PopupAd() {
                 window.open(current.image_url, '_blank');
               }
             }}
-            className="flex-1 bg-gold hover:bg-gold-light text-navy py-2.5 sm:py-3 rounded-xl font-extrabold text-[10px] sm:text-xs uppercase tracking-widest flex items-center justify-center gap-2 transition-all shadow-lg shadow-gold/20"
+            className="w-full sm:flex-1 bg-gold hover:bg-gold-light text-navy py-3 rounded-xl font-extrabold text-xs uppercase tracking-widest flex items-center justify-center gap-2 transition-all shadow-lg shadow-gold/20"
             title="Download Announcement"
           >
             <Download className="h-4 w-4" /> Download

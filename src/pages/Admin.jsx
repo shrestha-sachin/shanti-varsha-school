@@ -1981,6 +1981,7 @@ function PopupsTab({ toast }) {
 function Admin() {
   const navigate = useNavigate()
   const [activeTab, setActiveTab] = useState('dashboard')
+  const [showMobileSidebar, setShowMobileSidebar] = useState(false)
   const [toast, setToast] = useState({ type: '', text: '' })
 
   useEffect(() => {
@@ -2055,16 +2056,55 @@ function Admin() {
 
       {/* Mobile Top Header */}
       <header className="lg:hidden bg-white border-b border-gray-200 sticky top-0 z-[70] px-4 py-3 flex items-center justify-between shadow-md">
-        <div className="flex items-center gap-2">
-          <div className="bg-navy p-1 rounded-lg">
-            <img src="/logos/SVS logo.png" alt="Logo" className="h-5 w-5 object-contain" />
+        <div className="flex items-center gap-3">
+          <button onClick={() => setShowMobileSidebar(true)} className="p-1 -ml-1 text-navy hover:bg-gray-100 rounded-lg">
+            <Menu className="h-6 w-6" />
+          </button>
+          <div className="flex items-center gap-2">
+            <div className="bg-navy p-1 rounded-md hidden sm:block">
+              <img src="/logos/SVS logo.png" alt="Logo" className="h-4 w-4 object-contain" />
+            </div>
+            <h1 className="font-display font-bold text-navy text-lg truncate">{currentTab?.label || 'Admin'}</h1>
           </div>
-          <h1 className="font-display font-bold text-navy text-base truncate">{currentTab?.label || 'Admin'}</h1>
         </div>
-        <button onClick={handleLogout} className="p-2 text-red-500 hover:bg-red-50 rounded-lg transition-colors">
+        <button onClick={handleLogout} className="p-1.5 text-red-500 hover:bg-red-50 rounded-lg transition-colors">
           <LogOut className="h-5 w-5" />
         </button>
       </header>
+
+      {/* Mobile Sidebar Overlay */}
+      {showMobileSidebar && (
+        <div className="lg:hidden fixed inset-0 z-[100] flex animate-fade-in">
+          <div className="absolute inset-0 bg-navy/80 backdrop-blur-sm" onClick={() => setShowMobileSidebar(false)} />
+          <div className="relative w-72 bg-white h-full shadow-2xl flex flex-col animate-slide-in-right">
+            <div className="px-6 py-5 border-b border-gray-100 flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="bg-navy p-1.5 rounded-lg">
+                  <img src="/logos/SVS logo.png" alt="Logo" className="h-6 w-6 object-contain" />
+                </div>
+                <p className="text-navy font-display font-bold text-lg">Menu</p>
+              </div>
+              <button onClick={() => setShowMobileSidebar(false)} className="p-2 text-gray-400 hover:text-navy hover:bg-gray-100 rounded-full">
+                <X className="h-5 w-5" />
+              </button>
+            </div>
+            
+            <nav className="flex-1 px-4 py-4 space-y-1.5 overflow-y-auto">
+              <p className="px-4 text-[10px] font-extrabold text-gray-400 uppercase tracking-widest mb-2">Modules</p>
+              {tabs.map(({ id, label, icon: Icon }) => (
+                <button 
+                  key={id} 
+                  onClick={() => { setActiveTab(id); setShowMobileSidebar(false); }} 
+                  className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all font-bold text-sm ${activeTab === id ? 'bg-gold text-white shadow-md' : 'text-gray-500 hover:bg-gray-50 hover:text-navy'}`}
+                >
+                  <Icon className="h-5 w-5 flex-shrink-0" />
+                  {label}
+                </button>
+              ))}
+            </nav>
+          </div>
+        </div>
+      )}
 
       {/* Main Content Area */}
       <div className="flex-1 min-w-0 flex flex-col h-full overflow-hidden relative z-0">
@@ -2097,38 +2137,6 @@ function Admin() {
           </div>
         </main>
       </div>
-
-      {/* Mobile Bottom Navigation */}
-      <nav className="lg:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-gray-100 px-1 py-1 flex items-center justify-around z-50 shadow-[0_-4px_16px_rgba(0,0,0,0.06)] pb-safe">
-        {tabs.slice(0, 4).map(({ id, label, icon: Icon }) => (
-          <button
-            key={id}
-            onClick={() => setActiveTab(id)}
-            className={`flex flex-col items-center justify-center py-2 px-1 rounded-xl transition-all flex-1 ${activeTab === id ? 'text-gold' : 'text-gray-400'}`}
-          >
-            <Icon className={`h-5 w-5 ${activeTab === id ? 'animate-pulse-slow' : ''}`} />
-            <span className="text-[10px] mt-1 font-bold truncate w-full text-center">{label}</span>
-          </button>
-        ))}
-        {/* Mobile Menu Toggle/Cycle */}
-        <button
-          onClick={() => {
-            const others = tabs.slice(4)
-            const currentIdx = others.findIndex(t => t.id === activeTab)
-            if (currentIdx === -1) setActiveTab(others[0].id)
-            else setActiveTab(others[(currentIdx + 1) % others.length].id)
-          }}
-          className={`flex flex-col items-center justify-center py-2 px-1 rounded-xl transition-all flex-1 ${tabs.slice(4).some(t => t.id === activeTab) ? 'text-gold' : 'text-gray-400'}`}
-        >
-          <div className="relative">
-            <Layout className="h-5 w-5" />
-            <div className="absolute -top-1 -right-1 w-2 h-2 bg-gold rounded-full border-2 border-white shadow-sm" />
-          </div>
-          <span className="text-[10px] mt-1 font-bold truncate w-full text-center">
-            {tabs.slice(4).some(t => t.id === activeTab) ? currentTab?.label : 'More'}
-          </span>
-        </button>
-      </nav>
     </div>
   )
 }
