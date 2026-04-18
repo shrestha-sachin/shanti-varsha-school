@@ -127,27 +127,46 @@ function PopupAd() {
   if (!isVisible || !current) return null
 
   return (
-    <div className="fixed inset-0 z-[100] flex items-center justify-center px-4 overflow-hidden animate-fade-in" onClick={close}>
-      <div className="absolute inset-0 bg-navy/80 backdrop-blur-md" />
+    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 overflow-hidden animate-fade-in" onClick={close}>
+      <div className="absolute inset-0 bg-navy/90 backdrop-blur-sm" />
       <div 
-        className="relative bg-white rounded-lg overflow-hidden shadow-[0_0_50px_rgba(0,0,0,0.3)] max-w-[90vw] md:max-w-md w-full animate-scale-in border border-white/20"
+        className="relative bg-white rounded-2xl overflow-hidden shadow-[0_0_50px_rgba(0,0,0,0.5)] w-full max-w-md max-h-[90vh] animate-scale-in border border-white/10 flex flex-col"
         onClick={e => e.stopPropagation()}
       >
         <button 
           onClick={close} 
-          className="absolute top-3 right-3 z-20 bg-red-600 hover:bg-red-700 text-white p-2.5 rounded-full shadow-lg transition-all group"
+          className="absolute top-3 right-3 z-30 bg-black/50 backdrop-blur-md hover:bg-red-600 text-white p-2 rounded-full shadow-lg transition-all group"
           title="Close"
         >
           <X className="h-5 w-5 group-hover:rotate-90 transition-transform duration-300" />
         </button>
 
-        <div className="absolute bottom-0 left-0 right-0 p-4 bg-navy/80 backdrop-blur-md flex flex-row items-center justify-center gap-3 z-20 border-t border-white/10">
+        <div className="relative flex-1 overflow-y-auto bg-gray-100 flex items-center justify-center min-h-[300px]">
+          {current.link_url ? (
+            <Link to={current.link_url} onClick={() => close()} className="block w-full h-full cursor-pointer group">
+               <div className="absolute inset-0 bg-gold/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-10" />
+               <img 
+                 src={`${current.image_url}?t=${Date.now()}`} 
+                 alt="Announcement" 
+                 className="w-full h-auto object-contain max-h-[70vh] group-hover:scale-[1.02] transition-transform duration-700 sm:max-h-[75vh]" 
+               />
+            </Link>
+          ) : (
+            <img 
+              src={`${current.image_url}?t=${Date.now()}`} 
+              alt="Announcement" 
+              className="w-full h-auto object-contain max-h-[70vh] sm:max-h-[75vh]" 
+            />
+          )}
+        </div>
+
+        <div className="p-3 sm:p-4 bg-navy/95 border-t border-white/10 flex flex-row items-center justify-center gap-2 sm:gap-3 flex-shrink-0">
           <button 
             onClick={(e) => { e.stopPropagation(); window.open(current.image_url, '_blank') }}
-            className="flex-1 bg-white/10 hover:bg-white/20 text-white border border-white/20 px-4 py-2.5 rounded-xl font-bold text-[10px] uppercase tracking-widest flex items-center justify-center gap-2 transition-all"
+            className="flex-1 bg-white/10 hover:bg-white/20 text-white border border-white/20 py-2.5 sm:py-3 rounded-xl font-bold text-[10px] sm:text-xs uppercase tracking-widest flex items-center justify-center gap-2 transition-all"
             title="View Full Screen"
           >
-            <Maximize2 className="h-3.5 w-3.5" /> Full Size
+            <Maximize2 className="h-4 w-4" /> Full Size
           </button>
           <button 
             onClick={async (e) => {
@@ -166,33 +185,17 @@ function PopupAd() {
                 window.open(current.image_url, '_blank');
               }
             }}
-            className="flex-1 bg-gold hover:bg-gold-light text-white px-4 py-2.5 rounded-xl font-bold text-[10px] uppercase tracking-widest flex items-center justify-center gap-2 transition-all shadow-lg shadow-gold/20"
+            className="flex-1 bg-gold hover:bg-gold-light text-navy py-2.5 sm:py-3 rounded-xl font-extrabold text-[10px] sm:text-xs uppercase tracking-widest flex items-center justify-center gap-2 transition-all shadow-lg shadow-gold/20"
             title="Download Announcement"
           >
-            <Download className="h-3.5 w-3.5" /> Download
+            <Download className="h-4 w-4" /> Download
           </button>
         </div>
-        
-        {current.link_url ? (
-          <Link to={current.link_url} onClick={() => close()} className="block relative cursor-pointer group">
-             <div className="absolute inset-0 bg-gold/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-10" />
-             <img 
-               src={`${current.image_url}?t=${Date.now()}`} 
-               alt="Announcement" 
-               className="w-full h-auto object-cover max-h-[80vh] group-hover:scale-[1.02] transition-transform duration-700" 
-             />
-          </Link>
-        ) : (
-          <img 
-            src={`${current.image_url}?t=${Date.now()}`} 
-            alt="Announcement" 
-            className="w-full h-auto object-cover max-h-[80vh]" 
-          />
-        )}
       </div>
     </div>
   )
 }
+
 
 function Home() {
   const [imgErrors, setImgErrors] = useState({})
@@ -370,17 +373,17 @@ function Home() {
             </div>
 
             {/* Right: highlight cards */}
-            <div className="reveal-right grid grid-cols-2 gap-4">
+            <div className="reveal-right grid grid-cols-1 sm:grid-cols-2 gap-4 mt-8 lg:mt-0">
               {[
                 { icon: GraduationCap, label: 'NEB Affiliated', desc: 'Officially affiliated with the National Examination Board of Nepal', color: 'bg-navy/5 text-navy border-navy/20' },
                 { icon: Trophy, label: 'District Topper', desc: 'Multiple district and national rank holders from our school', color: 'bg-gold/10 text-gold-dark border-gold/20' },
                 { icon: BookOpen, label: 'English Medium', desc: 'English-medium instruction from Grade 1 through Grade 10', color: 'bg-navy/5 text-navy border-navy/20' },
                 { icon: Clock, label: `Since ${settings.established} B.S.`, desc: `Over decades of trusted education in the ${(settings.address || '').split(',').slice(-2, -1).join('').trim() || 'local'} community`, color: 'bg-gold/10 text-gold-dark border-gold/20' },
               ].map(({ icon: Icon, label, desc, color }) => (
-                <div key={label} className={`p-5 rounded-2xl border ${color} card-hover`}>
-                  <Icon className="h-7 w-7 mb-3 opacity-80" />
+                <div key={label} className={`p-4 sm:p-5 rounded-2xl border ${color} card-hover`}>
+                  <Icon className="h-6 w-6 sm:h-7 sm:w-7 mb-2 sm:mb-3 opacity-80" />
                   <p className="font-display font-bold text-sm mb-1">{label}</p>
-                  <p className="text-xs opacity-70 leading-relaxed">{desc}</p>
+                  <p className="text-[11px] sm:text-xs opacity-70 leading-relaxed">{desc}</p>
                 </div>
               ))}
             </div>
