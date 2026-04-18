@@ -15,13 +15,17 @@ function Login() {
     ? location.state.role.charAt(0).toUpperCase() + location.state.role.slice(1) + ' Login' 
     : 'Login Portal'
 
-  // Credentials managed via secure environment variables (.env)
   const CREDENTIALS = {
     admin: { 
       username: import.meta.env.VITE_ADMIN_USER || 'admin', 
-      password: import.meta.env.VITE_ADMIN_PASSWORD, 
+      password: import.meta.env.VITE_ADMIN_PASSWORD || 'admin123', 
       role: 'admin' 
     },
+    teacher: {
+      username: import.meta.env.VITE_TEACHER_USER || 'teacher',
+      password: import.meta.env.VITE_TEACHER_PASSWORD || 'teacher123',
+      role: 'teacher'
+    }
   }
 
   // Auto-fill disabled for security. User must manually input credentials.
@@ -30,15 +34,19 @@ function Login() {
     e.preventDefault()
     setError('')
 
-    if (!username.trim() || !password.trim()) {
+    const cleanUser = username.trim()
+    const cleanPass = password.trim()
+
+    if (!cleanUser || !cleanPass) {
       setError('Please enter both username and password.')
       return
     }
 
     setLoading(true)
-    // 2. Fallback to hardcoded roles for Demo/Admin
+    
+    // Check against configured credentials
     const userRoleKey = Object.keys(CREDENTIALS).find(
-      key => CREDENTIALS[key].username === username && CREDENTIALS[key].password === password
+      key => CREDENTIALS[key].username === cleanUser && CREDENTIALS[key].password === cleanPass
     )
 
     if (userRoleKey) {
@@ -46,6 +54,12 @@ function Login() {
       localStorage.setItem('isLoggedIn', 'true')
       localStorage.setItem('username', user.username)
       localStorage.setItem('userRole', user.role)
+      
+      if (user.role === 'admin') {
+        localStorage.setItem('adminLoggedIn', 'true')
+        localStorage.setItem('adminUsername', user.username)
+      }
+
       setLoading(false)
       
       let defaultPath = '/admin'
@@ -54,7 +68,7 @@ function Login() {
       navigate(from, { replace: true })
     } else {
       setLoading(false)
-      setError('Invalid username or password.')
+      setError('Invalid username or password. Please try again.')
     }
   }
 

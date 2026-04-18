@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { Calendar, Bell, Pin, ChevronRight, Search } from 'lucide-react'
+import { Calendar, Bell, Pin, ChevronRight, Search, Download, ExternalLink, Eye } from 'lucide-react'
 import { supabase } from '../supabaseClient'
 
 const CATEGORY_STYLES = {
@@ -74,9 +74,9 @@ function NoticeBoard({ limit = null, showSearch = false }) {
               {/* Hover shimmer */}
               <div className="absolute inset-0 rounded-r-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-500 animate-shimmer-effect pointer-events-none" />
 
-              <div className="relative z-10">
-                <div className="flex items-start justify-between gap-3 mb-2">
-                  <div className="flex items-center gap-2 flex-wrap">
+              <div className="relative z-10 flex flex-col md:flex-row md:items-start justify-between gap-5">
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-2 flex-wrap mb-2">
                     {notice.pinned && (
                       <span className="flex items-center gap-1 text-[10px] font-bold text-cat-urgent bg-amber-50 border border-cat-urgent/20 px-2 py-0.5 rounded-full">
                         <Pin className="h-2.5 w-2.5" /> Pinned
@@ -86,19 +86,67 @@ function NoticeBoard({ limit = null, showSearch = false }) {
                       <span className={`badge ${cat.badge} text-[11px]`}>{notice.category}</span>
                     )}
                   </div>
-                  <div className="flex items-center gap-1.5 text-gray-400 text-xs whitespace-nowrap flex-shrink-0">
+                  <div className="flex items-center gap-1.5 text-gray-400 text-xs mb-1">
                     <Calendar className="h-3.5 w-3.5" />
                     {formatDate(notice.date)}
                   </div>
+                  <h3 className="text-base md:text-lg font-semibold text-navy group-hover:text-gold transition-colors duration-300 leading-snug">
+                    {notice.title}
+                  </h3>
+                  {notice.description && (
+                    <div 
+                      className="text-gray-500 text-sm mt-1.5 leading-relaxed prose prose-sm max-w-none"
+                      dangerouslySetInnerHTML={{ __html: notice.description }}
+                    />
+                  )}
                 </div>
-                <h3 className="text-base font-semibold text-navy group-hover:text-gold transition-colors duration-300 leading-snug">
-                  {notice.title}
-                </h3>
-                {notice.description && (
-                  <p className="text-gray-500 text-sm mt-1.5 leading-relaxed line-clamp-2">
-                    {notice.description}
-                  </p>
-                )}
+
+                {/* Actions on Right */}
+                <div className="flex flex-col sm:flex-row md:flex-col gap-2 flex-shrink-0 md:min-w-[140px]">
+                  {notice.file_url && (
+                    <>
+                      <button 
+                         onClick={(e) => { e.stopPropagation(); window.open(notice.file_url, '_blank') }}
+                         className="flex items-center justify-center gap-2 px-4 py-2 bg-navy/5 hover:bg-navy hover:text-white text-navy text-xs font-bold rounded-xl transition-all border border-navy/10 shadow-sm"
+                      >
+                         <Eye className="h-3.5 w-3.5" /> View
+                      </button>
+                      <button 
+                        onClick={async (e) => {
+                          e.stopPropagation();
+                          try {
+                            const res = await fetch(notice.file_url);
+                            const blob = await res.blob();
+                            const url = window.URL.createObjectURL(blob);
+                            const a = document.createElement('a');
+                            a.href = url;
+                            const ext = notice.file_url.split('.').pop().split('?')[0] || 'file';
+                            a.download = `Notice-${notice.title.replace(/\s+/g, '-').substring(0,25)}.${ext}`;
+                            document.body.appendChild(a);
+                            a.click();
+                            document.body.removeChild(a);
+                          } catch (err) {
+                            window.open(notice.file_url, '_blank');
+                          }
+                        }}
+                        className="flex items-center justify-center gap-2 px-4 py-2 bg-gold/10 hover:bg-gold hover:text-white text-gold-dark text-xs font-bold rounded-xl transition-all border border-gold/20 shadow-sm"
+                      >
+                        <Download className="h-3.5 w-3.5" /> Download
+                      </button>
+                    </>
+                  )}
+                  {notice.external_link && (
+                    <a 
+                      href={notice.external_link} 
+                      target="_blank" 
+                      rel="noopener noreferrer" 
+                      onClick={(e) => e.stopPropagation()}
+                      className="flex items-center justify-center gap-2 px-4 py-2 bg-emerald-50 hover:bg-emerald-600 hover:text-white text-emerald-700 text-xs font-bold rounded-xl transition-all border border-emerald-100 shadow-sm"
+                    >
+                      <ExternalLink className="h-3.5 w-3.5" /> Visit Link
+                    </a>
+                  )}
+                </div>
               </div>
             </div>
           )

@@ -72,93 +72,92 @@ function Gallery() {
   const prev = () => setLightboxIndex(i => Math.max(0, i - 1))
   const next = () => setLightboxIndex(i => Math.min(filtered.length - 1, i + 1))
 
-  return (
-    <div className="min-h-screen bg-slate-50 animate-fade-in">
-      {/* Hero */}
-      <section className="page-hero py-20 text-white">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center gap-4 animate-fade-in-up">
-            <div className="bg-white/15 p-3 rounded-2xl backdrop-blur-sm">
-              <Camera className="h-8 w-8 text-white" />
-            </div>
-            <div>
-              <h1 className="font-display font-bold text-3xl md:text-5xl">Photo Gallery</h1>
-              <p className="text-gold-light text-sm mt-1">Memories from our school life</p>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        {/* Album tabs */}
-        <div className="flex items-center gap-2 overflow-x-auto pb-4 scrollbar-hide no-scrollbar -mx-4 px-4 sm:mx-0 sm:px-0 animate-fade-in-up">
-          {albums.map(album => (
-            <button
-              key={album}
-              onClick={() => setActiveAlbum(album)}
-              className={`px-5 py-2.5 rounded-full text-xs sm:text-sm font-bold transition-all duration-300 whitespace-nowrap ${activeAlbum === album
-                  ? 'bg-gradient-to-r from-navy to-gold text-white shadow-lg'
-                  : 'bg-white text-gray-500 border border-gray-100 hover:border-gold/40 hover:text-navy active:scale-95'
-                }`}
-            >
-              {album}
-              <span className={`ml-1.5 text-[10px] ${activeAlbum === album ? 'text-white/70' : 'text-gray-400'}`}>
-                ({album === 'All' ? allImages.length : allImages.filter(g => g.album === album).length})
-              </span>
-            </button>
-          ))}
-        </div>
-
-        {/* Masonry grid */}
-        {filtered.length === 0 ? (
-          <div className="text-center py-24">
-            <Camera className="h-16 w-16 text-gray-200 mx-auto mb-4" />
-            <p className="text-gray-400 text-lg font-medium">No photos in this album yet.</p>
-          </div>
-        ) : (
-          <div className="columns-2 sm:columns-3 md:columns-4 gap-3 space-y-3">
-            {filtered.map((img, idx) => (
-              <div
-                key={img.id}
-                className="group relative break-inside-avoid rounded-xl overflow-hidden cursor-pointer shadow-sm hover:shadow-xl transition-all duration-400 animate-fade-in"
-                style={{ animationDelay: `${idx * 0.04}s` }}
-                onClick={() => openLightbox(idx)}
-              >
-                {!imgErrors[img.id] ? (
-                  <img
-                    src={`${img.image_url || img.photo_url || img.image}?t=${Date.now()}`}
-                    alt={img.caption || 'Gallery'}
-                    className="w-full h-auto object-cover group-hover:scale-105 transition-transform duration-500"
-                    onError={() => setImgErrors(p => ({ ...p, [img.id]: true }))}
-                  />
-                ) : (
-                  <div className="w-full h-40 bg-gradient-to-br from-gray-100 to-gray-200 flex flex-col items-center justify-center gap-2">
-                    <ImageOff className="h-8 w-8 text-gray-300" />
-                    <span className="text-xs text-gray-400">No image</span>
-                  </div>
-                )}
-                <div className="absolute inset-0 bg-navy/60 opacity-0 group-hover:opacity-100 transition-all duration-400 flex flex-col items-center justify-center gap-2">
-                  <ZoomIn className="h-8 w-8 text-white" />
-                  {img.caption && <p className="text-white text-xs text-center px-3 leading-tight font-medium">{img.caption}</p>}
-                  {img.album && <span className="badge badge-news text-[10px]">{img.album}</span>}
+    return (
+        <div className="min-h-screen bg-white animate-fade-in">
+            {/* Standard Hero */}
+            <section className="page-hero py-20 text-white">
+                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                    <div className="flex flex-col sm:flex-row items-center gap-6 animate-fade-in-up">
+                        <div className="bg-white/15 p-4 rounded-3xl backdrop-blur-md border border-white/20 shadow-2xl">
+                            <Camera className="h-10 w-10 text-white" />
+                        </div>
+                        <div>
+                            <h1 className="font-display font-bold text-4xl md:text-5xl lg:text-6xl tracking-tight">Photo Gallery</h1>
+                            <p className="text-gold-light text-base md:text-lg mt-2 font-medium">Capturing beautiful moments at Shanti Varsha</p>
+                        </div>
+                    </div>
                 </div>
-              </div>
-            ))}
-          </div>
-        )}
-      </div>
+            </section>
 
-      {lightboxIndex !== null && (
-        <Lightbox
-          images={filtered}
-          index={lightboxIndex}
-          onClose={closeLightbox}
-          onPrev={prev}
-          onNext={next}
-        />
-      )}
-    </div>
-  )
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+                {/* Simplified Album Tabs */}
+                <div className="flex flex-wrap justify-center gap-3 mb-12 animate-fade-in-up">
+                    {albums.map(album => (
+                        <button
+                            key={album}
+                            onClick={() => setActiveAlbum(album)}
+                            className={`px-6 py-2.5 rounded-2xl text-xs font-bold transition-all duration-300 whitespace-nowrap ${activeAlbum === album
+                                    ? 'bg-navy text-white shadow-lg scale-105'
+                                    : 'bg-slate-50 text-gray-400 border border-gray-100 hover:border-gold/40 hover:text-navy active:scale-95'
+                                }`}
+                        >
+                            {album}
+                            <span className="ml-2 opacity-40">
+                                {album === 'All' ? allImages.length : allImages.filter(g => g.album === album).length}
+                            </span>
+                        </button>
+                    ))}
+                </div>
+
+                {/* Masonry grid with balanced rounding */}
+                {filtered.length === 0 ? (
+                    <div className="text-center py-20 bg-slate-50 rounded-3xl border border-gray-100">
+                        <Camera className="h-16 w-16 text-gray-200 mx-auto mb-4" />
+                        <h3 className="text-xl font-bold text-navy/40">No photos found</h3>
+                    </div>
+                ) : (
+                    <div className="columns-1 sm:columns-2 md:columns-3 lg:columns-4 gap-4 space-y-4">
+                        {filtered.map((img, idx) => (
+                            <div
+                                key={img.id}
+                                className="group relative break-inside-avoid rounded-3xl overflow-hidden cursor-pointer shadow-sm hover:shadow-2xl transition-all duration-500 animate-fade-in-up border border-gray-100"
+                                style={{ animationDelay: `${idx * 0.04}s` }}
+                                onClick={() => openLightbox(idx)}
+                            >
+                                {!imgErrors[img.id] ? (
+                                    <img
+                                        src={`${img.image_url || img.photo_url || img.image}?t=${Date.now()}`}
+                                        alt={img.caption || 'Gallery'}
+                                        className="w-full h-auto object-cover group-hover:scale-105 transition-transform duration-700"
+                                        onError={() => setImgErrors(p => ({ ...p, [img.id]: true }))}
+                                    />
+                                ) : (
+                                    <div className="w-full h-40 bg-slate-50 flex items-center justify-center">
+                                        <ImageOff className="h-8 w-8 text-gray-200" />
+                                    </div>
+                                )}
+                                <div className="absolute inset-0 bg-navy/40 opacity-0 group-hover:opacity-100 transition-all duration-500 flex flex-col items-center justify-center p-4 text-center">
+                                    <div className="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center mb-3 scale-50 group-hover:scale-100 transition-transform duration-500 backdrop-blur-md">
+                                       <ZoomIn className="h-5 w-5 text-white" />
+                                    </div>
+                                    {img.caption && <p className="text-white text-xs font-bold line-clamp-2">{img.caption}</p>}
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                )}
+            </div>
+            {lightboxIndex !== null && (
+                <Lightbox
+                    images={filtered}
+                    index={lightboxIndex}
+                    onClose={closeLightbox}
+                    onPrev={prev}
+                    onNext={next}
+                />
+            )}
+        </div>
+    )
 }
 
 export default Gallery

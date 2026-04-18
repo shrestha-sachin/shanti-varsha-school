@@ -83,7 +83,7 @@ function Navbar() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-auto min-h-[68px] md:min-h-[80px] py-2">
           {/* Logo */}
-          <Link to="/" className="flex items-center space-x-3 group flex-shrink-0">
+          <Link to="/" className="flex items-center space-x-3 group flex-shrink-0 mr-6 xl:mr-12">
             {!logoError ? (
               <div className="bg-white w-10 h-10 sm:w-12 sm:h-12 md:w-14 md:h-14 rounded-full flex items-center justify-center shadow-lg group-hover:shadow-xl group-hover:shadow-gold/30 transition-all duration-300 group-hover:scale-105 flex-shrink-0">
                 <img
@@ -98,8 +98,8 @@ function Navbar() {
                 <GraduationCap className="h-6 w-6 sm:h-7 sm:w-7 md:h-8 md:w-8 text-navy" />
               </div>
             )}
-            <div className="flex flex-col min-w-0">
-              <span className="text-sm md:text-base lg:text-lg font-bold text-white whitespace-nowrap group-hover:text-gold transition-colors duration-300 leading-tight font-display">
+            <div className="flex flex-col min-w-0 max-w-[200px] xl:max-w-xs">
+              <span className="text-sm md:text-base lg:text-[15px] xl:text-lg font-bold text-white whitespace-nowrap group-hover:text-gold transition-colors duration-300 leading-tight font-display overflow-hidden text-ellipsis">
                 {settings.name}
               </span>
               <span className="text-[10px] sm:text-xs text-white/70 leading-tight truncate">
@@ -109,12 +109,12 @@ function Navbar() {
           </Link>
 
           {/* Desktop Nav */}
-          <div className="hidden lg:flex items-center space-x-1">
+          <div className="hidden lg:flex items-center gap-x-0.5 xl:gap-x-1">
             {navLinks.map((link) => (
               <Link
                 key={link.path}
                 to={link.path}
-                className={`relative px-3 xl:px-4 py-2 rounded-xl text-sm font-medium transition-all duration-300 whitespace-nowrap ${isActive(link.path)
+                className={`relative px-2.5 xl:px-4 py-2 rounded-xl text-[13px] xl:text-sm font-medium transition-all duration-300 whitespace-nowrap ${isActive(link.path)
                   ? 'bg-gradient-to-r from-gold to-gold-light text-white shadow-lg shadow-gold/30'
                   : 'text-gray-200 hover:text-white hover:bg-white/10'
                   }`}
@@ -129,12 +129,14 @@ function Navbar() {
               </Link>
             ))}
 
+            <div className="h-6 w-px bg-white/10 mx-1 xl:mx-2" />
+
             {isLoggedIn ? (
-              <>
+              <div className="flex items-center gap-1 xl:gap-2 pl-1">
                 <Link
                   to={userRole === 'admin' ? '/admin' : '/staff'}
-                  className={`px-3 xl:px-4 py-2 rounded-xl text-sm font-medium transition-all duration-300 ${isActive('/admin') || isActive('/staff')
-                    ? 'bg-gold text-white shadow-lg shadow-gold/30'
+                  className={`px-3 xl:px-4 py-2 rounded-xl text-[13px] xl:text-sm font-bold transition-all duration-300 ${isActive('/admin') || isActive('/staff')
+                    ? 'bg-gold text-white shadow-lg shadow-gold/20'
                     : 'text-gold hover:text-white hover:bg-gold/20 border border-gold/30'
                     }`}
                 >
@@ -142,12 +144,12 @@ function Navbar() {
                 </Link>
                 <button
                   onClick={handleLogout}
-                  className="px-3 xl:px-4 py-2 rounded-xl text-sm font-medium text-gray-300 hover:text-white hover:bg-red-600/70 transition-all duration-300 flex items-center space-x-1"
+                  className="p-2 xl:px-3 xl:py-2 rounded-xl text-[13px] xl:text-sm font-bold text-gray-300 hover:text-white hover:bg-red-600/20 transition-all duration-300 flex items-center gap-1 border border-transparent hover:border-red-600/30"
                 >
-                  <LogOut className="h-4 w-4" />
+                  <LogOut className="h-4 w-4 text-red-400" />
                   <span className="hidden xl:inline">Logout</span>
                 </button>
-              </>
+              </div>
             ) : (
               <div className="relative group">
                 <button

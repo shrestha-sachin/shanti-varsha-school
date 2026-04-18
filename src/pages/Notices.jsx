@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { Bell, Search, Filter, Calendar, Pin, ChevronLeft, ChevronRight } from 'lucide-react'
+import { Bell, Search, Filter, Calendar, Pin, ChevronLeft, ChevronRight, Eye, Download, ExternalLink } from 'lucide-react'
 import { supabase } from '../supabaseClient'
 
 const CATEGORIES = ['All', 'General', 'Exam', 'Event', 'Urgent', 'Meeting']
@@ -119,7 +119,7 @@ function Notices() {
                   className={`group bg-white border-l-4 ${BORDER_MAP[cat] || BORDER_MAP.General} p-5 rounded-r-2xl border border-gray-100 hover:border-gold/20 hover:shadow-card transition-all duration-300 animate-fade-in-up relative overflow-hidden`}
                   style={{ animationDelay: `${i * 0.05}s` }}
                 >
-                  <div className="flex items-start justify-between gap-4">
+                  <div className="flex flex-col md:flex-row md:items-start justify-between gap-5 relative z-10">
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2 mb-2 flex-wrap">
                         {notice.pinned && (
@@ -129,6 +129,10 @@ function Notices() {
                         )}
                         <span className={`badge ${BADGE_MAP[cat] || 'badge-general'} text-[11px]`}>{cat}</span>
                       </div>
+                      <div className="flex items-center gap-1.5 text-gray-400 text-xs mb-1">
+                        <Calendar className="h-3.5 w-3.5" />
+                        {fmtDate(notice.date)}
+                      </div>
                       <h3 className="font-display font-bold text-navy text-lg mb-2 leading-snug group-hover:text-gold transition-colors">
                         {notice.title}
                       </h3>
@@ -136,9 +140,52 @@ function Notices() {
                         <p className="text-gray-500 text-sm leading-relaxed">{notice.description}</p>
                       )}
                     </div>
-                    <div className="flex items-center gap-1.5 text-gray-400 text-xs whitespace-nowrap flex-shrink-0 bg-gray-50 px-3 py-1.5 rounded-full">
-                      <Calendar className="h-3.5 w-3.5" />
-                      {fmtDate(notice.date)}
+
+                    {/* Actions on Right */}
+                    <div className="flex flex-col sm:flex-row md:flex-col gap-2 flex-shrink-0 md:min-w-[140px]">
+                      {notice.file_url && (
+                        <>
+                          <button 
+                             onClick={(e) => { e.stopPropagation(); window.open(notice.file_url, '_blank') }}
+                             className="flex items-center justify-center gap-2 px-4 py-2 bg-navy/5 hover:bg-navy hover:text-white text-navy text-xs font-bold rounded-xl transition-all border border-navy/10 shadow-sm"
+                          >
+                             <Eye className="h-3.5 w-3.5" /> View
+                          </button>
+                          <button 
+                            onClick={async (e) => {
+                              e.stopPropagation();
+                              try {
+                                const res = await fetch(notice.file_url);
+                                const blob = await res.blob();
+                                const url = window.URL.createObjectURL(blob);
+                                const a = document.createElement('a');
+                                a.href = url;
+                                const ext = notice.file_url.split('.').pop().split('?')[0] || 'file';
+                                a.download = `Notice-${notice.title.replace(/\s+/g, '-').substring(0,25)}.${ext}`;
+                                document.body.appendChild(a);
+                                a.click();
+                                document.body.removeChild(a);
+                              } catch (err) {
+                                window.open(notice.file_url, '_blank');
+                              }
+                            }}
+                            className="flex items-center justify-center gap-2 px-4 py-2 bg-gold/10 hover:bg-gold hover:text-white text-gold-dark text-xs font-bold rounded-xl transition-all border border-gold/20 shadow-sm"
+                          >
+                            <Download className="h-3.5 w-3.5" /> Download
+                          </button>
+                        </>
+                      )}
+                      {notice.external_link && (
+                        <a 
+                          href={notice.external_link} 
+                          target="_blank" 
+                          rel="noopener noreferrer" 
+                          onClick={(e) => e.stopPropagation()}
+                          className="flex items-center justify-center gap-2 px-4 py-2 bg-emerald-50 hover:bg-emerald-600 hover:text-white text-emerald-700 text-xs font-bold rounded-xl transition-all border border-emerald-100 shadow-sm"
+                        >
+                          <ExternalLink className="h-3.5 w-3.5" /> Visit Link
+                        </a>
+                      )}
                     </div>
                   </div>
                 </div>

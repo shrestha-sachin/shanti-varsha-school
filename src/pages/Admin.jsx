@@ -2,11 +2,34 @@ import React, { useState, useEffect } from 'react'
 import { createPortal } from 'react-dom'
 
 import { useNavigate } from 'react-router-dom'
-import {
-  Bell, Calendar, LogOut, Edit, Trash2, Plus, X, CheckCircle, AlertCircle,
-  Pin, Eye, EyeOff, TrendingUp, BookOpen, Search, Users as UsersIcon, GraduationCap, Phone, MapPin, Upload, Download, School, Settings, FileText, LayoutDashboard, Newspaper, Image, Loader2, Award, User, Quote
+import { 
+  UsersIcon, Bell, GraduationCap, Settings, Plus, X, Trash2, Edit, Save, 
+  Search, Filter, LogOut, ChevronRight, Image, Layout, List, FileText, Newspaper,
+  MapPin, Phone, Mail, Globe, Clock, Info, CheckCircle2, AlertCircle, Loader2,
+  Table, Pin, Maximize2, Download, Calendar, BookOpen, TrendingUp, Eye, EyeOff, Award, User, Quote, Upload
 } from 'lucide-react'
+import ReactQuill, { Quill } from 'react-quill'
+import 'react-quill/dist/quill.snow.css'
+import ImageResize from 'quill-image-resize-module-react'
 import { supabase } from '../supabaseClient'
+
+// Registering ImageResize module for Quill
+Quill.register('modules/imageResize', ImageResize)
+
+const QUILL_MODULES = {
+  toolbar: [
+    [{ 'header': [1, 2, 3, false] }],
+    ['bold', 'italic', 'underline', 'strike'],
+    [{ 'color': [] }, { 'background': [] }],
+    [{ 'list': 'ordered' }, { 'list': 'bullet' }],
+    [{ 'align': [] }],
+    ['link', 'image'],
+    ['clean']
+  ],
+  imageResize: {
+     modules: ['Resize', 'DisplaySize', 'Toolbar']
+  }
+}
 
 // ── helpers ──────────────────────────────────────────────────────────────────
 const NOTICE_CATEGORIES = ['General', 'Exam', 'Event', 'Urgent', 'Meeting']
@@ -34,7 +57,7 @@ function Toast({ msg }) {
         ? 'bg-success-light border-success/40 text-green-800'
         : 'bg-danger-light border-danger/40 text-red-800'
       }`}>
-      {msg.type === 'success' ? <CheckCircle className="h-5 w-5 text-success" /> : <AlertCircle className="h-5 w-5 text-danger" />}
+      {msg.type === 'success' ? <CheckCircle2 className="h-5 w-5 text-success" /> : <AlertCircle className="h-5 w-5 text-danger" />}
       {msg.text}
     </div>
   )
@@ -290,7 +313,7 @@ function CropModal({ src, onDone, onCancel }) {
 }
 
 // ── File Uploader ─────────────────────────────────────────────────────────────
-function FileUploader({ onUpload, currentUrl, label = "Upload Image", folder = "profile" }) {
+function FileUploader({ onUpload, currentUrl, label = "Upload Image", folder = "profile", type = "image" }) {
   const [uploading, setUploading] = useState(false)
   const [preview, setPreview] = useState(currentUrl)
   const [error, setError] = useState(null)
@@ -306,9 +329,40 @@ function FileUploader({ onUpload, currentUrl, label = "Upload Image", folder = "
     e.target.value = ''
     setError(null)
     setSuccess(false)
-    const reader = new FileReader()
-    reader.onload = () => setCropSrc(reader.result)
-    reader.readAsDataURL(file)
+    
+    // If it's an image and we are in image mode (or it's an image in 'all' mode), show cropper
+    if (file.type.startsWith('image/')) {
+      const reader = new FileReader()
+      reader.onload = () => setCropSrc(reader.result)
+      reader.readAsDataURL(file)
+    } else {
+      // It's a document, upload directly without cropping
+      doUploadFile(file)
+    }
+  }
+
+  const doUploadFile = async (file) => {
+    try {
+      setUploading(true)
+      setError(null)
+      const ext = file.name.split('.').pop()
+      const path = `${folder}/${Date.now()}.${ext}`
+      
+      const { error: uploadErr } = await supabase.storage
+        .from('school-assets')
+        .upload(path, file, { contentType: file.type, upsert: true })
+
+      if (uploadErr) throw uploadErr
+
+      const { data: urlData } = supabase.storage.from('school-assets').getPublicUrl(path)
+      setPreview(urlData.publicUrl)
+      setSuccess(true)
+      onUpload(urlData.publicUrl)
+    } catch (err) {
+      setError(err.message)
+    } finally {
+      setUploading(false)
+    }
   }
 
   const doUpload = async (dataUrl) => {
@@ -346,17 +400,35 @@ function FileUploader({ onUpload, currentUrl, label = "Upload Image", folder = "
   return (
     <div className="space-y-2">
       <div className="flex items-center gap-4 p-4 border-2 border-dashed border-gray-200 rounded-2xl bg-gray-50/50 hover:bg-gray-50 transition-all">
-        <div className="w-20 h-20 rounded-2xl bg-white border border-gray-200 overflow-hidden flex-shrink-0 flex items-center justify-center shadow-sm">
-          {preview
-            ? <img src={preview} className="w-full h-full object-cover" alt="preview" onError={() => setPreview(null)} />
-            : <Upload className="h-7 w-7 text-gray-300" />}
+        <div className="w-20 h-20 rounded-2xl bg-white border border-gray-200 overflow-hidden flex-shrink-0 flex items-center justify-center shadow-sm relative">
+          {preview ? (
+            preview.match(/\.(jpg|jpeg|png|gif|webp)/i) ? (
+              <img src={preview} className="w-full h-full object-cover" alt="preview" onError={() => setPreview(null)} />
+            ) : (
+              <div className="flex flex-col items-center justify-center bg-gray-50 h-full w-full">
+                 <FileText className="h-8 w-8 text-gold" />
+                 <span className="text-[8px] font-bold text-gray-400 mt-1 uppercase">DOC/PDF</span>
+              </div>
+            )
+          ) : (
+            <Upload className="h-7 w-7 text-gray-300" />
+          )}
         </div>
         <div className="flex-1 min-w-0">
-          <input type="file" id={uid} accept="image/jpeg,image/png,image/webp" onChange={handleChange} disabled={uploading} className="hidden" />
+          <input 
+            type="file" 
+            id={uid} 
+            accept={type === 'image' ? "image/jpeg,image/png,image/webp" : "image/*,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"} 
+            onChange={handleChange} 
+            disabled={uploading} 
+            className="hidden" 
+          />
           <label htmlFor={uid} className="cursor-pointer inline-flex items-center gap-2 px-4 py-2.5 bg-white border-2 border-gray-200 rounded-xl text-sm font-bold text-navy hover:border-gold hover:text-gold transition-all shadow-sm">
-            {uploading ? <><Loader2 className="h-4 w-4 animate-spin" /> Uploading...</> : <><Plus className="h-4 w-4" /> {preview ? 'Change Photo' : 'Choose Photo'}</>}
+            {uploading ? <><Loader2 className="h-4 w-4 animate-spin" /> Uploading...</> : <><Plus className="h-4 w-4" /> {preview ? 'Change File' : 'Choose File'}</>}
           </label>
-          <p className="text-[10px] text-gray-400 mt-1.5 italic">JPG, PNG, WEBP — tap to crop before uploading</p>
+          <p className="text-[10px] text-gray-400 mt-1.5 italic">
+            {type === 'image' ? 'JPG, PNG, WEBP — tap to crop' : 'Images, PDF, DOCX, XLSX'}
+          </p>
           {success && !error && <p className="text-[11px] text-green-600 font-bold mt-1">✓ Uploaded! Click Save to apply.</p>}
           {error && (
             <div className="mt-2 p-2 bg-red-50 border border-red-200 rounded-lg">
@@ -378,7 +450,15 @@ function EmptyState({ message = 'No items yet.' }) {
 // ── NOTICE TAB ────────────────────────────────────────────────────────────────
 function NoticesTab({ toast }) {
   const [notices, setNotices] = useState([])
-  const [form, setForm] = useState({ title: '', date: today(), category: 'General', description: '', pinned: false })
+  const [form, setForm] = useState({ 
+    title: '', 
+    date: today(), 
+    category: 'General', 
+    description: '', 
+    pinned: false,
+    file_url: '',
+    external_link: ''
+  })
   const [editing, setEditing] = useState(null)
   const [loading, setLoading] = useState(true)
 
@@ -405,12 +485,31 @@ function NoticesTab({ toast }) {
     } else {
       toast({ type: 'success', text: editing ? 'Notice updated!' : 'Notice added!' })
       setEditing(null)
-      setForm({ title: '', date: today(), category: 'General', description: '', pinned: false })
+      setForm({ 
+        title: '', 
+        date: today(), 
+        category: 'General', 
+        description: '', 
+        pinned: false,
+        file_url: '',
+        external_link: ''
+      })
       fetchNotices()
     }
   }
 
-  const startEdit = (n) => { setEditing(n); setForm({ title: n.title, date: n.date, category: n.category || 'General', description: n.description || '', pinned: !!n.pinned }) }
+  const startEdit = (n) => { 
+    setEditing(n); 
+    setForm({ 
+      title: n.title, 
+      date: n.date, 
+      category: n.category || 'General', 
+      description: n.description || '', 
+      pinned: !!n.pinned,
+      file_url: n.file_url || '',
+      external_link: n.external_link || ''
+    }) 
+  }
   const del = async (id) => { 
     if (confirm('Delete this notice?')) { 
       const { error } = await supabase.from('school_notices').delete().eq('id', id)
@@ -418,7 +517,7 @@ function NoticesTab({ toast }) {
       else { toast({ type: 'success', text: 'Deleted.' }); fetchNotices() } 
     } 
   }
-  const cancel = () => { setEditing(null); setForm({ title: '', date: today(), category: 'General', description: '', pinned: false }) }
+  const cancel = () => { setEditing(null); setForm({ title: '', date: today(), category: 'General', description: '', pinned: false, file_url: '', external_link: '' }) }
 
   return (
     <div className="space-y-6">
@@ -441,6 +540,38 @@ function NoticesTab({ toast }) {
             <select className="input-modern" value={form.category} onChange={e => setForm(p => ({ ...p, category: e.target.value }))}>
               {NOTICE_CATEGORIES.map(c => <option key={c}>{c}</option>)}
             </select>
+          </div>
+          <div className="md:col-span-1">
+            <label className="label-modern">Attach Document/Photo</label>
+            <FileUploader 
+              label="PDF, DOCX or Image" 
+              folder="notices" 
+              type="all"
+              currentUrl={form.file_url} 
+              onUpload={url => setForm(p => ({ ...p, file_url: url }))} 
+            />
+          </div>
+          <div className="md:col-span-1">
+            <label className="label-modern">External Link (Optional)</label>
+            <input 
+              className="input-modern" 
+              placeholder="e.g. https://google.com" 
+              value={form.external_link} 
+              onChange={e => setForm(p => ({ ...p, external_link: e.target.value }))} 
+            />
+            <p className="text-[10px] text-gray-400 mt-2">Useful for YouTube links or external news</p>
+          </div>
+          <div className="md:col-span-2">
+            <label className="label-modern">Detail Description (Optional)</label>
+            <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
+               <ReactQuill 
+                 theme="snow" 
+                 modules={QUILL_MODULES}
+                 value={form.description} 
+                 onChange={val => setForm(p => ({ ...p, description: val }))}
+                 className="min-h-[150px] font-sans"
+               />
+            </div>
           </div>
           <div className="md:col-span-2">
             <button type="submit" className="btn-gold w-full">{editing ? 'Update' : 'Add'} Notice</button>
@@ -553,7 +684,15 @@ function NewsTab({ toast }) {
           </div>
           <div className="md:col-span-2">
             <label className="label-modern">Content *</label>
-            <textarea className="input-modern resize-none" rows={5} placeholder="Write the full news article content here..." value={form.content} onChange={e => setForm(p => ({ ...p, content: e.target.value }))} required />
+            <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
+               <ReactQuill 
+                 theme="snow" 
+                 modules={QUILL_MODULES}
+                 value={form.content} 
+                 onChange={val => setForm(p => ({ ...p, content: val }))}
+                 className="min-h-[250px] font-sans"
+               />
+            </div>
           </div>
           <div className="md:col-span-2 flex items-center gap-3">
             <input type="checkbox" id="news-published" checked={form.published} onChange={e => setForm(p => ({ ...p, published: e.target.checked }))} className="w-4 h-4 accent-gold" />
@@ -665,7 +804,15 @@ function ArticlesTab({ toast }) {
           </div>
           <div className="md:col-span-2">
             <label className="label-modern">Article Body *</label>
-            <textarea className="input-modern resize-none" rows={7} placeholder="Write your article content here..." value={form.body} onChange={e => setForm(p => ({ ...p, body: e.target.value }))} required />
+            <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
+               <ReactQuill 
+                 theme="snow" 
+                 modules={QUILL_MODULES}
+                 value={form.body} 
+                 onChange={val => setForm(p => ({ ...p, body: val }))}
+                 className="min-h-[350px] font-sans"
+               />
+            </div>
           </div>
           <div className="md:col-span-2 flex gap-3">
             <button type="submit" className="btn-gold flex-1"><Plus className="h-4 w-4" />{editing ? 'Update Article' : 'Publish Article'}</button>
@@ -1527,6 +1674,115 @@ function ToppersTab({ toast }) {
   )
 }
 
+// ── POPUPS TAB (MULTI) ────────────────────────────────────────────────────────
+function PopupsTab({ toast }) {
+  const [popups, setPopups] = useState([])
+  const [loading, setLoading] = useState(true)
+  const [form, setForm] = useState({ image_url: '', link_url: '', is_active: true, display_order: 0 })
+  const [editing, setEditing] = useState(null)
+  const [showEditor, setShowEditor] = useState(false)
+
+  const fetchPopups = async () => {
+    setLoading(true)
+    const { data, error } = await supabase.from('school_popups').select('*').order('display_order', { ascending: true })
+    if (data) setPopups(data)
+    setLoading(false)
+  }
+
+  useEffect(() => { fetchPopups() }, [])
+
+  const save = async (e) => {
+    e.preventDefault()
+    if (!form.image_url) return toast({ type: 'error', text: 'Image is required' })
+    
+    const { error } = await supabase.from('school_popups').upsert(editing ? { ...form, id: editing.id } : [form])
+    
+    if (error) {
+      toast({ type: 'error', text: `Failed: ${error.message}. Ensure table exists.` })
+    } else {
+      toast({ type: 'success', text: editing ? 'Popup updated!' : 'New popup added!' })
+      setShowEditor(false)
+      setEditing(null)
+      setForm({ image_url: '', link_url: '', is_active: true, display_order: 0 })
+      fetchPopups()
+      window.dispatchEvent(new Event('schoolPopupsUpdated'))
+    }
+  }
+
+  const startEdit = (p) => { setEditing(p); setForm(p); setShowEditor(true); window.scrollTo(0,0) }
+  const startAdd = () => { setEditing(null); setForm({ image_url: '', link_url: '', is_active: true, display_order: 0 }); setShowEditor(true); window.scrollTo(0,0) }
+  const del = async (id) => { if (confirm('Delete this popup?')) { await supabase.from('school_popups').delete().eq('id', id); toast({ type: 'success', text: 'Deleted.' }); fetchPopups() } }
+
+  return (
+    <div className="space-y-6 animate-fade-in">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div className="flex items-center gap-3">
+          <SectionIcon icon={Bell} />
+          <div>
+            <h3 className="font-display font-bold text-navy text-xl">Popup Sequence</h3>
+            <p className="text-xs text-navy/60">Managed ads that appear sequentially to visitors</p>
+          </div>
+        </div>
+        {!showEditor && (
+          <button onClick={startAdd} className="btn-gold px-6 py-3 flex items-center justify-center gap-2 shadow-lg shadow-gold/20">
+            <Plus className="h-5 w-5" /> New Popup
+          </button>
+        )}
+      </div>
+
+      {showEditor && (
+        <div className="bg-white rounded-3xl border-2 border-gold/30 shadow-2xl overflow-hidden mb-8">
+          <form onSubmit={save} className="p-6 md:p-8 space-y-6">
+            <div className="flex items-center justify-between">
+              <h4 className="font-display font-bold text-navy text-lg">{editing ? 'Edit Popup' : 'Add New Sequence Item'}</h4>
+              <button type="button" onClick={() => setShowEditor(false)} className="p-2 hover:bg-gray-100 rounded-full text-gray-400"><X className="h-5 w-5" /></button>
+            </div>
+            
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+               <div className="lg:col-span-1">
+                 <label className="label-modern">Popup Banner Image *</label>
+                 <FileUploader folder="popups" currentUrl={form.image_url} onUpload={url => setForm(p=>({...p, image_url: url}))} />
+               </div>
+               <div className="lg:col-span-2 space-y-5">
+                 <div><label className="label-modern">Action Link (Optional)</label><input className="input-modern" placeholder="e.g. /notices or https://..." value={form.link_url} onChange={e=>setForm({...form, link_url: e.target.value})} /></div>
+                 <div className="grid grid-cols-2 gap-4">
+                    <div><label className="label-modern">Display Order</label><input type="number" className="input-modern" value={form.display_order} onChange={e=>setForm({...form, display_order: parseInt(e.target.value)})} /></div>
+                    <div className="flex items-center gap-3 pt-8">
+                       <input type="checkbox" id="popup-active" checked={form.is_active} onChange={e=>setForm({...form, is_active: e.target.checked})} className="w-4 h-4 accent-gold" />
+                       <label htmlFor="popup-active" className="text-sm font-bold text-navy cursor-pointer">Published & Active</label>
+                    </div>
+                 </div>
+                 <div className="flex gap-3 pt-6">
+                    <button type="submit" className="flex-1 btn-gold py-4 font-bold shadow-xl shadow-gold/20">Save Popup</button>
+                    <button type="button" onClick={() => setShowEditor(false)} className="px-8 py-4 border-2 border-gray-100 rounded-2xl font-bold text-navy hover:bg-gray-50 transition-all">Cancel</button>
+                 </div>
+               </div>
+            </div>
+          </form>
+        </div>
+      )}
+
+      {loading ? <EmptyState message="Loading popups..." /> : popups.length === 0 ? <EmptyState message="No popups in sequence. Start by adding a new one!" /> : (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {popups.map(p => (
+            <div key={p.id} className="bg-white rounded-3xl border border-gray-100 overflow-hidden hover:shadow-xl transition-all group">
+              <div className="relative aspect-[4/5] bg-slate-50">
+                 <img src={p.image_url} alt="Popup" className="w-full h-full object-cover" />
+                 {!p.is_active && <div className="absolute inset-0 bg-white/60 backdrop-blur-[2px] flex items-center justify-center font-black text-gray-500 uppercase tracking-widest text-xs">Inactive</div>}
+                 <div className="absolute top-3 left-3 bg-navy/80 backdrop-blur-md text-white text-[10px] font-black px-2 py-1 rounded-lg">ORDER: {p.display_order}</div>
+              </div>
+              <div className="p-4 flex gap-2">
+                 <button onClick={() => startEdit(p)} className="flex-1 py-2.5 text-xs font-bold bg-gray-50 border border-gray-100 text-navy hover:bg-gold/10 hover:text-gold rounded-xl transition-all flex items-center justify-center gap-2"><Edit className="h-3.5 w-3.5" /> Edit</button>
+                 <button onClick={() => del(p.id)} className="w-11 py-2.5 text-red-500 bg-red-50 hover:bg-red-100 border border-red-100 rounded-xl transition-all flex items-center justify-center"><Trash2 className="h-4 w-4" /></button>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  )
+}
+
 function Admin() {
   const navigate = useNavigate()
   const [activeTab, setActiveTab] = useState('dashboard')
@@ -1552,7 +1808,7 @@ function Admin() {
   }
 
   const tabs = [
-    { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
+    { id: 'dashboard', label: 'Dashboard', icon: Layout },
     { id: 'notices', label: 'Notices', icon: Bell },
     { id: 'news', label: 'News', icon: Newspaper },
     { id: 'articles', label: 'Articles', icon: FileText },
@@ -1562,6 +1818,7 @@ function Admin() {
     { id: 'smc', label: 'SMC', icon: UsersIcon },
     { id: 'testimonials', label: 'Messages', icon: Quote },
     { id: 'gallery', label: 'Gallery', icon: Image },
+    { id: 'popup', label: 'Ad Popup', icon: Bell },
     { id: 'settings', label: 'School Info', icon: Settings },
   ]
 
@@ -1640,6 +1897,7 @@ function Admin() {
             {activeTab === 'smc' && <SMCTab toast={showToast} />}
             {activeTab === 'testimonials' && <TestimonialsTab toast={showToast} />}
             {activeTab === 'gallery' && <GalleryTab toast={showToast} />}
+            {activeTab === 'popup' && <PopupsTab toast={showToast} />}
             {activeTab === 'settings' && <SettingsTab toast={showToast} />}
           </div>
         </main>
@@ -1668,7 +1926,7 @@ function Admin() {
           className={`flex flex-col items-center justify-center py-2 px-1 rounded-xl transition-all flex-1 ${tabs.slice(4).some(t => t.id === activeTab) ? 'text-gold' : 'text-gray-400'}`}
         >
           <div className="relative">
-            <LayoutDashboard className="h-5 w-5" />
+            <Layout className="h-5 w-5" />
             <div className="absolute -top-1 -right-1 w-2 h-2 bg-gold rounded-full border-2 border-white shadow-sm" />
           </div>
           <span className="text-[10px] mt-1 font-bold truncate w-full text-center">

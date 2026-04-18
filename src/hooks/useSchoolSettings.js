@@ -10,6 +10,9 @@ const DEFAULT_SETTINGS = {
   instagram: '#',
   youtube: '#',
   established: '2043',
+  popup_active: false,
+  popup_image: '',
+  popup_link: '',
 }
 
 function safeGet() {

@@ -32,9 +32,9 @@ function Articles() {
 
     return (
         <div className="min-h-screen bg-slate-50 animate-fade-in">
-            {/* Hero */}
+            {/* Standard Hero */}
             <section className="page-hero py-20 text-white">
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center sm:text-left">
+                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                     <div className="flex flex-col sm:flex-row items-center gap-6 animate-fade-in-up">
                         <div className="bg-white/15 p-4 rounded-3xl backdrop-blur-md border border-white/20 shadow-2xl">
                             <FileText className="h-10 w-10 text-white" />
@@ -48,7 +48,7 @@ function Articles() {
             </section>
 
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-                {/* Search */}
+                {/* Simplified Search */}
                 <div className="max-w-2xl mx-auto mb-12 animate-fade-in-up">
                     <div className="relative group">
                         <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400 group-focus-within:text-gold transition-colors" />
@@ -71,19 +71,6 @@ function Articles() {
                                 <div className="h-4 bg-gray-200 rounded w-5/6"></div>
                             </div>
                         ))}
-                    </div>
-                ) : filtered.length === 0 ? (
-                    <div className="text-center py-24 bg-white rounded-3xl border-2 border-dashed border-gray-200 animate-fade-in">
-                        <FileText className="h-20 w-20 text-gray-200 mx-auto mb-4" />
-                        <p className="text-gray-500 text-xl font-display font-bold">No articles found matching your search.</p>
-                        {search && (
-                            <button 
-                                onClick={() => setSearch('')} 
-                                className="mt-4 text-gold font-bold hover:text-gold-dark transition-colors inline-flex items-center gap-2"
-                            >
-                                <X className="h-4 w-4" /> Clear filters
-                            </button>
-                        )}
                     </div>
                 ) : (
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
@@ -113,7 +100,7 @@ function Articles() {
                                     {article.title}
                                 </h2>
                                 <p className="text-gray-500 text-sm md:text-base leading-relaxed line-clamp-3 mb-6 flex-1">
-                                    {article.body}
+                                    {article.body?.replace(/<[^>]*>?/gm, '')}
                                 </p>
                                 <div className="pt-6 border-t border-gray-50 flex items-center justify-between">
                                     <div className="flex items-center gap-3">

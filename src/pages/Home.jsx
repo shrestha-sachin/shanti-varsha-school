@@ -3,23 +3,36 @@ import { Link } from 'react-router-dom'
 import {
   ArrowRight, Users, GraduationCap, Award, Calendar, Trophy, Medal,
   Newspaper, Bell, Star, BookOpen, UserCheck, Sparkles, MapPin, Phone,
-  Clock, ChevronRight
+  Clock, ChevronRight, X, Maximize2, Download
 } from 'lucide-react'
 import NoticeBoard from '../components/NoticeBoard'
 import { supabase } from '../supabaseClient'
 import { useSchoolSettings } from '../hooks/useSchoolSettings'
 
-function useScrollReveal() {
+function useScrollReveal(deps = []) {
   useEffect(() => {
     const observer = new IntersectionObserver(
       (entries) => entries.forEach(e => {
-        if (e.isIntersecting) { e.target.classList.add('visible'); observer.unobserve(e.target) }
+        if (e.isIntersecting) { 
+          e.target.classList.add('visible'); 
+          observer.unobserve(e.target) 
+        }
       }),
       { threshold: 0.1 }
     )
-    document.querySelectorAll('.reveal, .reveal-left, .reveal-right, .reveal-scale').forEach(el => observer.observe(el))
-    return () => observer.disconnect()
-  }, [])
+    
+    // Tiny delay to ensure DOM is updated
+    const timer = setTimeout(() => {
+      document.querySelectorAll('.reveal, .reveal-left, .reveal-right, .reveal-scale').forEach(el => {
+        if (!el.classList.contains('visible')) observer.observe(el)
+      })
+    }, 100)
+
+    return () => {
+      observer.disconnect()
+      clearTimeout(timer)
+    }
+  }, deps)
 }
 
 function AnimatedCounter({ target, duration = 2000 }) {
@@ -48,20 +61,138 @@ function AnimatedCounter({ target, duration = 2000 }) {
   return <span ref={ref}>{count}</span>
 }
 
-const toppers = [
-  { name: 'Ms. Sanjana Wagle', batch: '2069', score: '93.37%', badge: '4th Nationwide', img: '/images/toppers/sanjana-wagle.jpg', note: 'Secured 4th position nationwide & topped Tanahun district', delay: '0.1s' },
-  { name: 'Sneha Giri', batch: '2071', score: '4.0 GPA', badge: '4.0 GPA', img: '/images/toppers/sneha-giri.jpg', note: 'Achieved perfect 4.0 GPA in SEE examination', delay: '0.2s' },
-  { name: 'Sachin Shrestha', batch: '2078', score: '4.0 GPA', badge: '4.0 GPA', img: '/images/toppers/sachin-shrestha.png', note: 'Outstanding performance with perfect 4.0 GPA in SEE', delay: '0.3s' },
-  { name: 'Kripa Shahi', batch: '2078', score: '4.0 GPA', badge: '4.0 GPA', img: '/images/toppers/kripa-shahi.png', note: 'Exemplary achievement with perfect 4.0 GPA in SEE', delay: '0.4s' },
-]
-
-
-
 const features = [
   { icon: BookOpen, title: 'Quality Education', desc: 'Comprehensive curriculum with modern teaching methodologies tailored to equip students with skills for the future.', color: 'from-navy-light to-navy' },
   { icon: UserCheck, title: 'Experienced Faculty', desc: 'Our dedicated and highly qualified teachers are genuinely invested in every student\'s academic and personal growth.', color: 'from-gold to-gold-dark' },
   { icon: Sparkles, title: 'Holistic Development', desc: 'Beyond academics — we nurture leadership, creativity, sportsmanship, and extracurricular excellence in every child.', color: 'from-navy to-navy-darker' },
 ]
+
+function PopupAd() {
+  const [popups, setPopups] = useState([])
+  const [currentIndex, setCurrentIndex] = useState(0)
+  const [isVisible, setIsVisible] = useState(false)
+
+  useEffect(() => {
+    const fetchPopups = async () => {
+      try {
+        const { data } = await supabase.from('school_popups')
+          .select('*')
+          .eq('is_active', true)
+          .order('display_order', { ascending: true })
+        
+        if (data && data.length > 0) {
+          // Only show those not yet dismissed in THIS session
+          const dismissedStrings = sessionStorage.getItem('dismissedPopupIds')
+          const dismissedIds = dismissedStrings ? JSON.parse(dismissedStrings) : []
+          const remaining = data.filter(p => !dismissedIds.includes(p.id))
+          
+          if (remaining.length > 0) {
+            setPopups(remaining)
+            const timer = setTimeout(() => setIsVisible(true), 1500)
+            return () => clearTimeout(timer)
+          }
+        }
+      } catch (err) {
+        console.warn("Popups table may not exist yet")
+      }
+    }
+    fetchPopups()
+  }, [])
+
+  const current = popups[currentIndex]
+
+  const close = (e) => {
+    if (e) e.stopPropagation()
+    
+    // Save dismissal to session
+    if (current) {
+      const dismissedStrings = sessionStorage.getItem('dismissedPopupIds')
+      const dismissedIds = dismissedStrings ? JSON.parse(dismissedStrings) : []
+      if (!dismissedIds.includes(current.id)) dismissedIds.push(current.id)
+      sessionStorage.setItem('dismissedPopupIds', JSON.stringify(dismissedIds))
+    }
+
+    if (currentIndex < popups.length - 1) {
+      // Transition to next popup
+      setIsVisible(false) // Hide briefly for effect
+      setTimeout(() => {
+        setCurrentIndex(prev => prev + 1)
+        setIsVisible(true)
+      }, 300)
+    } else {
+      setIsVisible(false)
+    }
+  }
+
+  if (!isVisible || !current) return null
+
+  return (
+    <div className="fixed inset-0 z-[100] flex items-center justify-center px-4 overflow-hidden animate-fade-in" onClick={close}>
+      <div className="absolute inset-0 bg-navy/80 backdrop-blur-md" />
+      <div 
+        className="relative bg-white rounded-lg overflow-hidden shadow-[0_0_50px_rgba(0,0,0,0.3)] max-w-[90vw] md:max-w-md w-full animate-scale-in border border-white/20"
+        onClick={e => e.stopPropagation()}
+      >
+        <button 
+          onClick={close} 
+          className="absolute top-3 right-3 z-20 bg-red-600 hover:bg-red-700 text-white p-2.5 rounded-full shadow-lg transition-all group"
+          title="Close"
+        >
+          <X className="h-5 w-5 group-hover:rotate-90 transition-transform duration-300" />
+        </button>
+
+        <div className="absolute bottom-0 left-0 right-0 p-4 bg-navy/80 backdrop-blur-md flex flex-row items-center justify-center gap-3 z-20 border-t border-white/10">
+          <button 
+            onClick={(e) => { e.stopPropagation(); window.open(current.image_url, '_blank') }}
+            className="flex-1 bg-white/10 hover:bg-white/20 text-white border border-white/20 px-4 py-2.5 rounded-xl font-bold text-[10px] uppercase tracking-widest flex items-center justify-center gap-2 transition-all"
+            title="View Full Screen"
+          >
+            <Maximize2 className="h-3.5 w-3.5" /> Full Size
+          </button>
+          <button 
+            onClick={async (e) => {
+              e.stopPropagation();
+              try {
+                const response = await fetch(current.image_url);
+                const blob = await response.blob();
+                const url = window.URL.createObjectURL(blob);
+                const link = document.createElement('a');
+                link.href = url;
+                link.download = `announcement-${current.id}.jpg`;
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+              } catch (err) {
+                window.open(current.image_url, '_blank');
+              }
+            }}
+            className="flex-1 bg-gold hover:bg-gold-light text-white px-4 py-2.5 rounded-xl font-bold text-[10px] uppercase tracking-widest flex items-center justify-center gap-2 transition-all shadow-lg shadow-gold/20"
+            title="Download Announcement"
+          >
+            <Download className="h-3.5 w-3.5" /> Download
+          </button>
+        </div>
+        
+        {current.link_url ? (
+          <Link to={current.link_url} onClick={() => close()} className="block relative cursor-pointer group">
+             <div className="absolute inset-0 bg-gold/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-10" />
+             <img 
+               src={`${current.image_url}?t=${Date.now()}`} 
+               alt="Announcement" 
+               className="w-full h-auto object-cover max-h-[80vh] group-hover:scale-[1.02] transition-transform duration-700" 
+             />
+          </Link>
+        ) : (
+          <img 
+            src={`${current.image_url}?t=${Date.now()}`} 
+            alt="Announcement" 
+            className="w-full h-auto object-cover max-h-[80vh]" 
+          />
+        )}
+      </div>
+    </div>
+  )
+}
 
 function Home() {
   const [imgErrors, setImgErrors] = useState({})
@@ -75,35 +206,37 @@ function Home() {
   ])
   const settings = useSchoolSettings()
 
-  useScrollReveal()
+  useScrollReveal([latestNews, liveToppers])
 
   useEffect(() => {
     const fetchData = async () => {
       // Fetch news
-      const { data: newsData } = await supabase.from('school_news')
+      const { data: newsData, error: newsError } = await supabase.from('school_news')
         .select('*')
         .eq('published', true)
         .order('date', { ascending: false })
         .limit(3)
+      if (newsError) console.error("Home news fetch error:", newsError)
       if (newsData) setLatestNews(newsData)
       
       // Fetch toppers
-      const { data: toppersData } = await supabase.from('school_toppers').select('*').order('batch', { ascending: false })
-      if (toppersData && toppersData.length > 0) setLiveToppers(toppersData)
+      const { data: toppersData, error: toppersError } = await supabase.from('school_toppers').select('*').order('batch', { ascending: false })
+      if (toppersError) console.error("Home toppers fetch error:", toppersError)
+      if (toppersData) setLiveToppers(toppersData)
 
       // Fetch dynamic stats
       try {
-        const [ {count: sCount}, {count: smcCount} ] = await Promise.all([
+        const [{ count: sCount }, { count: smcCount }] = await Promise.all([
           supabase.from('school_staff').select('*', { count: 'exact', head: true }),
           supabase.from('school_smc').select('*', { count: 'exact', head: true })
         ])
-        
+
         setLiveStats(prev => {
           const established = parseInt(settings.established) || 2043;
           // Standard conversion: B.S. = A.D. + 57 years roughly
           const currentBSYear = new Date().getFullYear() + 57;
           const years = Math.max(0, currentBSYear - established);
-          
+
           return [
             { ...prev[0], value: 750 }, // Updated for 750+ learners
             { ...prev[1], value: (sCount || 0) + (smcCount || 0) },
@@ -122,12 +255,13 @@ function Home() {
 
   return (
     <div>
+      <PopupAd />
       {/* ── HERO ── */}
       <section className="relative min-h-[100svh] lg:min-h-[600px] lg:h-[calc(100svh-88px)] flex flex-col lg:items-center lg:justify-center text-white lg:overflow-hidden particle-bg">
         <div
           className="absolute inset-0 bg-top sm:bg-center bg-cover bg-no-repeat"
-          style={{ 
-            backgroundImage: 'url(/images/school.webp)', 
+          style={{
+            backgroundImage: 'url(/images/school.webp)',
           }}
         >
           {/* Internal overlay for the zoom effect - enabled only on larger screens via CSS if needed, 
@@ -136,12 +270,12 @@ function Home() {
         </div>
         <div className="absolute inset-0 z-[1]" style={{ background: 'linear-gradient(135deg, rgba(7,47,110,0.88) 0%, rgba(13,71,161,0.75) 55%, rgba(8,145,178,0.60) 100%)' }} />
         <div className="absolute inset-0 bg-black/10 z-[1]" />
- 
+
         {/* Floating orbs */}
         <div className="absolute top-16 left-12 w-40 h-40 bg-gold/10 rounded-full blur-3xl animate-float animate-morph z-[2]" />
         <div className="absolute bottom-16 right-12 w-48 h-48 bg-gold/10 rounded-full blur-3xl animate-float animate-morph z-[2]" style={{ animationDelay: '2s' }} />
         <div className="absolute top-1/3 right-1/4 w-28 h-28 bg-white/5 rounded-full blur-2xl animate-float z-[2]" style={{ animationDelay: '4s' }} />
- 
+
         {/* Hero Content - Tightly packed for mobile 'First Screen' visibility */}
         <div className="relative z-10 flex-1 flex flex-col items-center justify-center text-center px-4 max-w-5xl mx-auto pt-0 sm:pt-12 pb-0 lg:py-0 -mt-16 lg:-mt-10">
           <div className="inline-flex items-center gap-2 bg-white/15 backdrop-blur-sm border border-white/20 rounded-full px-3 py-1 text-[9px] sm:text-sm font-medium mb-2 sm:mb-6 animate-fade-in-up" style={{ animationDelay: '0.1s', animationFillMode: 'both' }}>
@@ -167,7 +301,7 @@ function Home() {
             </Link>
           </div>
         </div>
- 
+
         {/* ── STATS BAND (2x2 on mobile for readability, 1x4 on desktop) ── */}
         <div className="relative lg:absolute lg:bottom-0 lg:left-0 lg:right-0 overflow-hidden z-20 group border-t border-white/10 shadow-[0_-10px_40px_rgba(6,182,212,0.2)] w-full">
           <div className="absolute inset-0 bg-gradient-to-r from-gold-darker via-gold-dark to-gold-darker" />
@@ -264,66 +398,63 @@ function Home() {
       </section>
 
       {/* ── TOPPERS ── */}
-      <section className="bg-white pt-20 pb-4 overflow-hidden">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-10 reveal">
-            <div className="flex items-center justify-center gap-4 mb-3">
-              <Trophy className="h-10 w-10 text-gold animate-float" />
-              <h2 className="font-display font-extrabold text-4xl md:text-5xl section-heading">Our Academic Excellence</h2>
-              <Trophy className="h-10 w-10 text-gold animate-float" style={{ animationDelay: '1.5s' }} />
+      {liveToppers.length > 0 && (
+        <section className="bg-white pt-20 pb-4 overflow-hidden">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="text-center mb-10 reveal">
+              <div className="flex items-center justify-center gap-4 mb-3">
+                <Trophy className="h-10 w-10 text-gold animate-float" />
+                <h2 className="font-display font-extrabold text-4xl md:text-5xl section-heading">Our Academic Excellence</h2>
+                <Trophy className="h-10 w-10 text-gold animate-float" style={{ animationDelay: '1.5s' }} />
+              </div>
+              <div className="section-divider" />
+              <p className="text-gray-500 text-base max-w-2xl mx-auto mt-5 leading-relaxed">
+                Celebrating our outstanding students who achieved remarkable results in NEB / SEE examinations
+              </p>
             </div>
-            <div className="section-divider" />
-            <p className="text-gray-500 text-base max-w-2xl mx-auto mt-5 leading-relaxed">
-              Celebrating our outstanding students who achieved remarkable results in NEB / SEE examinations
-            </p>
-          </div>
 
-          {(() => {
-            const displayToppers = liveToppers.length > 0 ? liveToppers : toppers;
-            const lgCols = displayToppers.length === 1 ? 'lg:grid-cols-1 max-w-sm mx-auto' : 
-                           displayToppers.length === 2 ? 'lg:grid-cols-2 max-w-3xl mx-auto' : 
-                           displayToppers.length === 3 ? 'lg:grid-cols-3 max-w-5xl mx-auto' : 
-                           'lg:grid-cols-4';
-            return (
-              <div className={`grid grid-cols-1 sm:grid-cols-2 ${lgCols} gap-6`}>
-                {displayToppers.map((t, idx) => (
-              <div
-                key={t.name}
-                className="group bg-white rounded-2xl shadow-card border border-gray-100 p-6 text-center glow-border card-hover relative overflow-hidden reveal-scale"
-                style={{ transitionDelay: t.delay || `${idx * 0.1}s` }}
-              >
-                <div className="absolute top-0 right-0 bg-gradient-to-br from-gold to-gold-dark text-white px-3 py-1 rounded-bl-2xl rounded-tr-2xl text-xs font-bold shadow-md group-hover:scale-105 transition-transform z-10">
-                  {t.badge}
-                </div>
-                <div className="mb-5">
-                  <div className="w-32 h-32 mx-auto rounded-full bg-gradient-to-br from-gold/30 to-navy/20 flex items-center justify-center overflow-hidden border-4 border-gold/30 group-hover:border-gold/60 shadow-xl transition-all duration-500 group-hover:shadow-gold/30">
-                    {(t.photo_url || t.image_url || t.image || t.img) ? (
-                      <img 
-                        src={`${t.photo_url || t.image_url || t.image || t.img}?t=${Date.now()}`} 
-                        alt={t.name} 
-                        className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" 
-                      />
-                    ) : (
-                      <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-navy to-navy-dark text-white">
-                        <GraduationCap className="h-16 w-16 opacity-70" />
-                      </div>
-                    )}
+            <div className={`grid grid-cols-1 sm:grid-cols-2 ${liveToppers.length === 1 ? 'lg:grid-cols-1 max-w-sm mx-auto' :
+                liveToppers.length === 2 ? 'lg:grid-cols-2 max-w-3xl mx-auto' :
+                  liveToppers.length === 3 ? 'lg:grid-cols-3 max-w-5xl mx-auto' :
+                    'lg:grid-cols-4'
+              } gap-6`}>
+              {liveToppers.map((t, idx) => (
+                <div
+                  key={t.name}
+                  className="group bg-white rounded-2xl shadow-card border border-gray-100 p-6 text-center glow-border card-hover relative overflow-hidden reveal-scale"
+                  style={{ transitionDelay: t.delay || `${idx * 0.1}s` }}
+                >
+                  <div className="absolute top-0 right-0 bg-gradient-to-br from-gold to-gold-dark text-white px-3 py-1 rounded-bl-2xl rounded-tr-2xl text-xs font-bold shadow-md group-hover:scale-105 transition-transform z-10">
+                    {t.badge}
                   </div>
+                  <div className="mb-5">
+                    <div className="w-32 h-32 mx-auto rounded-full bg-gradient-to-br from-gold/30 to-navy/20 flex items-center justify-center overflow-hidden border-4 border-gold/30 group-hover:border-gold/60 shadow-xl transition-all duration-500 group-hover:shadow-gold/30">
+                      {(t.photo_url || t.image_url || t.image || t.img) ? (
+                        <img
+                          src={`${t.photo_url || t.image_url || t.image || t.img}?t=${Date.now()}`}
+                          alt={t.name}
+                          className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                        />
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-navy to-navy-dark text-white">
+                          <GraduationCap className="h-16 w-16 opacity-70" />
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                  <h3 className="font-display font-bold text-navy text-lg mb-1 group-hover:text-gold transition-colors">{t.name}</h3>
+                  <p className="text-sm text-gray-400 mb-3 font-medium">Batch {t.batch}</p>
+                  <div className="flex items-center justify-center gap-2 bg-gradient-to-r from-gold/15 to-gold/5 px-4 py-2 rounded-full mb-3">
+                    <Medal className="h-4 w-4 text-gold animate-pulse-slow" />
+                    <span className="text-gold font-bold">{t.score}</span>
+                  </div>
+                  <p className="text-xs text-gray-500 leading-relaxed">{t.note}</p>
                 </div>
-                <h3 className="font-display font-bold text-navy text-lg mb-1 group-hover:text-gold transition-colors">{t.name}</h3>
-                <p className="text-sm text-gray-400 mb-3 font-medium">Batch {t.batch}</p>
-                <div className="flex items-center justify-center gap-2 bg-gradient-to-r from-gold/15 to-gold/5 px-4 py-2 rounded-full mb-3">
-                  <Medal className="h-4 w-4 text-gold animate-pulse-slow" />
-                  <span className="text-gold font-bold">{t.score}</span>
-                </div>
-                <p className="text-xs text-gray-500 leading-relaxed">{t.note}</p>
-              </div>
-            ))}
-              </div>
-            )
-          })()}
-        </div>
-      </section>
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
 
       {/* ── LATEST NEWS ── */}
       <section className="bg-gradient-to-b from-gray-50 to-white pt-8 pb-10">
@@ -344,7 +475,7 @@ function Home() {
               </Link>
             )}
           </div>
-          
+
           {latestNews.length === 0 ? (
             <div className="text-center py-12 px-4 bg-white rounded-3xl border border-gray-100 shadow-sm reveal">
               <div className="bg-gray-50 w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-4 border border-gray-100">
@@ -356,10 +487,10 @@ function Home() {
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               {latestNews.map((n, i) => (
-                <Link 
-                  to={`/news/${n.id}`} 
-                  key={n.id} 
-                  className="group bg-white rounded-2xl overflow-hidden border border-gray-100 hover:border-gold/30 shadow-sm hover:shadow-xl transition-all duration-500 block reveal" 
+                <Link
+                  to={`/news/${n.id}`}
+                  key={n.id}
+                  className="group bg-white rounded-2xl overflow-hidden border border-gray-100 hover:border-gold/30 shadow-sm hover:shadow-xl transition-all duration-500 block reveal"
                   style={{ transitionDelay: `${i * 0.1}s` }}
                 >
                   <div className="h-44 overflow-hidden relative">
@@ -371,12 +502,14 @@ function Home() {
                       </div>
                     )}
                     <div className="absolute top-4 left-4">
-                       <span className="bg-white/90 backdrop-blur-md text-navy text-[10px] font-black px-3 py-1 rounded-full uppercase tracking-widest shadow-sm">{n.category}</span>
+                      <span className="bg-white/90 backdrop-blur-md text-navy text-[10px] font-black px-3 py-1 rounded-full uppercase tracking-widest shadow-sm">{n.category}</span>
                     </div>
                   </div>
                   <div className="p-5">
                     <h3 className="font-display font-bold text-navy text-base mb-2 leading-snug group-hover:text-gold transition-colors line-clamp-2">{n.title}</h3>
-                    <p className="text-gray-500 text-sm leading-relaxed line-clamp-2 mb-4">{n.content}</p>
+                    <p className="text-gray-500 text-sm leading-relaxed line-clamp-2 mb-4">
+                      {n.content?.replace(/<[^>]*>?/gm, '')}
+                    </p>
                     <div className="flex items-center gap-2 text-xs text-gray-400 pt-3 border-t border-gray-50">
                       <Calendar className="h-3.5 w-3.5" />
                       {new Date(n.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}

@@ -75,287 +75,211 @@ function About() {
     { id: 2, name: 'Teacher Name 2', subject: 'Science', photo_url: '/images/teachers/teacher2.jpg' },
   ]
 
-  return (
-    <div className="min-h-screen bg-slate-50 animate-fade-in">
-      {/* Hero */}
-      <section className="page-hero py-20 text-white">
+    return (
+        <div className="min-h-screen bg-white animate-fade-in">
+            {/* Standard Hero */}
+            <section className="page-hero py-20 text-white">
+                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                    <div className="flex flex-col sm:flex-row items-center gap-6 animate-fade-in-up">
+                        <div className="bg-white/15 p-4 rounded-3xl backdrop-blur-md border border-white/20 shadow-2xl">
+                            <Users className="h-10 w-10 text-white" />
+                        </div>
+                        <div>
+                            <h1 className="font-display font-bold text-4xl md:text-5xl lg:text-6xl tracking-tight">About Us</h1>
+                            <p className="text-gold-light text-base md:text-lg mt-2 font-medium">Nurturing Excellence Since {settings.established} B.S.</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+      <section className="py-20 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center gap-4 animate-fade-in-up">
-            <div className="bg-white/15 p-3 rounded-2xl backdrop-blur-sm">
-              <Users className="h-8 w-8 text-white" />
-            </div>
-            <div>
-              <h1 className="font-display font-bold text-3xl md:text-5xl">About Us</h1>
-              <p className="text-gold-light text-sm mt-1">Learn more about our school's mission, history, and commitment to excellence in education.</p>
-            </div>
+          <div className="flex flex-col lg:flex-row gap-12 lg:gap-20">
+             {/* History */}
+             <div className="lg:w-1/2">
+                <div className="inline-flex items-center gap-3 mb-6">
+                  <div className="bg-gold/10 p-2.5 rounded-xl">
+                    <BookOpen className="h-6 w-6 text-gold" />
+                  </div>
+                  <h2 className="text-2xl font-display font-extrabold text-navy">Our History</h2>
+                </div>
+                <div className="space-y-5 text-gray-600 leading-relaxed text-lg">
+                  <p>
+                    Shanti Varsha Angreji Ma. Vi. has been serving the community of Vyas-5, Chapaghat,
+                    Damauli, Tanahun for many years. Established with a vision to provide quality
+                    education, our school has grown to become a cornerstone of learning in the region.
+                  </p>
+                  <p>
+                    Over the years, we have maintained our commitment to academic excellence while
+                    adapting to modern educational needs. Today, we uphold our rich traditions while embracing 
+                    technologies that prepare our students for a global future.
+                  </p>
+                </div>
+             </div>
+
+             {/* Mission */}
+             <div className="lg:w-1/2 bg-slate-50 p-8 md:p-12 rounded-[2rem] border border-gray-100 relative overflow-hidden">
+                <Target className="absolute -right-8 -bottom-8 h-48 w-48 text-navy/5" />
+                <div className="relative z-10">
+                  <div className="inline-flex items-center gap-3 mb-6">
+                    <div className="bg-gold/10 p-2.5 rounded-xl">
+                      <Target className="h-6 w-6 text-gold" />
+                    </div>
+                    <h2 className="text-2xl font-display font-extrabold text-navy">Our Mission</h2>
+                  </div>
+                  <ul className="space-y-4">
+                    {[
+                      'Achieve academic excellence through quality education',
+                      'Develop critical thinking and problem-solving skills',
+                      'Cultivate values of respect, integrity, and responsibility',
+                      'Foster creativity and innovation to prepare for future careers'
+                    ].map((m, i) => (
+                      <li key={i} className="flex items-start gap-4 text-gray-700">
+                        <div className="mt-1.5 h-1.5 w-1.5 rounded-full bg-gold shrink-0" />
+                        <span className="font-medium text-lg lg:text-base xl:text-lg">{m}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+             </div>
           </div>
         </div>
       </section>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        {/* Principal's Message */}
-        <section className="mb-16 animate-fade-in-up" style={{ animationDelay: '0.2s', animationFillMode: 'both' }}>
-          <div className="bg-white rounded-3xl shadow-xl overflow-hidden border border-gray-100 group">
-            <div className="flex flex-col lg:flex-row">
-              {/* Image Side */}
-              <div className="lg:w-1/3 relative min-h-[400px] bg-navy overflow-hidden">
-                {settings.principal_photo ? (
-                  <img 
-                    src={`${settings.principal_photo}?t=${Date.now()}`} 
-                    alt={settings.principal_name || "Principal"}
-                    className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
-                  />
-                ) : (
-                  <div className="absolute inset-0 w-full h-full flex flex-col items-center justify-center bg-gradient-to-br from-navy to-navy-dark border border-white/5">
-                    <User className="h-24 w-24 text-white opacity-20 mb-4" />
-                    <span className="text-white/40 uppercase tracking-widest text-xs font-bold">Photo Pending</span>
-                  </div>
-                )}
-                <div className="absolute inset-0 bg-gradient-to-t from-navy/80 via-transparent to-transparent" />
-                <div className="absolute bottom-0 left-0 right-0 p-8 text-white">
-                  <h3 className="font-display font-bold text-2xl">{settings.principal_name || 'Principal'}</h3>
-                  <p className="text-gold font-medium text-sm">Head of School</p>
+      {/* Principal's Message - Full Width Stylized */}
+      <section className="py-24 bg-slate-50 overflow-hidden">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex flex-col lg:flex-row items-center gap-16">
+             <div className="lg:w-1/3 w-full max-w-sm relative">
+                <div className="absolute inset-0 bg-gold rounded-[3rem] rotate-6 translate-x-4 translate-y-4 -z-0 opacity-20" />
+                <div className="relative z-10 aspect-[3/4] rounded-[3rem] overflow-hidden shadow-2xl border-8 border-white">
+                  {settings.principal_photo ? (
+                    <img 
+                      src={`${settings.principal_photo}?t=${Date.now()}`} 
+                      alt={settings.principal_name || "Principal"}
+                      className="w-full h-full object-cover"
+                    />
+                  ) : (
+                    <div className="w-full h-full bg-navy flex flex-col items-center justify-center text-white/20">
+                      <User className="h-32 w-32" />
+                    </div>
+                  )}
                 </div>
-              </div>
+             </div>
 
-              {/* Text Side */}
-              <div className="lg:w-2/3 p-8 md:p-12 flex flex-col justify-center relative">
-                <div className="absolute top-8 right-8 text-gold/10">
-                  <Quote className="h-32 w-32" />
-                </div>
+             <div className="lg:w-2/3 relative">
+                <Quote className="absolute -top-10 -left-10 h-32 w-32 text-navy/5" />
                 <div className="relative z-10">
-                  <div className="inline-flex items-center gap-2 bg-gold/10 text-gold-dark px-4 py-1.5 rounded-full text-xs font-bold uppercase tracking-widest mb-6">
-                    <User className="h-3.5 w-3.5" /> Welcome Message
-                  </div>
-                  <h2 className="text-3xl md:text-4xl font-display font-extrabold text-navy mb-8 leading-tight">
-                    From the <span className="text-gold-dark">Principal's Desk</span>
-                  </h2>
-                  <div className="prose max-w-none text-gray-600 space-y-4">
-                    {(settings.principal_message || '').split('\n').map((para, i) => (
-                      <p key={i} className="text-lg leading-relaxed">{para}</p>
-                    ))}
-                    {!settings.principal_message && (
-                      <p className="text-lg leading-relaxed italic opacity-70">
-                        The Principal's welcome message is being updated. Please check back soon.
-                      </p>
-                    )}
-                  </div>
-                  
-                  <div className="mt-10 flex items-center gap-4">
-                    <div className="h-0.5 w-12 bg-gold mt-1" />
-                    <p className="font-display font-bold text-navy uppercase tracking-widest text-sm">
-                      {settings.principal_name || 'Shanti Varsha Administration'}
-                    </p>
-                  </div>
+                   <h4 className="text-gold-dark font-bold uppercase tracking-[0.2em] text-xs mb-4">Leadership Message</h4>
+                   <h2 className="text-4xl md:text-5xl font-display font-black text-navy mb-8 leading-tight">
+                     From the <br/><span className="text-gold-dark italic">Principal's Desk</span>
+                   </h2>
+                   <div className="prose max-w-none text-gray-600 space-y-6 italic text-xl md:text-2xl font-medium leading-normal">
+                      {(settings.principal_message || 'The Principal\'s welcome message is being updated. Please check back soon.').split('\n').map((para, i) => (
+                        <p key={i}>"{para}"</p>
+                      ))}
+                   </div>
+                   <div className="mt-12 flex items-center gap-6">
+                      <div className="h-px w-20 bg-gold" />
+                      <div>
+                        <p className="font-display font-black text-navy text-lg uppercase tracking-wider">{settings.principal_name || 'School Administration'}</p>
+                        <p className="text-gold-dark font-bold text-xs uppercase mt-1">Principal & Academic Head</p>
+                      </div>
+                   </div>
                 </div>
-              </div>
-            </div>
+             </div>
           </div>
-        </section>
+        </div>
+      </section>
 
-        {/* School History */}
-        <section className="mb-16 animate-fade-in-up" style={{ animationDelay: '0.3s', animationFillMode: 'both' }}>
-          <div className="bg-white rounded-2xl shadow-xl p-8 md:p-10 border-2 border-gray-100 hover:shadow-2xl transition-all duration-500 relative overflow-hidden">
-            <div className="absolute top-0 left-0 w-64 h-64 bg-gold/5 rounded-full blur-3xl -z-0"></div>
-            <div className="relative z-10">
-              <div className="flex items-center space-x-3 mb-6">
-                <div className="bg-gradient-to-br from-gold/20 to-gold/10 p-3 rounded-xl shadow-lg">
-                  <BookOpen className="h-8 w-8 text-gold" />
-                </div>
-                <h2 className="text-3xl font-bold text-navy flex items-center space-x-3">
-                  <div className="w-1 h-8 bg-gradient-to-b from-gold to-gold-dark rounded-full"></div>
-                  <span>School History</span>
-                </h2>
-              </div>
-              <div className="prose max-w-none text-gray-700">
-                <p className="text-lg leading-relaxed mb-4 animate-fade-in-up" style={{ animationDelay: '0.4s', animationFillMode: 'both' }}>
-                  Shanti Varsha Angreji Ma. Vi. has been serving the community of Vyas-5, Chapaghat,
-                  Damauli, Tanahun for many years. Established with a vision to provide quality
-                  education to the local community, our school has grown to become a trusted
-                  institution in the region.
-                </p>
-                <p className="text-lg leading-relaxed mb-4 animate-fade-in-up" style={{ animationDelay: '0.5s', animationFillMode: 'both' }}>
-                  Over the years, we have maintained our commitment to academic excellence while
-                  adapting to the changing needs of education. Our school has produced numerous
-                  successful graduates who have gone on to make significant contributions in various
-                  fields.
-                </p>
-                <p className="text-lg leading-relaxed animate-fade-in-up" style={{ animationDelay: '0.6s', animationFillMode: 'both' }}>
-                  Today, we continue to uphold our values and traditions while embracing modern
-                  teaching methodologies and technologies to provide the best possible education
-                  to our students.
-                </p>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        {/* Mission Statement */}
-        <section className="mb-16 animate-fade-in-up" style={{ animationDelay: '0.4s', animationFillMode: 'both' }}>
-          <div className="bg-white rounded-2xl shadow-xl p-8 md:p-10 border-2 border-gray-100 hover:shadow-2xl transition-all duration-500 relative overflow-hidden">
-            <div className="absolute bottom-0 right-0 w-64 h-64 bg-gold/5 rounded-full blur-3xl -z-0"></div>
-            <div className="relative z-10">
-              <div className="flex items-center space-x-3 mb-6">
-                <div className="bg-gradient-to-br from-gold/20 to-gold/10 p-3 rounded-xl shadow-lg">
-                  <Target className="h-8 w-8 text-gold" />
-                </div>
-                <h2 className="text-3xl font-bold text-navy flex items-center space-x-3">
-                  <div className="w-1 h-8 bg-gradient-to-b from-gold to-gold-dark rounded-full"></div>
-                  <span>Our Mission</span>
-                </h2>
-              </div>
-              <div className="prose max-w-none text-gray-700">
-                <p className="text-lg leading-relaxed mb-4 animate-fade-in-up" style={{ animationDelay: '0.5s', animationFillMode: 'both' }}>
-                  Our mission is to provide a nurturing and stimulating learning environment that
-                  enables students to:
-                </p>
-                <ul className="list-disc list-inside space-y-3 text-lg text-gray-700 ml-4">
-                  <li className="animate-fade-in-up" style={{ animationDelay: '0.6s', animationFillMode: 'both' }}>Achieve academic excellence through quality education</li>
-                  <li className="animate-fade-in-up" style={{ animationDelay: '0.7s', animationFillMode: 'both' }}>Develop critical thinking and problem-solving skills</li>
-                  <li className="animate-fade-in-up" style={{ animationDelay: '0.8s', animationFillMode: 'both' }}>Cultivate values of respect, integrity, and responsibility</li>
-                  <li className="animate-fade-in-up" style={{ animationDelay: '0.9s', animationFillMode: 'both' }}>Foster creativity and innovation</li>
-                  <li className="animate-fade-in-up" style={{ animationDelay: '1s', animationFillMode: 'both' }}>Prepare for higher education and future careers</li>
-                  <li className="animate-fade-in-up" style={{ animationDelay: '1.1s', animationFillMode: 'both' }}>Contribute positively to society</li>
-                </ul>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        {/* Management Committee */}
-        <section className="mb-16 animate-fade-in-up" style={{ animationDelay: '0.5s', animationFillMode: 'both' }}>
-          <div className="bg-white rounded-2xl shadow-xl p-8 md:p-10 border-2 border-gray-100 hover:shadow-2xl transition-all duration-500 relative overflow-hidden">
-            <div className="absolute top-0 right-0 w-64 h-64 bg-gold/5 rounded-full blur-3xl -z-0"></div>
-            <div className="relative z-10">
-              <div className="flex items-center space-x-3 mb-8">
-                <div className="bg-gradient-to-br from-gold/20 to-gold/10 p-3 rounded-xl shadow-lg">
-                  <Users className="h-8 w-8 text-gold" />
-                </div>
-                <h2 className="text-3xl font-bold text-navy flex items-center space-x-3">
-                  <div className="w-1 h-8 bg-gradient-to-b from-gold to-gold-dark rounded-full"></div>
-                  <span>Management Committee</span>
-                </h2>
-              </div>
-              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
-                {displayCommittee.map((member, index) => (
-                  <div
-                    key={member.id}
-                    className="group card-3d magnetic hover-lift bg-gradient-to-br from-gray-50 to-white rounded-2xl p-6 text-center hover:shadow-xl transition-all duration-500 transform hover:-translate-y-2 border-2 border-gray-100 hover:border-gold/40 animate-scale-in glow-border"
-                    style={{ animationDelay: `${0.6 + index * 0.1}s`, animationFillMode: 'both' }}
-                  >
-                    <div className="mb-4 relative">
-                      <div className="w-32 h-32 mx-auto rounded-full bg-gradient-to-br from-gold/30 via-gold/20 to-navy/20 flex items-center justify-center overflow-hidden border-4 border-gold/40 shadow-xl group-hover:border-gold transition-all duration-500 group-hover:shadow-gold/50 relative">
+      {/* Teams Sections */}
+      <section className="py-24 bg-white relative overflow-hidden">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+           <div className="text-center mb-16">
+              <h4 className="text-gold font-bold uppercase tracking-[0.3em] text-[10px] mb-3">Our Core Team</h4>
+              <h2 className="text-4xl font-display font-black text-navy uppercase">Management Committee</h2>
+              <div className="mt-4 h-1 w-20 bg-gold mx-auto rounded-full" />
+           </div>
+           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-8">
+              {displayCommittee.map((member, index) => (
+                <div key={member.id} className="group text-center">
+                   <div className="relative mb-6 mx-auto w-48 h-48">
+                      <div className="absolute inset-0 bg-slate-50 rounded-full border border-gray-100 group-hover:scale-105 transition-transform duration-500" />
+                      <div className="absolute inset-2 rounded-full overflow-hidden border-2 border-white shadow-xl">
                         {(member.image_url || member.image || member.photo_url) ? (
-                          <img
-                            src={`${member.image_url || member.image || member.photo_url}?t=${Date.now()}`}
-                            alt={member.name}
-                            className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
-                          />
+                          <img src={`${member.image_url || member.image || member.photo_url}?t=${Date.now()}`} alt={member.name} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" />
                         ) : (
-                          <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-navy to-navy-dark text-white">
-                            <User className="h-16 w-16" />
-                          </div>
+                          <div className="w-full h-full bg-navy flex items-center justify-center text-white/10"><User className="h-20 w-20" /></div>
                         )}
                       </div>
-                    </div>
-                    <h3 className="text-lg font-bold text-navy mb-1 group-hover:text-gold transition-colors duration-300">{member.name}</h3>
-                    <p className="text-sm text-gray-600 font-medium">{member.position}</p>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
-        </section>
-
-        {/* Teachers and Staff */}
-        <section className="mb-16 animate-fade-in-up" style={{ animationDelay: '0.6s', animationFillMode: 'both' }}>
-          <div className="bg-white rounded-2xl shadow-xl p-8 md:p-10 border-2 border-gray-100 hover:shadow-2xl transition-all duration-500 relative overflow-hidden">
-            <div className="absolute bottom-0 left-0 w-64 h-64 bg-gold/5 rounded-full blur-3xl -z-0"></div>
-            <div className="relative z-10">
-              <div className="flex items-center space-x-3 mb-8">
-                <div className="bg-gradient-to-br from-gold/20 to-gold/10 p-3 rounded-xl shadow-lg">
-                  <GraduationCap className="h-8 w-8 text-gold" />
+                   </div>
+                   <h3 className="font-bold text-navy text-lg group-hover:text-gold transition-colors">{member.name}</h3>
+                   <p className="text-gold-dark text-[11px] font-bold uppercase tracking-widest mt-1 opacity-80">{member.position}</p>
                 </div>
-                <h2 className="text-3xl font-bold text-navy flex items-center space-x-3">
-                  <div className="w-1 h-8 bg-gradient-to-b from-gold to-gold-dark rounded-full"></div>
-                  <span>Our Teachers & Staff</span>
-                </h2>
-              </div>
-              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
-                {displayStaff.map((teacher, index) => (
-                  <div
-                    key={teacher.id}
-                    className="group card-3d magnetic hover-lift bg-gradient-to-br from-gray-50 to-white rounded-2xl p-6 text-center hover:shadow-xl transition-all duration-500 transform hover:-translate-y-2 border-2 border-gray-100 hover:border-gold/40 animate-scale-in glow-border"
-                    style={{ animationDelay: `${0.7 + index * 0.1}s`, animationFillMode: 'both' }}
-                  >
-                    <div className="mb-4 relative">
-                      <div className="w-32 h-32 mx-auto rounded-full bg-gradient-to-br from-gold/30 via-gold/20 to-navy/20 flex items-center justify-center overflow-hidden border-4 border-gold/40 shadow-xl group-hover:border-gold transition-all duration-500 group-hover:shadow-gold/50 relative">
-                         {(teacher.image_url || teacher.photo_url || teacher.image) ? (
-                           <img
-                             src={`${teacher.image_url || teacher.photo_url || teacher.image}?t=${Date.now()}`}
-                             alt={teacher.name}
-                             className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
-                           />
-                         ) : (
-                           <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-navy to-navy-dark text-white">
-                             <GraduationCap className="h-16 w-16" />
-                           </div>
-                         )}
-                      </div>
-                    </div>
-                    <h3 className="text-lg font-bold text-navy mb-1 group-hover:text-gold transition-colors duration-300">{teacher.name}</h3>
-                    <p className="text-sm text-gray-600 font-medium">{teacher.role === 'Teacher' ? teacher.subject : teacher.role}</p>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
-        </section>
+              ))}
+           </div>
+        </div>
+      </section>
 
-        {/* Parents and Stakeholders Testimonials */}
-        <section className="animate-fade-in-up" style={{ animationDelay: '0.7s', animationFillMode: 'both' }}>
-          <div className="bg-white rounded-2xl shadow-xl p-8 md:p-10 border-2 border-gray-100 hover:shadow-2xl transition-all duration-500 relative overflow-hidden">
-            <div className="absolute top-0 right-0 w-64 h-64 bg-gold/5 rounded-full blur-3xl -z-0"></div>
-            <div className="relative z-10">
-              <div className="flex items-center space-x-3 mb-8">
-                <div className="bg-gradient-to-br from-gold/20 to-gold/10 p-3 rounded-xl shadow-lg">
-                  <Quote className="h-8 w-8 text-gold" />
-                </div>
-                <h2 className="text-3xl font-bold text-navy flex items-center space-x-3">
-                  <div className="w-1 h-8 bg-gradient-to-b from-gold to-gold-dark rounded-full"></div>
-                  <span>Parents & Stakeholders Messages</span>
-                </h2>
-              </div>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                {testimonials.map((testimonial, index) => (
-                  <div
-                    key={testimonial.id}
-                    className="group card-3d bg-white rounded-3xl p-8 border border-gray-100 hover:border-gold/40 shadow-[0_8px_30px_rgba(0,0,0,0.04)] hover:shadow-[0_8px_30px_rgba(212,175,55,0.15)] transition-all duration-500 animate-fade-in-up glow-border relative flex flex-col justify-between"
-                    style={{ animationDelay: `${0.6 + index * 0.1}s`, animationFillMode: 'both' }}
-                  >
-                    <Quote className="absolute right-8 top-8 h-16 w-16 text-gray-50 group-hover:text-gold/10 transition-colors duration-500" />
-                    <div>
-                      <Quote className="h-6 w-6 text-gold mb-6" />
-                      <p className="text-gray-700 text-base md:text-lg leading-relaxed italic z-10 relative">
-                        "{testimonial.message}"
-                      </p>
-                    </div>
-                    <div className="mt-8 pt-6 border-t border-gray-100 flex items-center gap-4 relative z-10">
-                      <div className="w-12 h-12 flex-shrink-0 rounded-full bg-navy/5 flex items-center justify-center text-navy font-bold font-display text-lg group-hover:bg-gold flex-shrink-0 group-hover:text-white transition-colors duration-300 border border-gray-100 group-hover:border-gold">
-                        {testimonial.name.charAt(0)}
+      <section className="py-24 bg-slate-50">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+           <div className="text-center mb-16">
+              <h4 className="text-gold font-bold uppercase tracking-[0.3em] text-[10px] mb-3">Educational Excellence</h4>
+              <h2 className="text-4xl font-display font-black text-navy uppercase">Our Faculty & Staff</h2>
+              <div className="mt-4 h-1 w-20 bg-gold mx-auto rounded-full" />
+           </div>
+           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+              {displayStaff.map((teacher, index) => (
+                <div key={teacher.id} className="bg-white p-5 rounded-2xl border border-gray-100 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all group">
+                   <div className="flex items-center gap-4">
+                      <div className="w-16 h-16 rounded-xl overflow-hidden shadow-md flex-shrink-0">
+                        {(teacher.image_url || teacher.photo_url || teacher.image) ? (
+                            <img src={`${teacher.image_url || teacher.photo_url || teacher.image}?t=${Date.now()}`} alt={teacher.name} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" />
+                        ) : (
+                            <div className="w-full h-full bg-navy flex items-center justify-center text-white/10"><GraduationCap className="h-6 w-6" /></div>
+                        )}
                       </div>
                       <div className="min-w-0">
-                        <h3 className="text-lg font-bold text-navy truncate">{testimonial.name}</h3>
-                        <p className="text-[10px] uppercase tracking-widest font-extrabold text-gold-dark truncate">{testimonial.role}</p>
+                         <h3 className="font-bold text-navy truncate group-hover:text-gold transition-colors">{teacher.name}</h3>
+                         <p className="text-gray-500 text-xs mt-0.5">{teacher.role === 'Teacher' ? teacher.subject : teacher.role}</p>
                       </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
-        </section>
-      </div>
+                   </div>
+                </div>
+              ))}
+           </div>
+        </div>
+      </section>
+
+      {/* Testimonials */}
+      <section className="py-24 bg-white">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+           <div className="text-center mb-16">
+              <h4 className="text-gold font-bold uppercase tracking-[0.3em] text-[10px] mb-3">Community Voices</h4>
+              <h2 className="text-4xl font-display font-black text-navy uppercase">Messages & Testimonials</h2>
+              <div className="mt-4 h-1 w-20 bg-gold mx-auto rounded-full" />
+           </div>
+           <div className="grid grid-cols-1 md:grid-cols-2 gap-8 lg:gap-12">
+              {testimonials.map((testimonial, index) => (
+                <div key={testimonial.id} className="relative group p-8 lg:p-12 rounded-[2.5rem] bg-slate-50 border border-gray-100 shadow-sm hover:shadow-2xl hover:bg-white transition-all duration-500 flex flex-col justify-between overflow-hidden">
+                   <div className="absolute top-0 right-0 w-32 h-32 bg-gold/5 rounded-full -mr-16 -mt-16 group-hover:scale-150 transition-transform duration-700" />
+                   <div>
+                      <Quote className="h-10 w-10 text-gold/20 mb-6 group-hover:text-gold transition-colors" />
+                      <p className="text-gray-700 text-lg md:text-xl leading-relaxed font-medium italic relative z-10">"{testimonial.message}"</p>
+                   </div>
+                   <div className="mt-10 flex items-center gap-4 relative z-10">
+                      <div className="w-14 h-14 rounded-2xl bg-white border-2 border-slate-100 flex items-center justify-center text-navy font-black text-xl shadow-inner group-hover:border-gold transition-colors">
+                        {testimonial.name.charAt(0)}
+                      </div>
+                      <div>
+                        <h4 className="font-display font-bold text-navy text-lg">{testimonial.name}</h4>
+                        <p className="text-gold-dark text-[10px] font-bold uppercase tracking-widest">{testimonial.role}</p>
+                      </div>
+                   </div>
+                </div>
+              ))}
+           </div>
+        </div>
+      </section>
     </div>
   )
 }
