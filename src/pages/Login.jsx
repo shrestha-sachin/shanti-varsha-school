@@ -54,6 +54,7 @@ function Login() {
       localStorage.setItem('isLoggedIn', 'true')
       localStorage.setItem('username', user.username)
       localStorage.setItem('userRole', user.role)
+      localStorage.setItem('loginTimestamp', Date.now().toString())
       
       if (user.role === 'admin') {
         localStorage.setItem('adminLoggedIn', 'true')
@@ -67,8 +68,28 @@ function Login() {
       const from = location.state?.from?.pathname || defaultPath
       navigate(from, { replace: true })
     } else {
-      setLoading(false)
-      setError('Invalid username or password. Please try again.')
+      // Check database for individual staff logins
+      const { data: staffData } = await supabase
+        .from('school_staff')
+        .select('*')
+        .eq('id', cleanUser)
+        .eq('pin', cleanPass)
+        .maybeSingle()
+
+      if (staffData) {
+        localStorage.setItem('isLoggedIn', 'true')
+        localStorage.setItem('username', staffData.name)
+        localStorage.setItem('userRole', 'teacher')
+        localStorage.setItem('loginTimestamp', Date.now().toString())
+        sessionStorage.setItem('staffPortalUser', JSON.stringify(staffData))
+        
+        window.dispatchEvent(new Event('storage'))
+        setLoading(false)
+        navigate('/staff', { replace: true })
+      } else {
+        setLoading(false)
+        setError('Invalid credentials. Please check your Staff ID and PIN.')
+      }
     }
   }
 

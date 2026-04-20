@@ -124,8 +124,7 @@ function About() {
                 </div>
                 <div className="space-y-5 text-gray-600 leading-relaxed text-lg">
                   <p>
-                    Shanti Varsha Angreji Ma. Vi. has been serving the community of Vyas-5, Chapaghat,
-                    Damauli, Tanahun for many years. Established with a vision to provide quality
+                    {settings.name || 'Shanti Varsha Angreji Ma. Vi.'} has been serving the community of {settings.address} for many years. Established with a vision to provide quality
                     education, our school has grown to become a cornerstone of learning in the region.
                   </p>
                   <p>

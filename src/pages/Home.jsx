@@ -348,8 +348,8 @@ function Home() {
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-14 items-center">
             {/* Left: text */}
             <div className="reveal-left">
-              <div className="inline-flex items-center gap-2 bg-gold/10 text-gold border border-gold/20 rounded-full px-4 py-1.5 text-sm font-semibold mb-5">
-                <Star className="h-3.5 w-3.5 fill-gold" /> Est. 2043 B.S. · Vyas-5, Chapaghat, Damauli
+              <div className="inline-flex items-center gap-2 bg-gold/10 text-gold border border-gold/20 rounded-full px-4 py-1.5 text-sm font-semibold mb-5 truncate max-w-full">
+                <Star className="h-3.5 w-3.5 fill-gold shrink-0" /> Est. {settings.established || '2043'} B.S. · {settings.address}
               </div>
               <h2 className="font-display font-extrabold text-4xl md:text-5xl section-heading mb-5 leading-tight">
                 A School Built on Excellence

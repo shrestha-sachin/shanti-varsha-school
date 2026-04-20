@@ -34,7 +34,9 @@ function News() {
 
     const filtered = allNews.filter(n => {
         const matchCat = activeCategory === 'All' || n.category === activeCategory
-        const matchSearch = !search || n.title.toLowerCase().includes(search.toLowerCase()) || n.content.toLowerCase().includes(search.toLowerCase())
+        const matchSearch = !search || 
+            (n.title && n.title.toLowerCase().includes(search.toLowerCase())) || 
+            (n.content && n.content.toLowerCase().includes(search.toLowerCase()))
         return matchCat && matchSearch
     })
 
@@ -61,11 +63,16 @@ function News() {
                     <div className="relative flex-1 group">
                         <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400 group-focus-within:text-gold transition-colors" />
                         <input
-                            className="input-modern pl-12 h-14 border-2 border-gray-100 hover:border-gold/30 focus:border-gold shadow-sm"
+                            className="input-modern !pl-12 !pr-12 h-14 border-2 border-gray-100 hover:border-gold/30 focus:border-gold shadow-sm"
                             placeholder="Search stories..."
                             value={search}
                             onChange={e => setSearch(e.target.value)}
                         />
+                        {search && (
+                            <button onClick={() => setSearch('')} className="absolute right-4 top-1/2 -translate-y-1/2 p-1.5 text-gray-400 hover:text-red-500 rounded-full hover:bg-red-50 transition-colors">
+                                <X className="h-4 w-4" />
+                            </button>
+                        )}
                     </div>
                     <div className="flex items-center gap-2 overflow-x-auto pb-2 no-scrollbar px-1">
                         {categories.map(cat => (

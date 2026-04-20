@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { Bell, Search, Filter, Calendar, Pin, ChevronLeft, ChevronRight, Eye, Download, ExternalLink } from 'lucide-react'
+import { Bell, Search, Filter, Calendar, Pin, ChevronLeft, ChevronRight, Eye, Download, ExternalLink, X } from 'lucide-react'
 import { supabase } from '../supabaseClient'
 
 const CATEGORIES = ['All', 'General', 'Exam', 'Event', 'Urgent', 'Meeting']
@@ -33,7 +33,9 @@ function Notices() {
 
   const filtered = notices.filter(n => {
     const matchCat = category === 'All' || n.category === category
-    const matchSearch = !search || n.title.toLowerCase().includes(search.toLowerCase()) || (n.description || '').toLowerCase().includes(search.toLowerCase())
+    const matchSearch = !search || 
+      (n.title && n.title.toLowerCase().includes(search.toLowerCase())) || 
+      (n.description && n.description.toLowerCase().includes(search.toLowerCase()))
     return matchCat && matchSearch
   })
 
@@ -66,14 +68,22 @@ function Notices() {
         {/* Search & Filters */}
         <div className="bg-white rounded-2xl shadow-card border border-gray-100 p-5 mb-8 animate-fade-in-up">
           <div className="flex flex-col md:flex-row gap-4">
-            <div className="relative flex-1">
-              <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+            <div className="relative flex-1 group">
+              <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400 group-focus-within:text-gold transition-colors" />
               <input
-                className="input-modern pl-10"
+                className="input-modern !pl-12 !pr-10"
                 placeholder="Search notices..."
                 value={search}
                 onChange={e => handleSearch(e.target.value)}
               />
+              {search && (
+                <button 
+                  onClick={() => handleSearch('')}
+                  className="absolute right-4 top-1/2 -translate-y-1/2 p-1 text-gray-400 hover:text-red-500 transition-colors"
+                >
+                  <X className="h-4 w-4" />
+                </button>
+              )}
             </div>
             <div className="flex items-center gap-2 flex-wrap">
               <Filter className="h-4 w-4 text-gray-400" />

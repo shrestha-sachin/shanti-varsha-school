@@ -1,7 +1,9 @@
 import { useState } from 'react'
 import { MapPin, Phone, Mail, Clock, User, MessageSquare, Send, CheckCircle } from 'lucide-react'
+import { useSchoolSettings } from '../hooks/useSchoolSettings'
 
 function Contact() {
+  const settings = useSchoolSettings()
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -67,10 +69,8 @@ function Contact() {
                   </div>
                   <div className="flex-1">
                     <h3 className="font-bold text-navy mb-2 group-hover:text-gold transition-colors">Address</h3>
-                    <p className="text-gray-700 leading-relaxed">
-                      Vyas-5, Chapaghat<br />
-                      Damauli, Tanahun<br />
-                      Nepal
+                    <p className="text-gray-700 leading-relaxed pr-4">
+                      {settings.address}
                     </p>
                   </div>
                 </div>
@@ -81,8 +81,8 @@ function Contact() {
                   </div>
                   <div className="flex-1">
                     <h3 className="font-bold text-navy mb-2 group-hover:text-gold transition-colors">Phone</h3>
-                    <a href="tel:+977XXXXXXXX" className="text-gray-700 hover:text-gold transition-colors">
-                      +977-XXXXXXXX
+                    <a href={`tel:${settings.phone}`} className="text-gray-700 hover:text-gold transition-colors">
+                      {settings.phone}
                     </a>
                   </div>
                 </div>
@@ -93,8 +93,8 @@ function Contact() {
                   </div>
                   <div className="flex-1">
                     <h3 className="font-bold text-navy mb-2 group-hover:text-gold transition-colors">Email</h3>
-                    <a href="mailto:info@shantivarsha.edu.np" className="text-gray-700 hover:text-gold transition-colors break-all">
-                      info@shantivarsha.edu.np
+                    <a href={`mailto:${settings.email}`} className="text-gray-700 hover:text-gold transition-colors break-all">
+                      {settings.email}
                     </a>
                   </div>
                 </div>

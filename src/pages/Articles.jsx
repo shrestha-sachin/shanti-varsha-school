@@ -23,8 +23,8 @@ function Articles() {
 
     const filtered = articles.filter(a => {
         const matchSearch = !search || 
-            a.title.toLowerCase().includes(search.toLowerCase()) || 
-            a.body.toLowerCase().includes(search.toLowerCase()) ||
+            (a.title && a.title.toLowerCase().includes(search.toLowerCase())) || 
+            (a.body && a.body.toLowerCase().includes(search.toLowerCase())) ||
             (a.author && a.author.toLowerCase().includes(search.toLowerCase())) ||
             (a.tags && a.tags.toLowerCase().includes(search.toLowerCase()))
         return matchSearch
@@ -53,11 +53,16 @@ function Articles() {
                     <div className="relative group">
                         <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400 group-focus-within:text-gold transition-colors" />
                         <input
-                            className="input-modern pl-12 h-14 text-lg border-2 border-gray-100 hover:border-gold/30 focus:border-gold shadow-sm"
+                            className="input-modern !pl-12 !pr-12 h-14 text-lg border-2 border-gray-100 hover:border-gold/30 focus:border-gold shadow-sm"
                             placeholder="Search articles, authors, or topics..."
                             value={search}
                             onChange={e => setSearch(e.target.value)}
                         />
+                        {search && (
+                            <button onClick={() => setSearch('')} className="absolute right-4 top-1/2 -translate-y-1/2 p-1.5 text-gray-400 hover:text-red-500 rounded-full hover:bg-red-50 transition-colors">
+                                <X className="h-4 w-4" />
+                            </button>
+                        )}
                     </div>
                 </div>
 

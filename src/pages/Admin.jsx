@@ -6,7 +6,7 @@ import {
   UsersIcon, Bell, GraduationCap, Settings, Plus, X, Trash2, Edit, Save, 
   Search, Filter, LogOut, ChevronRight, Image, Layout, List, FileText, Newspaper,
   MapPin, Phone, Mail, Globe, Clock, Info, CheckCircle2, AlertCircle, Loader2,
-  Table, Pin, Maximize2, Download, Calendar, BookOpen, TrendingUp, Eye, EyeOff, Award, User, Quote, Upload, GripVertical, Menu
+  Table, Pin, Maximize2, Download, Calendar, BookOpen, TrendingUp, Eye, EyeOff, Award, User, Quote, Upload, GripVertical, Menu, Library
 } from 'lucide-react'
 import ReactQuill, { Quill } from 'react-quill'
 import 'react-quill/dist/quill.snow.css'
@@ -1999,6 +1999,7 @@ function Admin() {
     localStorage.removeItem('userRole')
     localStorage.removeItem('adminLoggedIn')
     localStorage.removeItem('adminUsername')
+    localStorage.removeItem('loginTimestamp')
     window.dispatchEvent(new Event('storage')) // Force Navbar state sync globally
     navigate('/login')
   }
@@ -2013,7 +2014,8 @@ function Admin() {
     { id: 'staff', label: 'Teachers', icon: GraduationCap },
     { id: 'smc', label: 'SMC', icon: UsersIcon },
     { id: 'testimonials', label: 'Messages', icon: Quote },
-    { id: 'gallery', label: 'Gallery', icon: Image },
+    {id: 'gallery', label: 'Gallery', icon: Image },
+    { id: 'curriculum', label: 'Curriculum', icon: Library },
     { id: 'popup', label: 'Ad Popup', icon: Bell },
     { id: 'settings', label: 'School Info', icon: Settings },
   ]
@@ -2132,10 +2134,203 @@ function Admin() {
             {activeTab === 'smc' && <SMCTab toast={showToast} />}
             {activeTab === 'testimonials' && <TestimonialsTab toast={showToast} />}
             {activeTab === 'gallery' && <GalleryTab toast={showToast} />}
+            {activeTab === 'curriculum' && <CurriculumTab toast={showToast} />}
             {activeTab === 'popup' && <PopupsTab toast={showToast} />}
             {activeTab === 'settings' && <SettingsTab toast={showToast} />}
           </div>
         </main>
+      </div>
+    </div>
+  )
+}
+
+function CurriculumTab({ toast }) {
+  const [curriculums, setCurriculums] = useState([])
+  const [loading, setLoading] = useState(true)
+  const [editing, setEditing] = useState(null)
+  const [showEditor, setShowEditor] = useState(false)
+  const [form, setForm] = useState({ grade: 'Grade 10', subject: 'English', title: "Teacher's Guide", url: '', type: 'Document' })
+
+  const grades = ['Nursery', 'LKG', 'UKG', 'Grade 1', 'Grade 2', 'Grade 3', 'Grade 4', 'Grade 5', 'Grade 6', 'Grade 7', 'Grade 8', 'Grade 9', 'Grade 10']
+  const subjects = ['General', 'Nepali', 'English', 'Mathematics', 'Science', 'Social', 'Moral', 'Computer', 'Creative']
+
+  const fetchCurriculum = async () => {
+    try {
+      setLoading(true)
+      const { data, error } = await supabase.from('school_curriculum').select('*').order('grade').order('subject')
+      if (error) throw error
+      if (data) setCurriculums(data)
+    } catch (err) {
+      console.warn('Curriculum table might be missing:', err.message)
+      setCurriculums([])
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  useEffect(() => { fetchCurriculum() }, [])
+
+  const startAdd = () => {
+    setEditing(null)
+    setForm({ grade: 'Grade 10', subject: 'English', title: "Teacher's Guide", url: '', type: 'Document' })
+    setShowEditor(true)
+    window.scrollTo({ top: 0, behavior: 'smooth' })
+  }
+
+  const startEdit = (c) => {
+    setEditing(c)
+    setForm(c)
+    setShowEditor(true)
+    window.scrollTo({ top: 0, behavior: 'smooth' })
+  }
+
+  const save = async (e) => {
+    e.preventDefault()
+    if (!form.url || !form.title) return toast({ type: 'error', text: 'Title and URL are required' })
+    
+    if (editing) {
+      const { error } = await supabase.from('school_curriculum').update(form).eq('id', editing.id)
+      if (error) toast({ type: 'error', text: error.message })
+      else { toast({ type: 'success', text: 'Updated!' }); setShowEditor(false); fetchCurriculum() }
+    } else {
+      const { error } = await supabase.from('school_curriculum').insert([form])
+      if (error) toast({ type: 'error', text: error.message })
+      else { toast({ type: 'success', text: 'Added!' }); setShowEditor(false); fetchCurriculum() }
+    }
+  }
+
+  const del = async (id) => {
+    if (confirm('Delete this link?')) {
+      await supabase.from('school_curriculum').delete().eq('id', id)
+      toast({ type: 'success', text: 'Deleted' })
+      fetchCurriculum()
+    }
+  }
+
+  if (loading) return <div className="flex justify-center py-20"><Loader2 className="h-8 w-8 animate-spin text-gold" /></div>
+
+  return (
+    <div className="space-y-6 animate-fade-in">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div className="flex items-center gap-3">
+          <SectionIcon icon={Library} />
+          <div>
+            <h3 className="font-display font-bold text-navy text-xl">Curriculum & Files</h3>
+            <p className="text-xs text-navy/60">Manage guides and syllabus for teachers</p>
+          </div>
+        </div>
+        {!showEditor && (
+          <button onClick={startAdd} className="btn-gold px-6 py-3 flex items-center justify-center gap-2 shadow-lg shadow-gold/20">
+            <Plus className="h-5 w-5" /> Add Link
+          </button>
+        )}
+      </div>
+
+      {showEditor && (
+        <div className="bg-white rounded-3xl border-2 border-gold/30 shadow-2xl overflow-hidden animate-fade-in relative z-50">
+          <div className="p-6 md:p-8 space-y-6">
+            <div className="flex items-center justify-between mb-2">
+               <h4 className="font-display font-bold text-navy text-lg">{editing ? 'Edit Link' : 'New Curriculum Link'}</h4>
+               <button onClick={() => setShowEditor(false)} className="p-2 hover:bg-gray-100 rounded-full text-gray-400 transition-colors"><X className="h-5 w-5" /></button>
+            </div>
+            <form onSubmit={save} className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              <div>
+                <label className="label-modern">Grade *</label>
+                <select className="input-modern" value={form.grade} onChange={e=>setForm({...form, grade: e.target.value})}>
+                  {grades.map(g => <option key={g} value={g}>{g}</option>)}
+                </select>
+              </div>
+              <div>
+                <label className="label-modern">Subject *</label>
+                <select className="input-modern" value={form.subject} onChange={e=>setForm({...form, subject: e.target.value})}>
+                  {subjects.map(s => <option key={s} value={s}>{s}</option>)}
+                </select>
+              </div>
+              <div>
+                <label className="label-modern">Resource Type *</label>
+                <select className="input-modern" value={form.type} onChange={e=>setForm({...form, type: e.target.value})}>
+                  <option value="Document">Official Curriculum</option>
+                  <option value="Archive">Lesson Syllabus</option>
+                  <option value="PDF Guide">Teaching Manual</option>
+                  <option value="Resources">Reference Material</option>
+                </select>
+              </div>
+              <div className="md:col-span-2">
+                <label className="label-modern">Title *</label>
+                <input className="input-modern" placeholder="e.g. Teacher's Guide Class 4" value={form.title} onChange={e=>setForm({...form, title: e.target.value})} required />
+              </div>
+              <div className="md:col-span-2 lg:col-span-3">
+                <label className="label-modern">URL (CDC Link or File Link) *</label>
+                <input className="input-modern" placeholder="https://moecdc.gov.np/..." value={form.url} onChange={e=>setForm({...form, url: e.target.value})} required />
+              </div>
+              <div className="md:col-span-2 lg:col-span-3 flex gap-4 pt-4">
+                 <button type="submit" className="btn-gold flex-1 py-4 text-base font-bold shadow-xl shadow-gold/20">Save Resource</button>
+                 <button type="button" onClick={() => setShowEditor(false)} className="px-8 py-4 border-2 border-gray-100 rounded-2xl font-bold text-navy hover:bg-gray-50 transition-all">Cancel</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      <div className="bg-white rounded-3xl border border-gray-100 shadow-sm overflow-hidden overflow-x-auto scrollbar-hide">
+        <table className="w-full text-left border-collapse min-w-[800px]">
+          <thead>
+            <tr className="bg-slate-50/50 border-b border-gray-100">
+              <th className="px-6 py-4 text-[10px] font-black uppercase tracking-widest text-gray-400">Grade / Subject</th>
+              <th className="px-6 py-4 text-[10px] font-black uppercase tracking-widest text-gray-400">Title</th>
+              <th className="px-6 py-4 text-[10px] font-black uppercase tracking-widest text-gray-400">Type</th>
+              <th className="px-6 py-4 text-[10px] font-black uppercase tracking-widest text-gray-400">Action</th>
+            </tr>
+          </thead>
+          <tbody className="divide-y divide-gray-50">
+            {curriculums.length === 0 ? (
+              <tr>
+                <td colSpan="4" className="px-6 py-12 text-center">
+                  <div className="max-w-md mx-auto space-y-3">
+                    <AlertCircle className="h-10 w-10 text-gold/40 mx-auto" />
+                    <p className="text-gray-500 font-medium tracking-tight">Curriculum data table not found or empty.</p>
+                    <div className="p-4 bg-slate-50 rounded-xl border border-gray-100 text-[10px] font-mono text-left text-gray-400 overflow-x-auto whitespace-pre">
+                      {`-- Run this in Supabase SQL Editor:
+CREATE TABLE school_curriculum (
+  id BIGINT GENERATED BY DEFAULT AS IDENTITY PRIMARY KEY,
+  grade TEXT,
+  subject TEXT,
+  title TEXT,
+  url TEXT,
+  type TEXT,
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);`}
+                    </div>
+                  </div>
+                </td>
+              </tr>
+            ) : curriculums.map(c => (
+              <tr key={c.id} className="hover:bg-slate-50/30 transition-colors group">
+                <td className="px-6 py-4">
+                  <div className="flex flex-col">
+                    <span className="text-xs font-black text-navy uppercase tracking-widest">{c.grade}</span>
+                    <span className="text-[10px] text-gold font-bold uppercase">{c.subject}</span>
+                  </div>
+                </td>
+                <td className="px-6 py-4">
+                  <div className="flex items-center gap-2">
+                    <span className="text-sm font-bold text-navy line-clamp-1">{c.title}</span>
+                    <a href={c.url} target="_blank" rel="noreferrer" className="p-1 text-gray-300 hover:text-gold transition-colors"><Maximize2 className="h-3 w-3" /></a>
+                  </div>
+                </td>
+                <td className="px-6 py-4">
+                  <span className="px-2.5 py-1 bg-navy/5 text-navy text-[10px] font-bold rounded-lg border border-navy/10">{c.type}</span>
+                </td>
+                <td className="px-6 py-4">
+                  <div className="flex items-center gap-2">
+                    <button onClick={() => startEdit(c)} className="p-2 text-gray-400 hover:text-navy hover:bg-white rounded-lg transition-all border border-transparent hover:border-gray-100"><Edit className="h-4 w-4" /></button>
+                    <button onClick={() => del(c.id)} className="p-2 text-gray-400 hover:text-red-500 hover:bg-white rounded-lg transition-all border border-transparent hover:border-red-100"><Trash2 className="h-4 w-4" /></button>
+                  </div>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
       </div>
     </div>
   )

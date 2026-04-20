@@ -17,11 +17,41 @@ import StaffPortal from './pages/StaffPortal'
 import Articles from './pages/Articles'
 import ArticleDetail from './pages/ArticleDetail'
 
-import { useLocation } from 'react-router-dom'
+import { useLocation, useNavigate } from 'react-router-dom'
+import { useEffect } from 'react'
 
 function AppContent() {
   const location = useLocation()
+  const navigate = useNavigate()
   const isDashboard = location.pathname.startsWith('/admin') || location.pathname.startsWith('/staff')
+
+  useEffect(() => {
+    const checkSession = () => {
+      const loginTime = localStorage.getItem('loginTimestamp')
+      if (loginTime) {
+        const timePassed = Date.now() - parseInt(loginTime, 10)
+        // 4 hours in milliseconds = 4 * 60 * 60 * 1000 = 14,400,000
+        if (timePassed > 14400000) {
+          localStorage.removeItem('isLoggedIn')
+          localStorage.removeItem('username')
+          localStorage.removeItem('userRole')
+          localStorage.removeItem('adminLoggedIn')
+          localStorage.removeItem('adminUsername')
+          localStorage.removeItem('loginTimestamp')
+          sessionStorage.removeItem('staffPortalUser')
+          window.dispatchEvent(new Event('storage'))
+          
+          if (location.pathname.startsWith('/admin') || location.pathname.startsWith('/staff')) {
+            navigate('/login')
+          }
+        }
+      }
+    }
+    
+    checkSession()
+    const interval = setInterval(checkSession, 60000) // Check every minute
+    return () => clearInterval(interval)
+  }, [location.pathname, navigate])
 
   return (
     <div className="min-h-screen flex flex-col">

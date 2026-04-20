@@ -55,6 +55,7 @@ function Navbar() {
     localStorage.removeItem('userRole')
     localStorage.removeItem('adminLoggedIn')
     localStorage.removeItem('adminUsername')
+    localStorage.removeItem('loginTimestamp')
     setIsLoggedIn(false)
     setUserRole('')
     navigate('/')

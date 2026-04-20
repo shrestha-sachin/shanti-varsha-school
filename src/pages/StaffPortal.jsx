@@ -1,12 +1,16 @@
 import { useState, useEffect } from 'react'
-import { Users, LogIn, LogOut, Bell, Calendar, Newspaper, User, Lock, BookOpen, Award, LayoutDashboard, GraduationCap, Edit, Save, CheckCircle, MapPin, Phone } from 'lucide-react'
+import { useNavigate } from 'react-router-dom'
+import { Users, LogIn, LogOut, Bell, Calendar, Newspaper, User, Lock, BookOpen, Award, LayoutDashboard, GraduationCap, Edit, Save, CheckCircle, MapPin, Phone, ExternalLink, Library, FileText, ChevronRight, Globe } from 'lucide-react'
 import { supabase } from '../supabaseClient'
 
 function StaffPortal() {
+    const navigate = useNavigate()
     const [activeTab, setActiveTab] = useState('dashboard')
+    const [activeGrade, setActiveGrade] = useState('Grade 10')
+    const [activeSubject, setActiveSubject] = useState('All')
     const [loggedIn, setLoggedIn] = useState(false)
     const [staffMember, setStaffMember] = useState(null)
-    const [nameInput, setNameInput] = useState('')
+    const [idInput, setIdInput] = useState('')
     const [pinInput, setPinInput] = useState('')
     const [error, setError] = useState('')
     const [loading, setLoading] = useState(false)
@@ -24,6 +28,7 @@ function StaffPortal() {
     const [events, setEvents] = useState([])
     const [news, setNews] = useState([])
     const [allStaff, setAllStaff] = useState([])
+    const [allCurriculum, setAllCurriculum] = useState([])
 
     const fetchDB = async () => {
         const { data: gData } = await supabase.from('student_grades').select('*')
@@ -44,6 +49,13 @@ function StaffPortal() {
 
         const { data: staffData } = await supabase.from('school_staff').select('*').order('name')
         if (staffData) setAllStaff(staffData)
+
+        try {
+            const { data: cData, error } = await supabase.from('school_curriculum').select('*')
+            if (!error && cData) setAllCurriculum(cData)
+        } catch (e) {
+            setAllCurriculum([])
+        }
     }
 
     useEffect(() => {
@@ -64,25 +76,38 @@ function StaffPortal() {
         setLoading(true)
         setError('')
         
-        const { data, error: fbError } = await supabase.from('school_staff').select('*').eq('name', nameInput.trim()).eq('pin', pinInput.trim()).maybeSingle()
+        const { data, error: fbError } = await supabase.from('school_staff').select('*').eq('id', idInput.trim()).eq('pin', pinInput.trim()).maybeSingle()
         
         if (data) {
             setStaffMember(data)
             setLoggedIn(true)
             sessionStorage.setItem('staffPortalUser', JSON.stringify(data))
+            
+            // Set global auth for Navbar and Watchdog
+            localStorage.setItem('isLoggedIn', 'true')
+            localStorage.setItem('userRole', 'teacher')
+            localStorage.setItem('username', data.name)
+            localStorage.setItem('loginTimestamp', Date.now().toString())
+            window.dispatchEvent(new Event('storage'))
         } else {
-            setError('Invalid credentials. Please contact the administrator.')
+            setError('Invalid Staff ID or PIN. Please check your credentials.')
         }
         setLoading(false)
     }
 
     const handleLogout = () => {
+        localStorage.removeItem('isLoggedIn')
+        localStorage.removeItem('username')
+        localStorage.removeItem('userRole')
+        localStorage.removeItem('loginTimestamp')
+        window.dispatchEvent(new Event('storage')) // Force Navbar state sync globally
         setLoggedIn(false)
         setStaffMember(null)
         sessionStorage.removeItem('staffPortalUser')
-        setNameInput('')
+        setIdInput('')
         setPinInput('')
         setError('')
+        navigate('/')
     }
 
 
@@ -108,17 +133,17 @@ function StaffPortal() {
 
                         {/* Form */}
                         <div className="p-6 sm:p-8">
-                            <p className="text-gray-500 text-xs sm:text-sm mb-6 text-center">Enter your registered name and PIN to access the portal.</p>
+                            <p className="text-gray-500 text-xs sm:text-sm mb-6 text-center">Enter your Staff ID and PIN to access the portal.</p>
                             <form onSubmit={handleLogin} className="space-y-4">
                                 <div>
-                                    <label className="label-modern">Full Name</label>
+                                    <label className="label-modern">Staff ID</label>
                                     <div className="relative">
                                         <User className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
                                         <input
                                             className="input-modern pl-10"
-                                            placeholder="Enter your name"
-                                            value={nameInput}
-                                            onChange={e => setNameInput(e.target.value)}
+                                            placeholder="e.g. TEA001"
+                                            value={idInput}
+                                            onChange={e => setIdInput(e.target.value)}
                                             required
                                         />
                                     </div>
@@ -184,6 +209,9 @@ function StaffPortal() {
                     <div className="flex items-center gap-2 overflow-x-auto pb-2 scrollbar-hide no-scrollbar">
                         <button onClick={() => setActiveTab('dashboard')} className={`flex items-center gap-2 px-5 py-3 rounded-t-xl text-xs font-bold transition-all border-b-2 whitespace-nowrap ${activeTab === 'dashboard' ? 'bg-white text-navy border-gold' : 'bg-white/5 text-white/60 border-transparent hover:bg-white/10'}`}>
                             <LayoutDashboard className="w-4 h-4" /> Dashboard
+                        </button>
+                        <button onClick={() => setActiveTab('curriculum')} className={`flex items-center gap-2 px-5 py-3 rounded-t-xl text-xs font-bold transition-all border-b-2 whitespace-nowrap ${activeTab === 'curriculum' ? 'bg-white text-navy border-gold' : 'bg-white/5 text-white/60 border-transparent hover:bg-white/10'}`}>
+                            <Library className="w-4 h-4" /> Curriculum & Files
                         </button>
                     </div>
                 </div>
@@ -257,7 +285,74 @@ function StaffPortal() {
                     </div>
                 </div>
 
+                {/* Educational Resources Section */}
+                <div className="mt-8">
+                    <div className="flex items-center gap-3 mb-6">
+                        <div className="bg-gradient-to-br from-navy to-navy-light p-2 rounded-xl">
+                            <BookOpen className="h-5 w-5 text-white" />
+                        </div>
+                        <h2 className="font-display font-bold text-navy text-xl">Educational Resources</h2>
+                    </div>
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                        {[
+                            { 
+                                name: 'NEB', 
+                                full: 'National Examination Board',
+                                desc: 'Grade 10 (SEE) & 12 board schedules, results & guidelines.', 
+                                url: 'https://neb.gov.np', 
+                                accent: 'bg-blue-500'
+                            },
+                            { 
+                                name: 'CDC', 
+                                full: 'Curriculum Development Centre',
+                                desc: 'National curriculum frameworks, textbooks & official guides.', 
+                                url: 'https://moecdc.gov.np', 
+                                accent: 'bg-emerald-500'
+                            },
+                            { 
+                                name: 'MOEST', 
+                                full: 'Ministry of Education, Science and Tech.',
+                                desc: 'Policy planning, scholarships & educational governance.', 
+                                url: 'https://moest.gov.np', 
+                                accent: 'bg-purple-500'
+                            },
+                            { 
+                                name: 'TSC', 
+                                full: 'Teacher Service Commission',
+                                desc: 'Licensing, permanent appointments & career promotions.', 
+                                url: 'https://tsc.gov.np', 
+                                accent: 'bg-rose-500'
+                            }
+                        ].map(resource => (
+                            <a 
+                                key={resource.name} 
+                                href={resource.url} 
+                                target="_blank" 
+                                rel="noopener noreferrer" 
+                                className="group bg-white rounded-2xl p-5 border border-slate-100 hover:border-gold/50 transition-all duration-300 flex flex-col h-full shadow-sm hover:shadow-md"
+                            >
+                                <div className="flex items-start justify-between mb-4">
+                                    <span className={`px-2 py-1 ${resource.accent} text-white text-[9px] font-black rounded-lg tracking-wider`}>
+                                        {resource.name}
+                                    </span>
+                                    <ExternalLink className="h-4 w-4 text-slate-200 group-hover:text-gold transition-colors" />
+                                </div>
+                                
+                                <h4 className="text-navy font-bold text-base leading-tight mb-2 group-hover:text-gold transition-colors">
+                                    {resource.full}
+                                </h4>
+                                
+                                <p className="text-slate-400 text-xs leading-relaxed mb-6 flex-grow">
+                                    {resource.desc}
+                                </p>
 
+                                <div className="flex items-center gap-2 text-[10px] font-black text-slate-400 uppercase tracking-widest group-hover:text-navy transition-colors">
+                                    Check Portal <ChevronRight className="h-3 w-3" />
+                                </div>
+                            </a>
+                        ))}
+                    </div>
+                </div>
 
                 {/* Staff directory */}
                 {allStaff.length > 0 && (
@@ -294,7 +389,121 @@ function StaffPortal() {
                     </div>
                 )}
 
+                {activeTab === 'curriculum' && (
+                    <div className="animate-fade-in flex flex-col lg:flex-row gap-8">
+                        {/* Grade Sidebar */}
+                        <div className="lg:w-64 flex-shrink-0">
+                            <div className="bg-white rounded-3xl shadow-card border border-gray-100 p-4 sticky top-8">
+                                <h3 className="font-display font-bold text-navy px-4 mb-4 text-sm uppercase tracking-widest opacity-50">Select Grade</h3>
+                                <div className="space-y-1">
+                                    {['Nursery', 'LKG', 'UKG', 'Grade 1', 'Grade 2', 'Grade 3', 'Grade 4', 'Grade 5', 'Grade 6', 'Grade 7', 'Grade 8', 'Grade 9', 'Grade 10'].map(grade => (
+                                        <button
+                                            key={grade}
+                                            onClick={() => setActiveGrade(grade)}
+                                            className={`w-full text-left px-4 py-3 rounded-xl text-sm font-bold transition-all ${activeGrade === grade 
+                                                ? 'bg-gold/10 text-gold-dark border-r-4 border-gold' 
+                                                : 'text-navy/60 hover:bg-gray-50 hover:text-navy'}`}
+                                        >
+                                            {grade}
+                                        </button>
+                                    ))}
+                                </div>
+                            </div>
+                        </div>
 
+                        {/* Resource Content */}
+                        <div className="flex-1 space-y-6">
+                            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                                <div>
+                                    <h2 className="font-display font-bold text-navy text-2xl">Resources for {activeGrade}</h2>
+                                    <p className="text-gray-400 text-xs font-bold uppercase tracking-widest mt-1">Academic Repository</p>
+                                </div>
+                                <div className="flex items-center gap-2 overflow-x-auto pb-2 no-scrollbar">
+                                    {['All', 'Nepali', 'English', 'Mathematics', 'Science', 'Social', 'Moral', 'Computer', 'Creative'].map(sub => (
+                                        <button
+                                            key={sub}
+                                            onClick={() => setActiveSubject(sub)}
+                                            className={`px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all whitespace-nowrap ${activeSubject === sub 
+                                                ? 'bg-navy text-white shadow-lg' 
+                                                : 'bg-white text-gray-400 border border-gray-100 hover:border-gold/30 hover:text-navy'}`}
+                                        >
+                                            {sub}
+                                        </button>
+                                    ))}
+                                </div>
+                            </div>
+
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                {(() => {
+                                    const filtered = allCurriculum.filter(c => c.grade === activeGrade && (activeSubject === 'All' || c.subject === activeSubject))
+                                    
+                                    if (filtered.length > 0) {
+                                        return filtered.map((item, idx) => {
+                                            const IconComponent = item.type === 'Archive' ? FileText : item.type === 'PDF Guide' ? GraduationCap : BookOpen;
+                                            return (
+                                                <div key={idx} className="group bg-white rounded-3xl p-6 border border-gray-100 hover:border-gold/30 hover:shadow-xl transition-all duration-300">
+                                                    <div className="flex items-start justify-between mb-4">
+                                                        <div className="bg-navy/5 p-3 rounded-2xl group-hover:bg-gold/10 group-hover:text-gold transition-colors">
+                                                            <IconComponent className="h-6 w-6" />
+                                                        </div>
+                                                        <span className="text-[10px] font-bold text-gray-400 bg-gray-50 px-2.5 py-1 rounded-lg uppercase">{item.type}</span>
+                                                    </div>
+                                                    <h4 className="font-display font-bold text-navy text-lg mb-2">{item.title}</h4>
+                                                    <p className="text-gray-500 text-sm leading-relaxed mb-6">{item.grade} · {item.subject}</p>
+                                                    <a 
+                                                        href={item.url} 
+                                                        target="_blank" 
+                                                        rel="noopener noreferrer"
+                                                        className="flex items-center justify-between w-full py-3 px-4 bg-gray-50 group-hover:bg-gold group-hover:text-white rounded-xl text-xs font-bold transition-all"
+                                                    >
+                                                        Access Resource
+                                                        <ChevronRight className="h-4 w-4" />
+                                                    </a>
+                                                </div>
+                                            );
+                                        })
+                                    }
+
+                                    return [
+                                        { title: 'Official Curriculum', desc: 'Ministry approved curriculum and standards', icon: BookOpen, type: 'Document' },
+                                        { title: 'Lesson Syllabus', desc: 'Grade specific learning objectives and timeline', icon: FileText, type: 'Archive' },
+                                        { title: 'Teaching Manual', desc: 'Recommended teaching methodologies and guides', icon: GraduationCap, type: 'PDF Guide' },
+                                        { title: 'Reference Material', desc: 'Additional research and lesson materials', icon: Library, type: 'Resources' }
+                                    ].map((item, idx) => {
+                                        const IconComponent = item.icon;
+                                        return (
+                                            <div key={idx} className="group bg-white rounded-3xl p-6 border border-gray-100 hover:border-gold/30 hover:shadow-xl transition-all duration-300">
+                                                <div className="flex items-start justify-between mb-4">
+                                                    <div className="bg-navy/5 p-3 rounded-2xl group-hover:bg-gold/10 group-hover:text-gold transition-colors">
+                                                        <IconComponent className="h-6 w-6" />
+                                                    </div>
+                                                    <span className="text-[10px] font-bold text-gray-400 bg-gray-50 px-2.5 py-1 rounded-lg uppercase">{item.type}</span>
+                                                </div>
+                                                <h4 className="font-display font-bold text-navy text-lg mb-2">{item.title}</h4>
+                                                <p className="text-gray-500 text-sm leading-relaxed mb-6">{item.desc}</p>
+                                                <a 
+                                                    href={`https://moecdc.gov.np/en/curriculum?grade=${activeGrade.replace(/\s+/g, '')}&subject=${activeSubject === 'All' ? '' : activeSubject}`} 
+                                                    target="_blank" 
+                                                    rel="noopener noreferrer"
+                                                    className="flex items-center justify-between w-full py-3 px-4 bg-gray-50 group-hover:bg-gold group-hover:text-white rounded-xl text-xs font-bold transition-all"
+                                                >
+                                                    Search {activeSubject !== 'All' ? `${activeSubject} ` : ''}{item.title}
+                                                    <ChevronRight className="h-4 w-4" />
+                                                </a>
+                                            </div>
+                                        );
+                                    })
+                                })()}
+                            </div>
+
+                            <div className="bg-gold/5 border-2 border-dashed border-gold/20 rounded-3xl p-8 text-center">
+                                <FileText className="h-10 w-10 text-gold/40 mx-auto mb-4" />
+                                <h3 className="text-navy font-bold mb-2">Classroom Materials Repository</h3>
+                                <p className="text-gray-500 text-sm max-w-md mx-auto">Upload and manage school-specific files, question papers, and results internally via the Admin portal.</p>
+                            </div>
+                        </div>
+                    </div>
+                )}
             </div>
         </div>
     )
