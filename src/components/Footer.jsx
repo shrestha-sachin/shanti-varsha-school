@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
-import { Facebook, Instagram, Youtube, Mail, Phone, MapPin, GraduationCap, ArrowRight } from 'lucide-react'
+import { Facebook, Instagram, Youtube, Mail, Phone, MapPin, GraduationCap, ArrowRight, CheckCircle } from 'lucide-react'
 import { useSchoolSettings } from '../hooks/useSchoolSettings'
 
 function Footer() {
@@ -131,8 +131,9 @@ function Footer() {
               Subscribe to get the latest notices and news from our school.
             </p>
             {subscribed ? (
-              <div className="bg-success/20 border border-success/40 rounded-xl px-4 py-3 text-success text-sm font-medium animate-fade-in">
-                ✓ Thank you for subscribing!
+              <div className="bg-success/20 border border-success/40 rounded-xl px-4 py-3 text-success text-sm font-medium animate-fade-in flex items-center gap-2">
+                <CheckCircle className="h-4 w-4 shrink-0" />
+                Thank you for subscribing!
               </div>
             ) : (
               <form onSubmit={handleSubscribe} className="space-y-3">

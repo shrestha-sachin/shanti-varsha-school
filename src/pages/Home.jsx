@@ -492,26 +492,40 @@ function Home() {
               <p className="text-gray-500 text-sm max-w-sm mx-auto italic">Our calendar is currently clear. Please stay tuned for upcoming events and announcements.</p>
             </div>
           ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-              {liveEvents.map((evt, i) => (
-                <div 
-                  key={evt.id} 
-                  className="group bg-slate-50 rounded-3xl border border-gray-100 p-5 hover:border-gold/30 hover:shadow-xl transition-all duration-300 reveal flex flex-col"
-                  style={{ transitionDelay: `${i * 0.1}s` }}
-                >
-                  <div className="flex items-center gap-3 mb-4">
-                    <div className="w-12 h-12 rounded-2xl bg-white shadow-sm border border-gray-100 flex flex-col items-center justify-center flex-shrink-0 text-navy group-hover:bg-gold group-hover:text-white group-hover:border-gold transition-colors">
-                      <span className="text-[10px] uppercase font-bold tracking-widest">{new Date(evt.date).toLocaleDateString('en-US', { month: 'short' })}</span>
-                      <span className="text-lg font-black leading-none">{new Date(evt.date).getDate()}</span>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+              {liveEvents.map((evt, i) => {
+                const Icon = evt.type === 'Sports' ? Trophy : evt.type === 'Music' || evt.type === 'Cultural' ? Music : evt.type === 'Academic' ? FlaskConical : Calendar;
+                return (
+                  <Link 
+                    to={`/notices`} // Or specific event detail if we have it
+                    key={evt.id} 
+                    className="group bg-white rounded-[2rem] border border-slate-100 p-8 hover:border-gold/30 hover:shadow-xl transition-all duration-500 reveal flex flex-col"
+                    style={{ transitionDelay: `${i * 0.1}s` }}
+                  >
+                    <div className="flex items-center justify-between mb-8">
+                      <div className="w-12 h-12 rounded-2xl bg-slate-50 flex items-center justify-center group-hover:bg-gold/10 transition-colors">
+                        <Icon className="h-6 w-6 text-slate-300 group-hover:text-gold transition-colors" />
+                      </div>
+                      <div className="bg-slate-50 px-3 py-1 rounded-full border border-slate-100 group-hover:bg-gold group-hover:border-gold transition-colors">
+                        <span className="text-[9px] font-black text-slate-400 group-hover:text-white uppercase tracking-widest">{evt.type || 'Event'}</span>
+                      </div>
                     </div>
-                    <div>
-                      <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest bg-white px-2 py-0.5 rounded-full border border-gray-100">{evt.type || 'Event'}</span>
+                    
+                    <div className="space-y-4 flex-1">
+                      <div className="flex items-baseline gap-2">
+                         <span className="text-3xl font-display font-black text-navy">{new Date(evt.date).getDate()}</span>
+                         <span className="text-xs font-bold text-slate-400 uppercase tracking-widest">{new Date(evt.date).toLocaleDateString('en-US', { month: 'short' })}</span>
+                      </div>
+                      <h3 className="font-display font-bold text-navy text-lg leading-tight group-hover:text-gold transition-colors line-clamp-2">{evt.title}</h3>
+                      {evt.description && <p className="text-xs text-slate-500 line-clamp-2 leading-relaxed">{evt.description}</p>}
                     </div>
-                  </div>
-                  <h3 className="font-display font-bold text-navy text-lg line-clamp-2 mb-2 group-hover:text-gold transition-colors">{evt.title}</h3>
-                  {evt.description && <p className="text-xs text-gray-500 line-clamp-2 mt-auto leading-relaxed">{evt.description}</p>}
-                </div>
-              ))}
+
+                    <div className="mt-8 pt-6 border-t border-slate-50 flex items-center gap-2 text-[10px] font-bold text-gold uppercase tracking-widest opacity-0 group-hover:opacity-100 transition-all">
+                      Learn More <ArrowRight className="h-3 w-3" />
+                    </div>
+                  </Link>
+                );
+              })}
             </div>
           )}
         </div>

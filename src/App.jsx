@@ -16,6 +16,8 @@ import Admin from './pages/Admin'
 import StaffPortal from './pages/StaffPortal'
 import Articles from './pages/Articles'
 import ArticleDetail from './pages/ArticleDetail'
+import ActivityDetail from './pages/ActivityDetail'
+
 
 import { useLocation, useNavigate } from 'react-router-dom'
 import { useEffect } from 'react'
@@ -68,6 +70,8 @@ function AppContent() {
           <Route path="/contact" element={<Contact />} />
           <Route path="/articles" element={<Articles />} />
           <Route path="/articles/:id" element={<ArticleDetail />} />
+          <Route path="/activities/:id" element={<ActivityDetail />} />
+
           <Route path="/login" element={<Login />} />
           <Route
             path="/staff"

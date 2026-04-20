@@ -429,11 +429,19 @@ function FileUploader({ onUpload, currentUrl, label = "Upload Image", folder = "
           <p className="text-[10px] text-gray-400 mt-1.5 italic">
             {type === 'image' ? 'JPG, PNG, WEBP — tap to crop' : 'Images, PDF, DOCX, XLSX'}
           </p>
-          {success && !error && <p className="text-[11px] text-green-600 font-bold mt-1">✓ Uploaded! Click Save to apply.</p>}
+          {success && !error && (
+            <div className="flex items-center gap-1.5 text-green-600 font-bold mt-1 animate-fade-in">
+               <CheckCircle2 className="h-3.5 w-3.5" />
+               <span className="text-[11px]">Uploaded! Click Save to apply.</span>
+            </div>
+          )}
           {error && (
-            <div className="mt-2 p-2 bg-red-50 border border-red-200 rounded-lg">
-              <p className="text-[11px] text-red-700 font-bold">✗ Upload failed</p>
-              <p className="text-[10px] text-red-500 mt-0.5">{error}</p>
+            <div className="mt-2 p-2 bg-red-50 border border-red-200 rounded-lg flex items-start gap-2">
+              <AlertCircle className="h-3.5 w-3.5 text-red-600 mt-0.5 shrink-0" />
+              <div>
+                <p className="text-[11px] text-red-700 font-bold">Upload failed</p>
+                <p className="text-[10px] text-red-500 mt-0.5">{error}</p>
+              </div>
             </div>
           )}
         </div>
@@ -1473,6 +1481,7 @@ function SettingsTab({ toast }) {
     principal_name: 'Sachin Shrestha',
     principal_message: 'Welcome to Shanti Varsha. We are committed to excellence in education.',
     principal_photo: '',
+    campus_photo: '',
   })
 
   const save = async (e) => {
@@ -1513,6 +1522,16 @@ function SettingsTab({ toast }) {
                 <input className="input-modern bg-gray-50/50" placeholder={placeholder} value={settings[field] || ''} onChange={e => setSettings(p => ({ ...p, [field]: e.target.value }))} />
               </div>
             ))}
+            <div>
+              <label className="label-modern font-bold text-navy mb-3 block">Campus Main Photo</label>
+              <FileUploader 
+                label="Front Building Image" 
+                folder="settings" 
+                currentUrl={settings.campus_photo} 
+                onUpload={url => setSettings(p => ({ ...p, campus_photo: url }))} 
+              />
+              <p className="text-[10px] text-gray-400 mt-2 italic">This image appears on the About Us page narrative section.</p>
+            </div>
           </div>
 
           <div className="h-px bg-gray-100" />
@@ -2015,7 +2034,8 @@ function Admin() {
     { id: 'smc', label: 'SMC', icon: UsersIcon },
     { id: 'testimonials', label: 'Messages', icon: Quote },
     {id: 'gallery', label: 'Gallery', icon: Image },
-    { id: 'curriculum', label: 'Curriculum', icon: Library },
+    { id: 'curriculum', label: 'CDC Links', icon: Library },
+    { id: 'levels', label: 'Academic Info', icon: BookOpen },
     { id: 'popup', label: 'Ad Popup', icon: Bell },
     { id: 'settings', label: 'School Info', icon: Settings },
   ]
@@ -2135,6 +2155,7 @@ function Admin() {
             {activeTab === 'testimonials' && <TestimonialsTab toast={showToast} />}
             {activeTab === 'gallery' && <GalleryTab toast={showToast} />}
             {activeTab === 'curriculum' && <CurriculumTab toast={showToast} />}
+            {activeTab === 'levels' && <AcademicOverviewTab toast={showToast} />}
             {activeTab === 'popup' && <PopupsTab toast={showToast} />}
             {activeTab === 'settings' && <SettingsTab toast={showToast} />}
           </div>
@@ -2331,6 +2352,128 @@ CREATE TABLE school_curriculum (
             ))}
           </tbody>
         </table>
+      </div>
+    </div>
+  )
+}
+
+function AcademicOverviewTab({ toast }) {
+  const [levels, setLevels] = useState([])
+  const [loading, setLoading] = useState(true)
+  const [editing, setEditing] = useState(null)
+  const [showEditor, setShowEditor] = useState(false)
+  const [form, setForm] = useState({ title: '', core: '', optional: '', icon: '🎓' })
+
+  const fetchLevels = async () => {
+    try {
+      setLoading(true)
+      const { data, error } = await supabase.from('school_academic_levels').select('*').order('id')
+      if (!error && data) setLevels(data)
+    } catch (e) { console.warn(e) }
+    finally { setLoading(false) }
+  }
+
+  useEffect(() => { fetchLevels() }, [])
+
+  const startAdd = () => {
+    setEditing(null)
+    setForm({ title: '', core: '', optional: '', icon: '🎓' })
+    setShowEditor(true)
+  }
+
+  const save = async (e) => {
+    e.preventDefault()
+    if (editing) {
+      const { error } = await supabase.from('school_academic_levels').update(form).eq('id', editing.id)
+      if (error) toast({ type: 'error', text: error.message })
+      else { toast({ type: 'success', text: 'Updated!' }); setShowEditor(false); fetchLevels() }
+    } else {
+      const { error } = await supabase.from('school_academic_levels').insert([form])
+      if (error) toast({ type: 'error', text: error.message })
+      else { toast({ type: 'success', text: 'Added!' }); setShowEditor(false); fetchLevels() }
+    }
+  }
+
+  const del = async (id) => {
+    if (confirm('Delete this level?')) {
+      await supabase.from('school_academic_levels').delete().eq('id', id)
+      fetchLevels()
+    }
+  }
+
+  if (loading) return <div className="py-20 text-center"><Loader2 className="h-8 w-8 animate-spin mx-auto text-gold" /></div>
+
+  return (
+    <div className="space-y-6 animate-fade-in">
+       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div className="flex items-center gap-3">
+          <SectionIcon icon={BookOpen} />
+          <div>
+            <h3 className="font-display font-bold text-navy text-xl">Academic Overview</h3>
+            <p className="text-xs text-navy/60">Manage subjects offered per grade level</p>
+          </div>
+        </div>
+        {!showEditor && (
+          <button onClick={startAdd} className="btn-gold px-6 py-3 flex items-center justify-center gap-2 shadow-lg shadow-gold/20">
+            <Plus className="h-5 w-5" /> Add Level
+          </button>
+        )}
+      </div>
+
+      {showEditor && (
+        <div className="bg-white rounded-3xl border-2 border-gold/30 shadow-2xl p-6 md:p-8 space-y-6">
+           <form onSubmit={save} className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="md:col-span-2">
+                <label className="label-modern">Level Title (e.g. Primary Grade 1-5) *</label>
+                <input className="input-modern" value={form.title} onChange={e=>setForm({...form, title: e.target.value})} required />
+              </div>
+              <div>
+                <label className="label-modern">Icon (Emoji) *</label>
+                <input className="input-modern" value={form.icon} onChange={e=>setForm({...form, icon: e.target.value})} maxLength={2} />
+              </div>
+              <div className="md:col-span-2">
+                <label className="label-modern">Core Subjects *</label>
+                <textarea className="input-modern h-24" value={form.core} onChange={e=>setForm({...form, core: e.target.value})} placeholder="English, Math, Science..." required />
+              </div>
+              <div className="md:col-span-2">
+                <label className="label-modern">Optional / Elective Subjects</label>
+                <textarea className="input-modern h-24" value={form.optional} onChange={e=>setForm({...form, optional: e.target.value})} placeholder="Computer, Music..." />
+              </div>
+              <div className="md:col-span-2 flex gap-4 pt-4">
+                 <button type="submit" className="btn-gold flex-1 py-4 font-bold">Save Level</button>
+                 <button type="button" onClick={() => setShowEditor(false)} className="px-8 py-4 border-2 border-gray-100 rounded-2xl">Cancel</button>
+              </div>
+           </form>
+        </div>
+      )}
+
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+         {levels.length === 0 ? (
+            <div className="col-span-full p-12 text-center border-2 border-dashed border-gray-200 rounded-3xl">
+               <p className="text-gray-400">No levels added yet. Run the SQL to create 'school_academic_levels' table.</p>
+               <div className="mt-4 p-4 bg-slate-50 rounded-xl text-[10px] font-mono text-left overflow-x-auto whitespace-pre">
+{`CREATE TABLE school_academic_levels (
+  id BIGINT GENERATED BY DEFAULT AS IDENTITY PRIMARY KEY,
+  title TEXT,
+  core TEXT,
+  optional TEXT,
+  icon TEXT DEFAULT '🎓'
+);`}
+               </div>
+            </div>
+         ) : levels.map(l => (
+            <div key={l.id} className="bg-white p-6 rounded-3xl border border-gray-100 shadow-sm hover:shadow-md transition-all group">
+               <div className="flex items-start justify-between mb-4">
+                  <div className="text-3xl">{l.icon}</div>
+                  <div className="flex gap-2">
+                    <button onClick={() => { setEditing(l); setForm(l); setShowEditor(true); }} className="p-2 text-gray-400 hover:text-navy hover:bg-gray-50 rounded-lg transition-colors"><Edit className="h-4 w-4" /></button>
+                    <button onClick={() => del(l.id)} className="p-2 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors"><Trash2 className="h-4 w-4" /></button>
+                  </div>
+               </div>
+               <h4 className="font-display font-bold text-navy text-lg mb-2">{l.title}</h4>
+               <p className="text-xs text-gray-500 line-clamp-2 mb-4">{l.core}</p>
+            </div>
+         ))}
       </div>
     </div>
   )
