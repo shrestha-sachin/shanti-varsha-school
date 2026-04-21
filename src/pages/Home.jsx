@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom'
 import {
   ArrowRight, Users, GraduationCap, Award, Calendar, Trophy, Medal,
   Newspaper, Bell, Star, BookOpen, UserCheck, Sparkles, MapPin, Phone,
-  Clock, ChevronRight, X, Maximize2, Download
+  Clock, ChevronRight, X, Maximize2, Download, Music, FlaskConical
 } from 'lucide-react'
 import NoticeBoard from '../components/NoticeBoard'
 import { supabase } from '../supabaseClient'
@@ -13,14 +13,14 @@ function useScrollReveal(deps = []) {
   useEffect(() => {
     const observer = new IntersectionObserver(
       (entries) => entries.forEach(e => {
-        if (e.isIntersecting) { 
-          e.target.classList.add('visible'); 
-          observer.unobserve(e.target) 
+        if (e.isIntersecting) {
+          e.target.classList.add('visible');
+          observer.unobserve(e.target)
         }
       }),
       { threshold: 0.1 }
     )
-    
+
     // Tiny delay to ensure DOM is updated
     const timer = setTimeout(() => {
       document.querySelectorAll('.reveal, .reveal-left, .reveal-right, .reveal-scale').forEach(el => {
@@ -79,13 +79,13 @@ function PopupAd() {
           .select('*')
           .eq('is_active', true)
           .order('display_order', { ascending: true })
-        
+
         if (data && data.length > 0) {
           // Only show those not yet dismissed in THIS session
           const dismissedStrings = sessionStorage.getItem('dismissedPopupIds')
           const dismissedIds = dismissedStrings ? JSON.parse(dismissedStrings) : []
           const remaining = data.filter(p => !dismissedIds.includes(p.id))
-          
+
           if (remaining.length > 0) {
             setPopups(remaining)
             const timer = setTimeout(() => setIsVisible(true), 1500)
@@ -103,7 +103,7 @@ function PopupAd() {
 
   const close = (e) => {
     if (e) e.stopPropagation()
-    
+
     // Save dismissal to session
     if (current) {
       const dismissedStrings = sessionStorage.getItem('dismissedPopupIds')
@@ -129,12 +129,12 @@ function PopupAd() {
   return (
     <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 overflow-hidden animate-fade-in" onClick={close}>
       <div className="absolute inset-0 bg-navy/90 backdrop-blur-sm" />
-      <div 
+      <div
         className="relative bg-white rounded-3xl overflow-hidden shadow-2xl w-[92vw] max-w-sm sm:max-w-md max-h-[85vh] animate-scale-in border border-white/10 flex flex-col mx-auto"
         onClick={e => e.stopPropagation()}
       >
-        <button 
-          onClick={close} 
+        <button
+          onClick={close}
           className="absolute top-2 right-2 sm:top-3 sm:right-3 z-40 bg-black/50 backdrop-blur-md hover:bg-red-600 text-white p-2 rounded-full shadow-lg transition-all group border border-white/10"
           title="Close"
         >
@@ -144,31 +144,31 @@ function PopupAd() {
         <div className="relative overflow-y-auto w-full bg-white flex flex-col items-center justify-center">
           {current.link_url ? (
             <Link to={current.link_url} onClick={() => close()} className="relative block w-full group">
-               <div className="absolute inset-0 bg-gold/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-10" />
-               <img 
-                 src={`${current.image_url}?t=${Date.now()}`} 
-                 alt="Announcement" 
-                 className="w-full h-auto object-contain max-h-[60vh] sm:max-h-[70vh] group-hover:scale-[1.02] transition-transform duration-700 block" 
-               />
+              <div className="absolute inset-0 bg-gold/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-10" />
+              <img
+                src={`${current.image_url}?t=${Date.now()}`}
+                alt="Announcement"
+                className="w-full h-auto object-contain max-h-[60vh] sm:max-h-[70vh] group-hover:scale-[1.02] transition-transform duration-700 block"
+              />
             </Link>
           ) : (
-            <img 
-              src={`${current.image_url}?t=${Date.now()}`} 
-              alt="Announcement" 
-              className="w-full h-auto object-contain max-h-[60vh] sm:max-h-[70vh] block" 
+            <img
+              src={`${current.image_url}?t=${Date.now()}`}
+              alt="Announcement"
+              className="w-full h-auto object-contain max-h-[60vh] sm:max-h-[70vh] block"
             />
           )}
         </div>
 
         <div className="p-3 sm:p-4 bg-navy/95 border-t border-white/10 flex flex-col sm:flex-row gap-2 sm:gap-3 flex-shrink-0 z-20">
-          <button 
+          <button
             onClick={(e) => { e.stopPropagation(); window.open(current.image_url, '_blank') }}
             className="w-full sm:flex-1 bg-white/10 hover:bg-white/20 text-white border border-white/20 py-3 rounded-xl font-bold text-xs uppercase tracking-widest flex items-center justify-center gap-2 transition-all"
             title="View Full Screen"
           >
             <Maximize2 className="h-4 w-4" /> Full Size
           </button>
-          <button 
+          <button
             onClick={async (e) => {
               e.stopPropagation();
               try {
@@ -203,10 +203,10 @@ function Home() {
   const [liveToppers, setLiveToppers] = useState([])
   const [liveEvents, setLiveEvents] = useState([])
   const [liveStats, setLiveStats] = useState([
-    { icon: Users, label: 'Active Learners', value: 500, suffix: '+', color: 'from-navy-light to-navy' },
-    { icon: GraduationCap, label: 'Qualified Staff', value: 25, suffix: '+', color: 'from-gold to-gold-dark' },
+    { icon: Users, label: 'Active Learners', value: 750, suffix: '+', color: 'from-navy-light to-navy' },
+    { icon: GraduationCap, label: 'Qualified Staff', value: 45, suffix: '+', color: 'from-gold to-gold-dark' },
     { icon: Calendar, label: 'Years of Service', value: 15, suffix: '+', color: 'from-navy-light to-navy' },
-    { icon: Award, label: 'Academic Awards', value: 50, suffix: '+', color: 'from-gold to-gold-dark' },
+    { icon: Award, label: 'Academic Excellence', value: 25, suffix: '+', color: 'from-gold to-gold-dark' },
   ])
   const settings = useSchoolSettings()
 
@@ -222,12 +222,12 @@ function Home() {
         .limit(3)
       if (newsError) console.error("Home news fetch error:", newsError)
       if (newsData) setLatestNews(newsData)
-      
+
       // Fetch toppers
       let { data: toppersData, error: toppersError } = await supabase.from('school_toppers').select('*').order('display_order', { ascending: true })
       if (toppersError) {
-         const fallback = await supabase.from('school_toppers').select('*').order('batch', { ascending: false })
-         toppersData = fallback.data
+        const fallback = await supabase.from('school_toppers').select('*').order('batch', { ascending: false })
+        toppersData = fallback.data
       }
       if (toppersData) setLiveToppers(toppersData)
 
@@ -297,7 +297,7 @@ function Home() {
         <div className="relative z-10 flex-1 flex flex-col items-center justify-center text-center px-4 max-w-5xl mx-auto pt-0 sm:pt-12 pb-0 lg:py-0 -mt-16 lg:-mt-10">
           <div className="inline-flex items-center gap-2 bg-white/15 backdrop-blur-sm border border-white/20 rounded-full px-3 py-1 text-[9px] sm:text-sm font-medium mb-2 sm:mb-6 animate-fade-in-up" style={{ animationDelay: '0.1s', animationFillMode: 'both' }}>
             <Star className="h-3 w-3 sm:h-4 sm:w-4 text-gold-light fill-gold-light" />
-            Quality Education is our Destination
+            Empowering Minds, Shaping Future Leaders
           </div>
           <h1 className="font-display font-extrabold text-3xl sm:text-5xl md:text-7xl lg:text-8xl mb-2 sm:mb-5 leading-tight sm:leading-none drop-shadow-2xl animate-fade-in-up" style={{ animationDelay: '0.2s', animationFillMode: 'both' }}>
             <span className="block bg-gradient-to-r from-white via-gold-light to-white bg-clip-text text-transparent">Welcome to</span>
@@ -305,16 +305,16 @@ function Home() {
           </h1>
           <div className="w-12 sm:w-24 h-0.5 sm:h-1 bg-gradient-to-r from-transparent via-gold to-transparent mx-auto mb-4 sm:mb-7 animate-fade-in-up" style={{ animationDelay: '0.3s', animationFillMode: 'both' }} />
           <p className="text-[12px] sm:text-lg md:text-xl text-gray-100 mb-6 sm:mb-10 font-light max-w-xl mx-auto leading-relaxed animate-fade-in-up" style={{ animationDelay: '0.35s', animationFillMode: 'both' }}>
-            Nurturing minds, building characters, and inspiring excellence in {settings.address}.
+            Providing excellence in education at {settings.address} for over {liveStats[2].value} years.
           </p>
           <div className="flex flex-row items-center justify-center gap-2 sm:gap-4 animate-fade-in-up" style={{ animationDelay: '0.45s', animationFillMode: 'both' }}>
             <Link to="/about" className="btn-modern group inline-flex items-center gap-2 bg-gradient-to-r from-gold to-gold-light text-white px-4 sm:px-7 py-2 sm:py-3.5 rounded-lg sm:rounded-2xl font-bold text-xs sm:text-base shadow-2xl shadow-gold/40 hover:shadow-gold/60 hover:scale-[1.04] transition-all duration-400">
-              <span>About Us</span>
+              <span>Explore Our Story</span>
               <ArrowRight className="h-3 w-3 sm:h-5 sm:w-5 group-hover:translate-x-1.5 transition-transform" />
             </Link>
             <Link to="/about#contact" className="inline-flex items-center gap-2 bg-white/15 backdrop-blur-sm border border-white/30 text-white px-4 sm:px-7 py-2 sm:py-3.5 rounded-lg sm:rounded-2xl font-semibold text-xs sm:text-base hover:bg-white/25 transition-all duration-300">
               <Phone className="h-3 w-3 sm:h-5 sm:w-5" />
-              Contact
+              Contact Us
             </Link>
           </div>
         </div>
@@ -352,11 +352,10 @@ function Home() {
                 <Star className="h-3.5 w-3.5 fill-gold shrink-0" /> Est. {settings.established || '2043'} B.S. · {settings.address}
               </div>
               <h2 className="font-display font-extrabold text-4xl md:text-5xl section-heading mb-5 leading-tight">
-                A School Built on Excellence
+                Academic Excellence and Personal Growth
               </h2>
               <p className="text-gray-600 leading-relaxed text-base mb-5">
-                We blend academic rigor with extracurricular opportunity, helping every student discover their potential
-                and build a strong foundation for life.
+                At {settings.name}, we believe that every student has the potential to achieve greatness. Our curriculum is designed to foster critical thinking, creativity, and a lifelong passion for learning.
               </p>
               <p className="text-gray-500 leading-relaxed text-sm mb-8">
                 Our graduates consistently achieve top results in SLC/SEE examinations, with multiple students ranking
@@ -364,10 +363,10 @@ function Home() {
               </p>
               <div className="flex flex-col sm:flex-row gap-3">
                 <Link to="/about" className="btn-primary group">
-                  Our Story <ArrowRight className="h-4 w-4 group-hover:translate-x-1 transition-transform" />
+                  Our Legacy <ArrowRight className="h-4 w-4 group-hover:translate-x-1 transition-transform" />
                 </Link>
                 <Link to="/contact" className="inline-flex items-center gap-2 px-5 py-2.5 border-2 border-navy/20 text-navy rounded-xl font-semibold text-sm hover:border-gold hover:text-gold transition-all duration-300">
-                  <MapPin className="h-4 w-4" /> Visit Us
+                  <MapPin className="h-4 w-4" /> Visit Campus
                 </Link>
               </div>
             </div>
@@ -395,7 +394,7 @@ function Home() {
       <section className="bg-gradient-to-b from-gray-50 to-white py-20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-14 reveal">
-            <h2 className="font-display font-extrabold text-4xl md:text-5xl section-heading mb-2">Why Choose Us?</h2>
+            <h2 className="font-display font-extrabold text-4xl md:text-5xl section-heading mb-2">Why parents trust us</h2>
             <div className="section-divider" />
             <p className="text-gray-500 text-base max-w-xl mx-auto mt-5">We are committed to excellence in education and the complete, holistic development of every student</p>
           </div>
@@ -421,7 +420,7 @@ function Home() {
             <div className="text-center mb-10 reveal">
               <div className="flex items-center justify-center gap-4 mb-3">
                 <Trophy className="h-10 w-10 text-gold animate-float" />
-                <h2 className="font-display font-extrabold text-4xl md:text-5xl section-heading">Our Academic Excellence</h2>
+                <h2 className="font-display font-extrabold text-4xl md:text-5xl section-heading">Our Brightest Stars</h2>
                 <Trophy className="h-10 w-10 text-gold animate-float" style={{ animationDelay: '1.5s' }} />
               </div>
               <div className="section-divider" />
@@ -431,9 +430,9 @@ function Home() {
             </div>
 
             <div className={`grid grid-cols-1 sm:grid-cols-2 ${liveToppers.length === 1 ? 'lg:grid-cols-1 max-w-sm mx-auto' :
-                liveToppers.length === 2 ? 'lg:grid-cols-2 max-w-3xl mx-auto' :
-                  liveToppers.length === 3 ? 'lg:grid-cols-3 max-w-5xl mx-auto' :
-                    'lg:grid-cols-4'
+              liveToppers.length === 2 ? 'lg:grid-cols-2 max-w-3xl mx-auto' :
+                liveToppers.length === 3 ? 'lg:grid-cols-3 max-w-5xl mx-auto' :
+                  'lg:grid-cols-4'
               } gap-6`}>
               {liveToppers.map((t, idx) => (
                 <div
@@ -496,9 +495,9 @@ function Home() {
               {liveEvents.map((evt, i) => {
                 const Icon = evt.type === 'Sports' ? Trophy : evt.type === 'Music' || evt.type === 'Cultural' ? Music : evt.type === 'Academic' ? FlaskConical : Calendar;
                 return (
-                  <Link 
+                  <Link
                     to={`/notices`} // Or specific event detail if we have it
-                    key={evt.id} 
+                    key={evt.id}
                     className="group bg-white rounded-[2rem] border border-slate-100 p-8 hover:border-gold/30 hover:shadow-xl transition-all duration-500 reveal flex flex-col"
                     style={{ transitionDelay: `${i * 0.1}s` }}
                   >
@@ -510,11 +509,11 @@ function Home() {
                         <span className="text-[9px] font-black text-slate-400 group-hover:text-white uppercase tracking-widest">{evt.type || 'Event'}</span>
                       </div>
                     </div>
-                    
+
                     <div className="space-y-4 flex-1">
                       <div className="flex items-baseline gap-2">
-                         <span className="text-3xl font-display font-black text-navy">{new Date(evt.date).getDate()}</span>
-                         <span className="text-xs font-bold text-slate-400 uppercase tracking-widest">{new Date(evt.date).toLocaleDateString('en-US', { month: 'short' })}</span>
+                        <span className="text-3xl font-display font-black text-navy">{new Date(evt.date).getDate()}</span>
+                        <span className="text-xs font-bold text-slate-400 uppercase tracking-widest">{new Date(evt.date).toLocaleDateString('en-US', { month: 'short' })}</span>
                       </div>
                       <h3 className="font-display font-bold text-navy text-lg leading-tight group-hover:text-gold transition-colors line-clamp-2">{evt.title}</h3>
                       {evt.description && <p className="text-xs text-slate-500 line-clamp-2 leading-relaxed">{evt.description}</p>}
@@ -540,13 +539,13 @@ function Home() {
                 <div className="bg-gradient-to-br from-gold/20 to-gold/10 p-2.5 rounded-xl">
                   <Newspaper className="h-6 w-6 text-gold" />
                 </div>
-                <h2 className="font-display font-extrabold text-3xl md:text-4xl section-heading">Latest News</h2>
+                <h2 className="font-display font-extrabold text-3xl md:text-4xl section-heading">Latest Campus Stories</h2>
               </div>
               <div className="section-divider ml-0" style={{ margin: '0' }} />
             </div>
             {latestNews.length > 0 && (
               <Link to="/news" className="hidden sm:flex items-center gap-2 text-gold font-semibold text-sm hover:gap-3 transition-all duration-300">
-                All News <ArrowRight className="h-4 w-4" />
+                View All Updates <ArrowRight className="h-4 w-4" />
               </Link>
             )}
           </div>
@@ -604,7 +603,7 @@ function Home() {
             <NoticeBoard limit={3} />
             <div className="mt-8 text-center">
               <Link to="/notices" className="group inline-flex items-center gap-2 text-navy font-bold hover:text-gold transition-colors duration-300 bg-white px-6 py-3 rounded-full shadow-card hover:shadow-card-hover border border-gray-100 hover:border-gold/30">
-                View All Notices
+                View All Official Notices
                 <ArrowRight className="h-4 w-4 group-hover:translate-x-1 transition-transform" />
               </Link>
             </div>

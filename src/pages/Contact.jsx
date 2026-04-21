@@ -23,13 +23,13 @@ function Contact() {
   const handleSubmit = (e) => {
     e.preventDefault()
     setIsSubmitting(true)
-    
+
     // Simulate form submission
     setTimeout(() => {
       setIsSubmitting(false)
       setIsSubmitted(true)
       setFormData({ name: '', email: '', subject: '', message: '' })
-      
+
       // Reset success message after 5 seconds
       setTimeout(() => setIsSubmitted(false), 5000)
     }, 1500)
@@ -61,7 +61,7 @@ function Contact() {
                 <div className="w-1 h-8 bg-gradient-to-b from-gold to-gold-dark rounded-full"></div>
                 <span>Get in Touch</span>
               </h2>
-              
+
               <div className="space-y-6">
                 <div className="group flex items-start space-x-4 p-4 rounded-xl hover:bg-gradient-to-r hover:from-gold/5 hover:to-transparent transition-all duration-300 cursor-pointer">
                   <div className="bg-gradient-to-br from-gold/20 to-gold/10 p-3 rounded-xl group-hover:from-gold/30 group-hover:to-gold/20 transition-all duration-300 shadow-lg group-hover:shadow-xl group-hover:scale-110">
@@ -120,7 +120,7 @@ function Contact() {
             <div className="bg-white rounded-2xl shadow-xl p-8 md:p-10 border-2 border-gray-100 hover:shadow-2xl transition-all duration-500 relative overflow-hidden">
               {/* Decorative background */}
               <div className="absolute top-0 right-0 w-64 h-64 bg-gold/5 rounded-full blur-3xl -z-0"></div>
-              
+
               <div className="relative z-10">
                 <h2 className="text-3xl font-bold text-navy mb-8 flex items-center space-x-3">
                   <div className="w-1 h-8 bg-gradient-to-b from-gold to-gold-dark rounded-full"></div>

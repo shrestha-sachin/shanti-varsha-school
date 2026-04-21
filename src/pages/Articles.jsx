@@ -22,8 +22,8 @@ function Articles() {
     }, [])
 
     const filtered = articles.filter(a => {
-        const matchSearch = !search || 
-            (a.title && a.title.toLowerCase().includes(search.toLowerCase())) || 
+        const matchSearch = !search ||
+            (a.title && a.title.toLowerCase().includes(search.toLowerCase())) ||
             (a.body && a.body.toLowerCase().includes(search.toLowerCase())) ||
             (a.author && a.author.toLowerCase().includes(search.toLowerCase())) ||
             (a.tags && a.tags.toLowerCase().includes(search.toLowerCase()))

@@ -90,22 +90,22 @@ function ActivityDetail() {
           <div className="space-y-16">
             {/* Lead description */}
             <div className="bg-slate-50 p-10 md:p-16 rounded-[3rem] border border-slate-100 italic">
-               <Quote className="h-10 w-10 text-gold/20 mb-6" />
-               <p className="text-2xl md:text-3xl font-display font-medium text-navy leading-relaxed">
-                 {activity.description}
-               </p>
+              <Quote className="h-10 w-10 text-gold/20 mb-6" />
+              <p className="text-2xl md:text-3xl font-display font-medium text-navy leading-relaxed">
+                {activity.description}
+              </p>
             </div>
 
             {/* Visual Frame */}
             <div className="aspect-video bg-slate-50 rounded-[3rem] overflow-hidden border border-slate-100 flex items-center justify-center">
-               {activity.image_url ? (
-                 <img src={activity.image_url} alt={activity.title} className="w-full h-full object-cover" />
-               ) : (
-                 <div className="text-center space-y-4">
-                    <Camera className="h-20 w-20 text-slate-200 mx-auto" />
-                    <p className="text-slate-300 font-bold text-[10px] uppercase tracking-widest">Visual Archive Pending Arrival</p>
-                 </div>
-               )}
+              {activity.image_url ? (
+                <img src={activity.image_url} alt={activity.title} className="w-full h-full object-cover" />
+              ) : (
+                <div className="text-center space-y-4">
+                  <Camera className="h-20 w-20 text-slate-200 mx-auto" />
+                  <p className="text-slate-300 font-bold text-[10px] uppercase tracking-widest">Visual Archive Pending Arrival</p>
+                </div>
+              )}
             </div>
 
             {/* Narrative Body */}
@@ -117,16 +117,16 @@ function ActivityDetail() {
 
             {/* Footer Actions */}
             <div className="pt-16 border-t border-slate-100 flex items-center justify-between">
-               <div className="flex items-center gap-4">
-                  <div className="w-10 h-10 rounded-full bg-navy text-white flex items-center justify-center font-black text-xs">SVS</div>
-                  <div>
-                    <p className="text-navy font-bold text-sm tracking-tight leading-none">Shanti Varsha School</p>
-                    <p className="text-slate-400 text-[9px] uppercase tracking-widest mt-1">Institutional Event History</p>
-                  </div>
-               </div>
-               <button onClick={() => window.print()} className="p-3 bg-slate-50 rounded-2xl hover:bg-gold/10 transition-colors text-slate-400 hover:text-gold">
-                 <Share2 className="h-5 w-5" />
-               </button>
+              <div className="flex items-center gap-4">
+                <div className="w-10 h-10 rounded-full bg-navy text-white flex items-center justify-center font-black text-xs">SVS</div>
+                <div>
+                  <p className="text-navy font-bold text-sm tracking-tight leading-none">Shanti Varsha School</p>
+                  <p className="text-slate-400 text-[9px] uppercase tracking-widest mt-1">Institutional Event History</p>
+                </div>
+              </div>
+              <button onClick={() => window.print()} className="p-3 bg-slate-50 rounded-2xl hover:bg-gold/10 transition-colors text-slate-400 hover:text-gold">
+                <Share2 className="h-5 w-5" />
+              </button>
             </div>
           </div>
         </div>

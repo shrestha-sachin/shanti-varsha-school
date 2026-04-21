@@ -34,8 +34,8 @@ function News() {
 
     const filtered = allNews.filter(n => {
         const matchCat = activeCategory === 'All' || n.category === activeCategory
-        const matchSearch = !search || 
-            (n.title && n.title.toLowerCase().includes(search.toLowerCase())) || 
+        const matchSearch = !search ||
+            (n.title && n.title.toLowerCase().includes(search.toLowerCase())) ||
             (n.content && n.content.toLowerCase().includes(search.toLowerCase()))
         return matchCat && matchSearch
     })
@@ -80,8 +80,8 @@ function News() {
                                 key={cat}
                                 onClick={() => setActiveCategory(cat)}
                                 className={`px-6 py-3 rounded-2xl text-xs font-bold transition-all duration-300 whitespace-nowrap ${activeCategory === cat
-                                        ? 'bg-navy text-white shadow-lg'
-                                        : 'bg-white text-gray-500 border border-gray-100 hover:border-gold/50 hover:text-navy active:scale-95'
+                                    ? 'bg-navy text-white shadow-lg'
+                                    : 'bg-white text-gray-500 border border-gray-100 hover:border-gold/50 hover:text-navy active:scale-95'
                                     }`}
                             >
                                 {cat}
@@ -114,9 +114,9 @@ function News() {
                                         </div>
                                     )}
                                     <div className="absolute top-4 left-4">
-                                       <span className="px-3 py-1 bg-white/90 backdrop-blur-md text-navy text-[10px] font-black uppercase tracking-widest rounded-lg shadow-sm">
-                                          {article.category}
-                                       </span>
+                                        <span className="px-3 py-1 bg-white/90 backdrop-blur-md text-navy text-[10px] font-black uppercase tracking-widest rounded-lg shadow-sm">
+                                            {article.category}
+                                        </span>
                                     </div>
                                 </div>
                                 <div className="p-6 md:p-8">

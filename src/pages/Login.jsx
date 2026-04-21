@@ -11,15 +11,15 @@ function Login() {
   const location = useLocation()
   const [loading, setLoading] = useState(false)
 
-  const roleTitle = location.state?.role 
-    ? location.state.role.charAt(0).toUpperCase() + location.state.role.slice(1) + ' Login' 
+  const roleTitle = location.state?.role
+    ? location.state.role.charAt(0).toUpperCase() + location.state.role.slice(1) + ' Login'
     : 'Login Portal'
 
   const CREDENTIALS = {
-    admin: { 
-      username: import.meta.env.VITE_ADMIN_USER || 'admin', 
-      password: import.meta.env.VITE_ADMIN_PASSWORD || 'admin123', 
-      role: 'admin' 
+    admin: {
+      username: import.meta.env.VITE_ADMIN_USER || 'admin',
+      password: import.meta.env.VITE_ADMIN_PASSWORD || 'admin123',
+      role: 'admin'
     },
     teacher: {
       username: import.meta.env.VITE_TEACHER_USER || 'teacher',
@@ -43,7 +43,7 @@ function Login() {
     }
 
     setLoading(true)
-    
+
     // Check against configured credentials
     const userRoleKey = Object.keys(CREDENTIALS).find(
       key => CREDENTIALS[key].username === cleanUser && CREDENTIALS[key].password === cleanPass
@@ -55,14 +55,14 @@ function Login() {
       localStorage.setItem('username', user.username)
       localStorage.setItem('userRole', user.role)
       localStorage.setItem('loginTimestamp', Date.now().toString())
-      
+
       if (user.role === 'admin') {
         localStorage.setItem('adminLoggedIn', 'true')
         localStorage.setItem('adminUsername', user.username)
       }
 
       setLoading(false)
-      
+
       let defaultPath = '/admin'
       if (user.role === 'teacher') defaultPath = '/staff'
       const from = location.state?.from?.pathname || defaultPath
@@ -82,7 +82,7 @@ function Login() {
         localStorage.setItem('userRole', 'teacher')
         localStorage.setItem('loginTimestamp', Date.now().toString())
         sessionStorage.setItem('staffPortalUser', JSON.stringify(staffData))
-        
+
         window.dispatchEvent(new Event('storage'))
         setLoading(false)
         navigate('/staff', { replace: true })
@@ -105,7 +105,7 @@ function Login() {
               </div>
               <h2 className="text-3xl font-bold text-navy bg-gradient-to-r from-navy to-navy-dark bg-clip-text text-transparent">{roleTitle}</h2>
             </div>
-          
+
             <p className="text-center text-gray-600 mb-8 animate-fade-in-up" style={{ animationDelay: '0.3s', animationFillMode: 'both' }}>
               Enter your credentials to access your dashboard
             </p>

@@ -65,7 +65,7 @@ function Navbar() {
 
   const navLinks = [
     { path: '/', label: 'Home' },
-    { path: '/about', label: 'About Us' },
+    { path: '/about', label: 'About' },
     { path: '/notices', label: 'Notices', badge: noticeCount > 0 },
     { path: '/news', label: 'News' },
     { path: '/articles', label: 'Articles' },
@@ -171,15 +171,17 @@ function Navbar() {
           </div>
 
           {/* Mobile menu button */}
-          <button
-            className="lg:hidden text-white hover:text-gold transition-all duration-300 p-2 rounded-xl hover:bg-white/10 ml-2 flex-shrink-0"
-            onClick={() => setIsOpen(!isOpen)}
-            aria-label="Toggle menu"
-          >
-            {isOpen
-              ? <X className="h-6 w-6" />
-              : <Menu className="h-6 w-6" />}
-          </button>
+            <div className="lg:hidden flex items-center gap-2">
+              <button
+                className="text-white hover:text-gold transition-all duration-300 p-2 rounded-xl hover:bg-white/10 flex-shrink-0"
+                onClick={() => setIsOpen(!isOpen)}
+                aria-label="Toggle menu"
+              >
+                {isOpen
+                  ? <X className="h-6 w-6" />
+                  : <Menu className="h-6 w-6" />}
+              </button>
+            </div>
         </div>
       </div>
 
@@ -225,7 +227,7 @@ function Navbar() {
                 </>
               ) : (
                 <div className="space-y-1 bg-white/5 rounded-xl border border-white/10 p-2">
-                  <div className="text-[10px] font-bold text-gray-400 px-3 uppercase tracking-wider mb-2 mt-1">Select Login Module</div>
+                  <div className="text-[10px] font-bold text-gray-400 px-3 uppercase tracking-wider mb-2 mt-1">Login</div>
                   <Link to="/login" state={{ role: 'teacher' }} onClick={() => setIsOpen(false)} className="flex items-center justify-between px-3 py-2.5 rounded-lg text-sm font-medium text-gray-300 hover:bg-white/10 hover:text-gold transition-colors">
                     Teacher Login <ChevronDown className="h-3.5 w-3.5 -rotate-90" />
                   </Link>

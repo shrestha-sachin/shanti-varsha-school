@@ -26,14 +26,14 @@ function About() {
    useEffect(() => {
       const observer = new IntersectionObserver(
          (entries) => entries.forEach(e => {
-            if (e.isIntersecting) { 
-               e.target.classList.add('visible'); 
-               observer.unobserve(e.target) 
+            if (e.isIntersecting) {
+               e.target.classList.add('visible');
+               observer.unobserve(e.target)
             }
          }),
          { threshold: 0.1 }
       )
-      
+
       const timer = setTimeout(() => {
          document.querySelectorAll('.reveal, .reveal-left, .reveal-right, .reveal-scale').forEach(el => {
             observer.observe(el)
@@ -262,7 +262,7 @@ function About() {
             {/* Visual Depth Accents */}
             <div className="absolute top-0 left-0 w-full h-20 bg-gradient-to-b from-white to-transparent pointer-events-none" />
             <div className="absolute bottom-0 left-0 w-full h-20 bg-gradient-to-t from-white to-transparent pointer-events-none" />
-            
+
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center relative z-10">
                <div className="mb-20 reveal">
                   <h2 className="text-3xl md:text-4xl font-display font-black text-navy uppercase tracking-tight">Academic Framework</h2>
@@ -283,8 +283,8 @@ function About() {
                      { title: 'Middle Years', core: 'Analytical thinking and moral ethics.', icon: Microscope },
                      { title: 'Secondary', core: 'Higher academic excellence and success.', icon: GraduationCap }
                   ]).map((level, i) => (
-                     <button 
-                        key={i} 
+                     <button
+                        key={i}
                         onClick={() => setSelectedLevel(selectedLevel === level.title ? null : level.title)}
                         className={`flex items-center gap-5 px-10 py-5 rounded-[1.5rem] border-2 transition-all duration-500 shadow-sm ${selectedLevel === level.title ? 'bg-navy border-navy shadow-2xl shadow-navy/20 scale-105' : 'bg-white border-slate-200 hover:border-gold/50 hover:bg-white hover:shadow-xl' + (selectedLevel === null ? ' animate-bounce-subtle' : '')}`}
                      >
@@ -310,7 +310,7 @@ function About() {
                         <div className="bg-navy px-8 py-8 md:py-12 flex flex-col md:flex-row items-start md:items-center justify-between gap-6 relative overflow-hidden">
                            {/* Decorative background accent */}
                            <div className="absolute top-0 right-0 w-96 h-96 bg-gold/10 rounded-full blur-[100px] -mr-48 -mt-48" />
-                           
+
                            <div className="flex items-center gap-5 relative z-10">
                               <div className="p-4 bg-white/10 rounded-2xl backdrop-blur-xl border border-white/10 shadow-2xl">
                                  <FileText className="h-7 w-7 text-gold-light" />
@@ -334,17 +334,17 @@ function About() {
                         {/* Narrative Lead-in */}
                         <div className="px-8 py-6 bg-slate-50/50 border-b border-slate-200 backdrop-blur-sm">
                            <p className="text-slate-500 font-medium text-sm leading-relaxed max-w-4xl italic">
-                              "{ (levels.find(l => l.title === selectedLevel)?.core) || 
+                              "{(levels.find(l => l.title === selectedLevel)?.core) ||
                                  ([
-                                     { title: 'Early Years', core: 'Sensory foundation and creative play.' },
-                                     { title: 'Foundation', core: 'Core literacy and scientific inquiry.' },
-                                     { title: 'Middle Years', core: 'Analytical thinking and moral ethics.' },
-                                     { title: 'Secondary', core: 'Higher academic excellence and success.' }
-                                  ].find(l => l.title === selectedLevel)?.core)
-                               }"
+                                    { title: 'Early Years', core: 'Sensory foundation and creative play.' },
+                                    { title: 'Foundation', core: 'Core literacy and scientific inquiry.' },
+                                    { title: 'Middle Years', core: 'Analytical thinking and moral ethics.' },
+                                    { title: 'Secondary', core: 'Higher academic excellence and success.' }
+                                 ].find(l => l.title === selectedLevel)?.core)
+                              }"
                            </p>
                         </div>
-                        
+
                         {/* The "Excel" Table */}
                         <div className="overflow-x-auto">
                            <table className="w-full text-left border-collapse">

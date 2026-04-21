@@ -2,8 +2,8 @@ import React, { useState, useEffect } from 'react'
 import { createPortal } from 'react-dom'
 
 import { useNavigate } from 'react-router-dom'
-import { 
-  UsersIcon, Bell, GraduationCap, Settings, Plus, X, Trash2, Edit, Save, 
+import {
+  UsersIcon, Bell, GraduationCap, Settings, Plus, X, Trash2, Edit, Save,
   Search, Filter, LogOut, ChevronRight, Image, Layout, List, FileText, Newspaper,
   MapPin, Phone, Mail, Globe, Clock, Info, CheckCircle2, AlertCircle, Loader2,
   Table, Pin, Maximize2, Download, Calendar, BookOpen, TrendingUp, Eye, EyeOff, Award, User, Quote, Upload, GripVertical, Menu, Library, Megaphone
@@ -27,7 +27,7 @@ const QUILL_MODULES = {
     ['clean']
   ],
   imageResize: {
-     modules: ['Resize', 'DisplaySize', 'Toolbar']
+    modules: ['Resize', 'DisplaySize', 'Toolbar']
   }
 }
 
@@ -54,8 +54,8 @@ function Toast({ msg }) {
   if (!msg.text) return null
   return (
     <div className={`fixed top-6 right-6 z-[100] flex items-center gap-3 px-5 py-4 rounded-2xl shadow-2xl border animate-fade-in-up text-sm font-semibold ${msg.type === 'success'
-        ? 'bg-success-light border-success/40 text-green-800'
-        : 'bg-danger-light border-danger/40 text-red-800'
+      ? 'bg-success-light border-success/40 text-green-800'
+      : 'bg-danger-light border-danger/40 text-red-800'
       }`}>
       {msg.type === 'success' ? <CheckCircle2 className="h-5 w-5 text-success" /> : <AlertCircle className="h-5 w-5 text-danger" />}
       {msg.text}
@@ -150,7 +150,7 @@ function CropModal({ src, onDone, onCancel }) {
     const { fx, fy } = toFrac(cx, cy)
     const r = getImgRect()
     if (!r) return
-    
+
     if (drag.mode === 'move') {
       const newLeft = Math.max(0, Math.min(1 - box.width, fx - drag.startFx))
       const newTop = Math.max(0, Math.min(1 - box.height, fy - drag.startFy))
@@ -192,7 +192,7 @@ function CropModal({ src, onDone, onCancel }) {
 
     const outW = 800
     const outH = ratio ? (800 / ratio) : (800 * (sh / sw))
-    
+
     const canvas = document.createElement('canvas')
     canvas.width = outW
     canvas.height = outH
@@ -221,10 +221,10 @@ function CropModal({ src, onDone, onCancel }) {
         <div className="px-5 py-4 border-b border-gray-100 flex items-center justify-between overflow-x-auto gap-4 custom-scrollbar">
           <h3 className="font-display font-bold text-navy text-lg whitespace-nowrap hidden sm:block">Editor</h3>
           <div className="flex gap-2 shrink-0">
-            <button type="button" onClick={() => setRatio(null)} className={`px-4 py-1.5 rounded-full text-xs font-bold transition-colors ${ratio===null?'bg-navy text-white shadow-md':'bg-gray-100 text-gray-500 hover:bg-gray-200'}`}>Free</button>
-            <button type="button" onClick={() => setRatio(1)} className={`px-4 py-1.5 rounded-full text-xs font-bold transition-colors ${ratio===1?'bg-navy text-white shadow-md':'bg-gray-100 text-gray-500 hover:bg-gray-200'}`}>1:1 Square</button>
-            <button type="button" onClick={() => setRatio(4/3)} className={`px-4 py-1.5 rounded-full text-xs font-bold transition-colors ${ratio===4/3?'bg-navy text-white shadow-md':'bg-gray-100 text-gray-500 hover:bg-gray-200'}`}>4:3</button>
-            <button type="button" onClick={() => setRatio(16/9)} className={`px-4 py-1.5 rounded-full text-xs font-bold transition-colors ${ratio===16/9?'bg-navy text-white shadow-md':'bg-gray-100 text-gray-500 hover:bg-gray-200'}`}>16:9</button>
+            <button type="button" onClick={() => setRatio(null)} className={`px-4 py-1.5 rounded-full text-xs font-bold transition-colors ${ratio === null ? 'bg-navy text-white shadow-md' : 'bg-gray-100 text-gray-500 hover:bg-gray-200'}`}>Free</button>
+            <button type="button" onClick={() => setRatio(1)} className={`px-4 py-1.5 rounded-full text-xs font-bold transition-colors ${ratio === 1 ? 'bg-navy text-white shadow-md' : 'bg-gray-100 text-gray-500 hover:bg-gray-200'}`}>1:1 Square</button>
+            <button type="button" onClick={() => setRatio(4 / 3)} className={`px-4 py-1.5 rounded-full text-xs font-bold transition-colors ${ratio === 4 / 3 ? 'bg-navy text-white shadow-md' : 'bg-gray-100 text-gray-500 hover:bg-gray-200'}`}>4:3</button>
+            <button type="button" onClick={() => setRatio(16 / 9)} className={`px-4 py-1.5 rounded-full text-xs font-bold transition-colors ${ratio === 16 / 9 ? 'bg-navy text-white shadow-md' : 'bg-gray-100 text-gray-500 hover:bg-gray-200'}`}>16:9</button>
           </div>
           <button type="button" onClick={onCancel} className="p-2 hover:bg-red-50 hover:text-red-500 rounded-full shrink-0 transition-colors"><X className="h-5 w-5" /></button>
         </div>
@@ -244,7 +244,7 @@ function CropModal({ src, onDone, onCancel }) {
               <p className="text-xs">Loading image...</p>
             </div>
           )}
-          
+
           <div ref={wrapRef} className="relative inline-block leading-none" style={{ fontSize: 0 }}>
             <img
               ref={imgRef}
@@ -274,7 +274,7 @@ function CropModal({ src, onDone, onCancel }) {
                   {[...Array(9)].map((_, i) => <div key={i} style={{ border: '1px solid rgba(255,255,255,0.4)', borderRight: i % 3 === 2 ? 'none' : '1px solid rgba(255,255,255,0.4)', borderBottom: i > 5 ? 'none' : '1px solid rgba(255,255,255,0.4)' }} />)}
                 </div>
                 {/* Resize Handle */}
-                <div 
+                <div
                   style={{ position: 'absolute', bottom: -6, right: -6, width: 20, height: 20, backgroundColor: 'white', borderRadius: '50%', cursor: 'se-resize', boxShadow: '0 2px 4px rgba(0,0,0,0.4)', pointerEvents: 'auto', border: '2px solid #072f6e', zIndex: 50 }}
                   onMouseDown={(e) => onDown(e, 'resize')}
                   onTouchStart={(e) => onDown(e, 'resize')}
@@ -287,17 +287,17 @@ function CropModal({ src, onDone, onCancel }) {
         <div className="p-5">
           {imgReady && <p className="text-xs text-gray-500 mb-4 text-center">Drag edges to frame your photo or choose an aspect ratio above</p>}
           <div className="flex flex-col sm:flex-row gap-3">
-            <button 
+            <button
               type="button"
-              onClick={applyCrop} 
+              onClick={applyCrop}
               disabled={!imgReady}
               className={`btn-gold flex-1 py-3 font-bold transition-all ${!imgReady ? 'opacity-50 cursor-not-allowed' : 'hover:scale-[1.02] active:scale-95'}`}
             >
               Upload Cropped
             </button>
-            <button 
+            <button
               type="button"
-              onClick={() => onDone(src)} 
+              onClick={() => onDone(src)}
               disabled={!imgReady}
               className={`flex-1 py-3 bg-navy hover:bg-navy-dark text-white rounded-2xl font-bold transition-all shadow-md ${!imgReady ? 'opacity-50 cursor-not-allowed' : 'hover:scale-[1.02] active:scale-95'}`}
             >
@@ -308,7 +308,7 @@ function CropModal({ src, onDone, onCancel }) {
       </div>
     </div>
   )
-  
+
   return createPortal(modalContent, document.body)
 }
 
@@ -329,7 +329,7 @@ function FileUploader({ onUpload, currentUrl, label = "Upload Image", folder = "
     e.target.value = ''
     setError(null)
     setSuccess(false)
-    
+
     // If it's an image and we are in image mode (or it's an image in 'all' mode), show cropper
     if (file.type.startsWith('image/')) {
       const reader = new FileReader()
@@ -347,7 +347,7 @@ function FileUploader({ onUpload, currentUrl, label = "Upload Image", folder = "
       setError(null)
       const ext = file.name.split('.').pop()
       const path = `${folder}/${Date.now()}.${ext}`
-      
+
       const { error: uploadErr } = await supabase.storage
         .from('school-assets')
         .upload(path, file, { contentType: file.type, upsert: true })
@@ -406,8 +406,8 @@ function FileUploader({ onUpload, currentUrl, label = "Upload Image", folder = "
               <img src={preview} className="w-full h-full object-cover" alt="preview" onError={() => setPreview(null)} />
             ) : (
               <div className="flex flex-col items-center justify-center bg-gray-50 h-full w-full">
-                 <FileText className="h-8 w-8 text-gold" />
-                 <span className="text-[8px] font-bold text-gray-400 mt-1 uppercase">DOC/PDF</span>
+                <FileText className="h-8 w-8 text-gold" />
+                <span className="text-[8px] font-bold text-gray-400 mt-1 uppercase">DOC/PDF</span>
               </div>
             )
           ) : (
@@ -415,13 +415,13 @@ function FileUploader({ onUpload, currentUrl, label = "Upload Image", folder = "
           )}
         </div>
         <div className="flex-1 min-w-0">
-          <input 
-            type="file" 
-            id={uid} 
-            accept={type === 'image' ? "image/jpeg,image/png,image/webp" : "image/*,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"} 
-            onChange={handleChange} 
-            disabled={uploading} 
-            className="hidden" 
+          <input
+            type="file"
+            id={uid}
+            accept={type === 'image' ? "image/jpeg,image/png,image/webp" : "image/*,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"}
+            onChange={handleChange}
+            disabled={uploading}
+            className="hidden"
           />
           <label htmlFor={uid} className="cursor-pointer inline-flex items-center gap-2 px-4 py-2.5 bg-white border-2 border-gray-200 rounded-xl text-sm font-bold text-navy hover:border-gold hover:text-gold transition-all shadow-sm">
             {uploading ? <><Loader2 className="h-4 w-4 animate-spin" /> Uploading...</> : <><Plus className="h-4 w-4" /> {preview ? 'Change File' : 'Choose File'}</>}
@@ -431,8 +431,8 @@ function FileUploader({ onUpload, currentUrl, label = "Upload Image", folder = "
           </p>
           {success && !error && (
             <div className="flex items-center gap-1.5 text-green-600 font-bold mt-1 animate-fade-in">
-               <CheckCircle2 className="h-3.5 w-3.5" />
-               <span className="text-[11px]">Uploaded! Click Save to apply.</span>
+              <CheckCircle2 className="h-3.5 w-3.5" />
+              <span className="text-[11px]">Uploaded! Click Save to apply.</span>
             </div>
           )}
           {error && (
@@ -458,11 +458,11 @@ function EmptyState({ message = 'No items yet.' }) {
 // ── NOTICE TAB ────────────────────────────────────────────────────────────────
 function NoticesTab({ toast }) {
   const [notices, setNotices] = useState([])
-  const [form, setForm] = useState({ 
-    title: '', 
-    date: today(), 
-    category: 'General', 
-    description: '', 
+  const [form, setForm] = useState({
+    title: '',
+    date: today(),
+    category: 'General',
+    description: '',
     pinned: false,
     file_url: '',
     external_link: ''
@@ -484,20 +484,20 @@ function NoticesTab({ toast }) {
   const save = async (e) => {
     e.preventDefault()
     if (!form.title.trim()) return toast({ type: 'error', text: 'Title is required.' })
-    
+
     const payload = { ...form }
     const { error } = await supabase.from('school_notices').upsert(editing ? { ...payload, id: editing.id } : [payload])
-    
+
     if (error) {
       toast({ type: 'error', text: `Failed: ${error.message}` })
     } else {
       toast({ type: 'success', text: editing ? 'Notice updated!' : 'Notice added!' })
       setEditing(null)
-      setForm({ 
-        title: '', 
-        date: today(), 
-        category: 'General', 
-        description: '', 
+      setForm({
+        title: '',
+        date: today(),
+        category: 'General',
+        description: '',
         pinned: false,
         file_url: '',
         external_link: ''
@@ -506,24 +506,24 @@ function NoticesTab({ toast }) {
     }
   }
 
-  const startEdit = (n) => { 
-    setEditing(n); 
-    setForm({ 
-      title: n.title, 
-      date: n.date, 
-      category: n.category || 'General', 
-      description: n.description || '', 
+  const startEdit = (n) => {
+    setEditing(n);
+    setForm({
+      title: n.title,
+      date: n.date,
+      category: n.category || 'General',
+      description: n.description || '',
       pinned: !!n.pinned,
       file_url: n.file_url || '',
       external_link: n.external_link || ''
-    }) 
+    })
   }
-  const del = async (id) => { 
-    if (confirm('Delete this notice?')) { 
+  const del = async (id) => {
+    if (confirm('Delete this notice?')) {
       const { error } = await supabase.from('school_notices').delete().eq('id', id)
       if (error) toast({ type: 'error', text: error.message })
-      else { toast({ type: 'success', text: 'Deleted.' }); fetchNotices() } 
-    } 
+      else { toast({ type: 'success', text: 'Deleted.' }); fetchNotices() }
+    }
   }
   const cancel = () => { setEditing(null); setForm({ title: '', date: today(), category: 'General', description: '', pinned: false, file_url: '', external_link: '' }) }
 
@@ -551,34 +551,34 @@ function NoticesTab({ toast }) {
           </div>
           <div className="md:col-span-1">
             <label className="label-modern">Attach Document/Photo</label>
-            <FileUploader 
-              label="PDF, DOCX or Image" 
-              folder="notices" 
+            <FileUploader
+              label="PDF, DOCX or Image"
+              folder="notices"
               type="all"
-              currentUrl={form.file_url} 
-              onUpload={url => setForm(p => ({ ...p, file_url: url }))} 
+              currentUrl={form.file_url}
+              onUpload={url => setForm(p => ({ ...p, file_url: url }))}
             />
           </div>
           <div className="md:col-span-1">
             <label className="label-modern">External Link (Optional)</label>
-            <input 
-              className="input-modern" 
-              placeholder="e.g. https://google.com" 
-              value={form.external_link} 
-              onChange={e => setForm(p => ({ ...p, external_link: e.target.value }))} 
+            <input
+              className="input-modern"
+              placeholder="e.g. https://google.com"
+              value={form.external_link}
+              onChange={e => setForm(p => ({ ...p, external_link: e.target.value }))}
             />
             <p className="text-[10px] text-gray-400 mt-2">Useful for YouTube links or external news</p>
           </div>
           <div className="md:col-span-2">
             <label className="label-modern">Detail Description (Optional)</label>
             <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
-               <ReactQuill 
-                 theme="snow" 
-                 modules={QUILL_MODULES}
-                 value={form.description} 
-                 onChange={val => setForm(p => ({ ...p, description: val }))}
-                 className="min-h-[150px] font-sans"
-               />
+              <ReactQuill
+                theme="snow"
+                modules={QUILL_MODULES}
+                value={form.description}
+                onChange={val => setForm(p => ({ ...p, description: val }))}
+                className="min-h-[150px] font-sans"
+              />
             </div>
           </div>
           <div className="md:col-span-2">
@@ -594,19 +594,19 @@ function NoticesTab({ toast }) {
             {notices.map(n => (
               <div key={n.id} className="flex items-center justify-between p-4 rounded-xl border border-gray-100 hover:border-gold/30 hover:bg-gray-50 transition-all">
                 <div className="flex-1 min-w-0">
-                   <div className="flex items-center gap-2 mb-1">
-                     <span className={`badge ${n.category === 'Urgent' ? 'badge-urgent' : 'badge-general'} text-[11px]`}>{n.category}</span>
-                     {n.pinned && <span className="flex items-center gap-1 text-[10px] font-bold text-amber-600 bg-amber-50 px-2 py-0.5 rounded-full"><Pin className="h-2.5 w-2.5" /> Pinned</span>}
-                   </div>
-                   <p className="font-semibold text-navy text-sm truncate">{n.title}</p>
-                   <p className="text-xs text-gray-400 mt-0.5">{n.date}</p>
+                  <div className="flex items-center gap-2 mb-1">
+                    <span className={`badge ${n.category === 'Urgent' ? 'badge-urgent' : 'badge-general'} text-[11px]`}>{n.category}</span>
+                    {n.pinned && <span className="flex items-center gap-1 text-[10px] font-bold text-amber-600 bg-amber-50 px-2 py-0.5 rounded-full"><Pin className="h-2.5 w-2.5" /> Pinned</span>}
+                  </div>
+                  <p className="font-semibold text-navy text-sm truncate">{n.title}</p>
+                  <p className="text-xs text-gray-400 mt-0.5">{n.date}</p>
                 </div>
                 <div className="flex items-center gap-1 ml-3">
-                   <button onClick={async () => { await supabase.from('school_notices').update({ pinned: !n.pinned }).eq('id', n.id); fetchNotices() }} className="p-2 text-gray-400 hover:text-gold hover:bg-gold/10 rounded-lg transition-all" title={n.pinned ? 'Unpin' : 'Pin'}>
-                     <Pin className={`h-4 w-4 ${n.pinned ? 'text-gold fill-gold' : ''}`} />
-                   </button>
-                   <button onClick={() => startEdit(n)} className="p-2 text-navy hover:bg-gold/10 hover:text-gold rounded-lg transition-all"><Edit className="h-4 w-4" /></button>
-                   <button onClick={() => del(n.id)} className="p-2 text-danger hover:bg-danger-light rounded-lg transition-all"><Trash2 className="h-4 w-4" /></button>
+                  <button onClick={async () => { await supabase.from('school_notices').update({ pinned: !n.pinned }).eq('id', n.id); fetchNotices() }} className="p-2 text-gray-400 hover:text-gold hover:bg-gold/10 rounded-lg transition-all" title={n.pinned ? 'Unpin' : 'Pin'}>
+                    <Pin className={`h-4 w-4 ${n.pinned ? 'text-gold fill-gold' : ''}`} />
+                  </button>
+                  <button onClick={() => startEdit(n)} className="p-2 text-navy hover:bg-gold/10 hover:text-gold rounded-lg transition-all"><Edit className="h-4 w-4" /></button>
+                  <button onClick={() => del(n.id)} className="p-2 text-danger hover:bg-danger-light rounded-lg transition-all"><Trash2 className="h-4 w-4" /></button>
                 </div>
               </div>
             ))}
@@ -638,9 +638,9 @@ function NewsTab({ toast }) {
   const save = async (e) => {
     e.preventDefault()
     if (!form.title.trim()) return toast({ type: 'error', text: 'Title is required.' })
-    
+
     const { error } = await supabase.from('school_news').upsert(editing ? { ...form, id: editing.id } : [form])
-    
+
     if (error) {
       toast({ type: 'error', text: `Failed: ${error.message}` })
     } else {
@@ -652,12 +652,12 @@ function NewsTab({ toast }) {
   }
 
   const startEdit = (n) => { setEditing(n); setForm({ title: n.title, category: n.category, content: n.content || '', image_url: n.image_url || '', date: n.date, published: !!n.published }) }
-  const del = async (id) => { 
-    if (confirm('Delete this article?')) { 
+  const del = async (id) => {
+    if (confirm('Delete this article?')) {
       const { error } = await supabase.from('school_news').delete().eq('id', id)
       if (error) toast({ type: 'error', text: error.message })
-      else { toast({ type: 'success', text: 'Deleted.' }); fetchNews() } 
-    } 
+      else { toast({ type: 'success', text: 'Deleted.' }); fetchNews() }
+    }
   }
   const cancel = () => { setEditing(null); setForm({ title: '', category: 'School News', content: '', image_url: '', date: today(), published: true }) }
   const togglePublish = async (n) => {
@@ -693,13 +693,13 @@ function NewsTab({ toast }) {
           <div className="md:col-span-2">
             <label className="label-modern">Content *</label>
             <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
-               <ReactQuill 
-                 theme="snow" 
-                 modules={QUILL_MODULES}
-                 value={form.content} 
-                 onChange={val => setForm(p => ({ ...p, content: val }))}
-                 className="min-h-[250px] font-sans"
-               />
+              <ReactQuill
+                theme="snow"
+                modules={QUILL_MODULES}
+                value={form.content}
+                onChange={val => setForm(p => ({ ...p, content: val }))}
+                className="min-h-[250px] font-sans"
+              />
             </div>
           </div>
           <div className="md:col-span-2 flex items-center gap-3">
@@ -765,7 +765,7 @@ function ArticlesTab({ toast }) {
     e.preventDefault()
     if (!form.title.trim()) return toast({ type: 'error', text: 'Title is required.' })
     const { error } = await supabase.from('school_articles').upsert(editing ? { ...form, id: editing.id } : [form])
-    
+
     if (error) {
       toast({ type: 'error', text: `Failed: ${error.message}` })
     } else {
@@ -777,12 +777,12 @@ function ArticlesTab({ toast }) {
   }
 
   const startEdit = (a) => { setEditing(a); setForm({ title: a.title, author: a.author || '', tags: a.tags || '', body: a.body || '', date: a.date, published: !!a.published }) }
-  const del = async (id) => { 
-    if (confirm('Delete this article?')) { 
+  const del = async (id) => {
+    if (confirm('Delete this article?')) {
       const { error } = await supabase.from('school_articles').delete().eq('id', id)
       if (error) toast({ type: 'error', text: error.message })
-      else { toast({ type: 'success', text: 'Deleted.' }); fetchArticles() } 
-    } 
+      else { toast({ type: 'success', text: 'Deleted.' }); fetchArticles() }
+    }
   }
   const cancel = () => { setEditing(null); setForm({ title: '', author: '', tags: '', body: '', date: today(), published: true }) }
 
@@ -813,13 +813,13 @@ function ArticlesTab({ toast }) {
           <div className="md:col-span-2">
             <label className="label-modern">Article Body *</label>
             <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
-               <ReactQuill 
-                 theme="snow" 
-                 modules={QUILL_MODULES}
-                 value={form.body} 
-                 onChange={val => setForm(p => ({ ...p, body: val }))}
-                 className="min-h-[350px] font-sans"
-               />
+              <ReactQuill
+                theme="snow"
+                modules={QUILL_MODULES}
+                value={form.body}
+                onChange={val => setForm(p => ({ ...p, body: val }))}
+                className="min-h-[350px] font-sans"
+              />
             </div>
           </div>
           <div className="md:col-span-2 flex gap-3">
@@ -881,7 +881,7 @@ function CalendarTab({ toast }) {
     e.preventDefault()
     if (!form.title.trim()) return toast({ type: 'error', text: 'Title is required.' })
     const { error } = await supabase.from('school_events').upsert(editing ? { ...form, id: editing.id } : [form])
-    
+
     if (error) {
       toast({ type: 'error', text: `Failed: ${error.message}` })
     } else {
@@ -893,12 +893,12 @@ function CalendarTab({ toast }) {
   }
 
   const startEdit = (ev) => { setEditing(ev); setForm({ title: ev.title, date: ev.date, type: ev.type || 'Academic', description: ev.description || '' }) }
-  const del = async (id) => { 
-    if (confirm('Delete this event?')) { 
+  const del = async (id) => {
+    if (confirm('Delete this event?')) {
       const { error } = await supabase.from('school_events').delete().eq('id', id)
       if (error) toast({ type: 'error', text: error.message })
-      else { toast({ type: 'success', text: 'Deleted.' }); fetchEvents() } 
-    } 
+      else { toast({ type: 'success', text: 'Deleted.' }); fetchEvents() }
+    }
   }
   const cancel = () => { setEditing(null); setForm({ title: '', date: today(), type: 'Academic', description: '' }) }
 
@@ -1012,11 +1012,11 @@ function StaffTab({ toast }) {
     setStaff(newStaff)
 
     try {
-      const updatePromises = newStaff.map((item, idx) => 
+      const updatePromises = newStaff.map((item, idx) =>
         supabase.from('school_staff').update({ display_order: idx }).eq('id', item.id)
       )
       const results = await Promise.all(updatePromises)
-      
+
       const errors = results.filter(r => r.error)
       if (errors.length > 0) {
         toast({ type: 'error', text: `Failed: ${errors[0].error.message}` })
@@ -1030,7 +1030,7 @@ function StaffTab({ toast }) {
     }
   }
 
-  const startEdit = (s) => { 
+  const startEdit = (s) => {
     setEditing(s)
     setForm({ id: s.id, name: s.name, role: s.role || 'Teacher', subject: s.subject || '', image_url: s.image_url || s.photo_url || '', pin: s.pin || '' })
     setShowEditor(true)
@@ -1050,9 +1050,9 @@ function StaffTab({ toast }) {
     if (editing) {
       const { id: _id, ...updatePayload } = form
       // Send only valid columns for school_staff
-      const payload = { 
-        ...updatePayload, 
-        photo_url: form.image_url 
+      const payload = {
+        ...updatePayload,
+        photo_url: form.image_url
       }
       delete payload.image_url // Remove the temporary JS field before sending to DB
       const { data: updated, error } = await supabase.from('school_staff').update(payload).eq('id', editing.id).select()
@@ -1060,9 +1060,9 @@ function StaffTab({ toast }) {
       else if (!updated || updated.length === 0) toast({ type: 'error', text: 'Update blocked by database policy.' })
       else { toast({ type: 'success', text: 'Staff updated!' }); setShowEditor(false); fetchStaff() }
     } else {
-      const payload = { 
-        ...form, 
-        photo_url: form.image_url 
+      const payload = {
+        ...form,
+        photo_url: form.image_url
       }
       delete payload.image_url
       const { error } = await supabase.from('school_staff').insert([payload])
@@ -1098,28 +1098,28 @@ function StaffTab({ toast }) {
         <div className="bg-white rounded-3xl border-2 border-gold/30 shadow-2xl overflow-hidden animate-fade-in relative">
           <div className="p-6 md:p-8 space-y-6">
             <div className="flex items-center justify-between mb-2">
-               <h4 className="font-display font-bold text-navy text-lg">{editing ? 'Edit Profile' : 'New Staff Profile'}</h4>
-               <button onClick={() => setShowEditor(false)} className="p-2 hover:bg-gray-100 rounded-full text-gray-400 transition-colors"><X className="h-5 w-5" /></button>
+              <h4 className="font-display font-bold text-navy text-lg">{editing ? 'Edit Profile' : 'New Staff Profile'}</h4>
+              <button onClick={() => setShowEditor(false)} className="p-2 hover:bg-gray-100 rounded-full text-gray-400 transition-colors"><X className="h-5 w-5" /></button>
             </div>
             <form onSubmit={save} className="grid grid-cols-1 lg:grid-cols-3 gap-8">
               <div className="lg:col-span-1 space-y-4">
                 <label className="block text-sm font-bold text-navy">Profile Photo</label>
-                <FileUploader folder="profile" currentUrl={form.image_url} onUpload={url => setForm(p=>({...p, image_url: url}))} />
+                <FileUploader folder="profile" currentUrl={form.image_url} onUpload={url => setForm(p => ({ ...p, image_url: url }))} />
                 <p className="text-[10px] text-gray-400 italic text-center">Images are automatically optimized for web use.</p>
               </div>
               <div className="lg:col-span-2 space-y-5">
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <div><label className="label-modern">Staff ID (Unique) *</label><input className="input-modern" placeholder="e.g. T-101" value={form.id} onChange={e=>setForm({...form, id: e.target.value})} disabled={!!editing} required /></div>
-                  <div><label className="label-modern">Full Name *</label><input className="input-modern" placeholder="Enter name" value={form.name} onChange={e=>setForm({...form, name: e.target.value})} required /></div>
+                  <div><label className="label-modern">Staff ID (Unique) *</label><input className="input-modern" placeholder="e.g. T-101" value={form.id} onChange={e => setForm({ ...form, id: e.target.value })} disabled={!!editing} required /></div>
+                  <div><label className="label-modern">Full Name *</label><input className="input-modern" placeholder="Enter name" value={form.name} onChange={e => setForm({ ...form, name: e.target.value })} required /></div>
                 </div>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <div><label className="label-modern">Role/Position</label><input className="input-modern" placeholder="e.g. Senior Teacher" value={form.role} onChange={e=>setForm({...form, role: e.target.value})} /></div>
-                  <div><label className="label-modern">Subject (if any)</label><input className="input-modern" placeholder="e.g. Mathematics" value={form.subject} onChange={e=>setForm({...form, subject: e.target.value})} /></div>
+                  <div><label className="label-modern">Role/Position</label><input className="input-modern" placeholder="e.g. Senior Teacher" value={form.role} onChange={e => setForm({ ...form, role: e.target.value })} /></div>
+                  <div><label className="label-modern">Subject (if any)</label><input className="input-modern" placeholder="e.g. Mathematics" value={form.subject} onChange={e => setForm({ ...form, subject: e.target.value })} /></div>
                 </div>
-                <div><label className="label-modern">Login PIN (4-digits) *</label><input className="input-modern" type="password" maxLength={4} value={form.pin} onChange={e=>setForm({...form, pin: e.target.value})} required /></div>
+                <div><label className="label-modern">Login PIN (4-digits) *</label><input className="input-modern" type="password" maxLength={4} value={form.pin} onChange={e => setForm({ ...form, pin: e.target.value })} required /></div>
                 <div className="flex gap-3 pt-4">
-                   <button type="submit" className="btn-gold flex-1 py-4 text-base font-bold shadow-xl shadow-gold/20">Save Profile</button>
-                   <button type="button" onClick={() => setShowEditor(false)} className="px-8 py-4 border-2 border-gray-100 rounded-2xl font-bold text-navy hover:bg-gray-50 transition-all">Cancel</button>
+                  <button type="submit" className="btn-gold flex-1 py-4 text-base font-bold shadow-xl shadow-gold/20">Save Profile</button>
+                  <button type="button" onClick={() => setShowEditor(false)} className="px-8 py-4 border-2 border-gray-100 rounded-2xl font-bold text-navy hover:bg-gray-50 transition-all">Cancel</button>
                 </div>
               </div>
             </form>
@@ -1129,8 +1129,8 @@ function StaffTab({ toast }) {
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
         {staff.map((s, idx) => (
-          <div 
-            key={s.id} 
+          <div
+            key={s.id}
             draggable
             onDragStart={(e) => handleDragStart(e, idx)}
             onDragEnd={handleDragEnd}
@@ -1140,9 +1140,9 @@ function StaffTab({ toast }) {
           >
             <div className="flex items-start gap-3 mb-4">
               <div className="flex flex-col items-center gap-2 pt-2">
-                 <div className="text-gray-300 group-hover:text-gold transition-colors">
-                    <GripVertical className="h-4 w-4" />
-                 </div>
+                <div className="text-gray-300 group-hover:text-gold transition-colors">
+                  <GripVertical className="h-4 w-4" />
+                </div>
               </div>
               <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-navy/5 to-gold/10 overflow-hidden flex-shrink-0 border border-gray-100 shadow-inner">
                 <img src={s.image_url ? `${s.image_url}?t=${Date.now()}` : (s.photo_url ? `${s.photo_url}?t=${Date.now()}` : `https://ui-avatars.com/api/?name=${encodeURIComponent(s.name)}&background=f0f2f5&color=072f6e`)} className="w-full h-full object-cover" alt={s.name} onError={e => e.target.src = 'https://ui-avatars.com/api/?name=' + encodeURIComponent(s.name)} />
@@ -1221,11 +1221,11 @@ function SMCTab({ toast }) {
     setSMC(newSMC)
 
     try {
-      const updatePromises = newSMC.map((item, idx) => 
+      const updatePromises = newSMC.map((item, idx) =>
         supabase.from('school_smc').update({ display_order: idx }).eq('id', item.id)
       )
       const results = await Promise.all(updatePromises)
-      
+
       const errors = results.filter(r => r.error)
       if (errors.length > 0) {
         toast({ type: 'error', text: `Failed: ${errors[0].error.message}` })
@@ -1239,7 +1239,7 @@ function SMCTab({ toast }) {
     }
   }
 
-  const startEdit = (m) => { 
+  const startEdit = (m) => {
     setEditing(m)
     setForm({ name: m.name, position: m.position, image_url: m.image_url || m.image || '' })
     setShowEditor(true)
@@ -1256,8 +1256,8 @@ function SMCTab({ toast }) {
   const save = async (e) => {
     e.preventDefault()
     if (!form.name) return toast({ type: 'error', text: 'Name is required' })
-    const payload = { 
-      ...form, 
+    const payload = {
+      ...form,
       image: form.image_url
     }
     delete payload.image_url
@@ -1291,20 +1291,20 @@ function SMCTab({ toast }) {
         <div className="bg-white rounded-3xl border-2 border-gold/30 shadow-2xl overflow-hidden animate-fade-in relative">
           <div className="p-6 md:p-8 space-y-6">
             <div className="flex items-center justify-between mb-2">
-               <h4 className="font-display font-bold text-navy text-lg">{editing ? 'Edit Member' : 'New Committee Member'}</h4>
-               <button onClick={() => setShowEditor(false)} className="p-2 hover:bg-gray-100 rounded-full text-gray-400 transition-colors"><X className="h-5 w-5" /></button>
+              <h4 className="font-display font-bold text-navy text-lg">{editing ? 'Edit Member' : 'New Committee Member'}</h4>
+              <button onClick={() => setShowEditor(false)} className="p-2 hover:bg-gray-100 rounded-full text-gray-400 transition-colors"><X className="h-5 w-5" /></button>
             </div>
             <form onSubmit={save} className="grid grid-cols-1 lg:grid-cols-3 gap-8">
               <div className="lg:col-span-1 space-y-4">
                 <label className="block text-sm font-bold text-navy">Member Photo</label>
-                <FileUploader folder="profile" currentUrl={form.image_url} onUpload={url => setForm(p=>({...p, image_url: url}))} />
+                <FileUploader folder="profile" currentUrl={form.image_url} onUpload={url => setForm(p => ({ ...p, image_url: url }))} />
               </div>
               <div className="lg:col-span-2 space-y-5">
-                <div><label className="label-modern">Full Name *</label><input className="input-modern" placeholder="Enter name" value={form.name} onChange={e=>setForm({...form, name: e.target.value})} required /></div>
-                <div><label className="label-modern">Position *</label><input className="input-modern" placeholder="e.g. Chairperson" value={form.position} onChange={e=>setForm({...form, position: e.target.value})} required /></div>
+                <div><label className="label-modern">Full Name *</label><input className="input-modern" placeholder="Enter name" value={form.name} onChange={e => setForm({ ...form, name: e.target.value })} required /></div>
+                <div><label className="label-modern">Position *</label><input className="input-modern" placeholder="e.g. Chairperson" value={form.position} onChange={e => setForm({ ...form, position: e.target.value })} required /></div>
                 <div className="flex gap-3 pt-4">
-                   <button type="submit" className="btn-gold flex-1 py-4 text-base font-bold shadow-xl shadow-gold/20">Save Member</button>
-                   <button type="button" onClick={() => setShowEditor(false)} className="px-8 py-4 border-2 border-gray-100 rounded-2xl font-bold text-navy hover:bg-gray-50 transition-all">Cancel</button>
+                  <button type="submit" className="btn-gold flex-1 py-4 text-base font-bold shadow-xl shadow-gold/20">Save Member</button>
+                  <button type="button" onClick={() => setShowEditor(false)} className="px-8 py-4 border-2 border-gray-100 rounded-2xl font-bold text-navy hover:bg-gray-50 transition-all">Cancel</button>
                 </div>
               </div>
             </form>
@@ -1314,8 +1314,8 @@ function SMCTab({ toast }) {
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
         {smc.map((m, idx) => (
-          <div 
-            key={m.id} 
+          <div
+            key={m.id}
             draggable
             onDragStart={(e) => handleDragStart(e, idx)}
             onDragEnd={handleDragEnd}
@@ -1325,9 +1325,9 @@ function SMCTab({ toast }) {
           >
             <div className="flex items-start gap-4 mb-4">
               <div className="flex flex-col items-center gap-2">
-                 <div className="w-6 h-6 flex items-center justify-center text-gray-300 group-hover:text-gold transition-colors">
-                    <GripVertical className="h-4 w-4" />
-                 </div>
+                <div className="w-6 h-6 flex items-center justify-center text-gray-300 group-hover:text-gold transition-colors">
+                  <GripVertical className="h-4 w-4" />
+                </div>
               </div>
               <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-gold/10 to-transparent overflow-hidden flex-shrink-0 border border-gold/10">
                 <img src={m.image_url ? `${m.image_url}?t=${Date.now()}` : (m.image ? `${m.image}?t=${Date.now()}` : `https://ui-avatars.com/api/?name=${encodeURIComponent(m.name)}&background=fdf8e6&color=b45309`)} className="w-full h-full object-cover" alt={m.name} onError={e => e.target.src = 'https://ui-avatars.com/api/?name=' + encodeURIComponent(m.name)} />
@@ -1378,12 +1378,12 @@ function GalleryTab({ toast }) {
 
   const save = async (e) => {
     e.preventDefault()
-    const payload = { 
-      ...form, 
+    const payload = {
+      ...form,
       image_url: form.image_url
     }
     const { error } = await supabase.from('school_gallery').upsert(editing ? { ...payload, id: editing.id } : [payload])
-    
+
     if (error) {
       toast({ type: 'error', text: `Failed: ${error.message}` })
     } else {
@@ -1395,12 +1395,12 @@ function GalleryTab({ toast }) {
   }
 
   const startEdit = (g) => { setEditing(g); setForm({ album: g.album || '', image_url: g.image_url, caption: g.caption || '', date: g.date }) }
-  const del = async (id) => { 
-    if (confirm('Delete this image?')) { 
+  const del = async (id) => {
+    if (confirm('Delete this image?')) {
       const { error } = await supabase.from('school_gallery').delete().eq('id', id)
       if (error) toast({ type: 'error', text: error.message })
-      else { toast({ type: 'success', text: 'Deleted.' }); fetchGallery() } 
-    } 
+      else { toast({ type: 'success', text: 'Deleted.' }); fetchGallery() }
+    }
   }
   const cancel = () => { setEditing(null); setForm({ album: '', image_url: '', caption: '', date: today() }) }
 
@@ -1489,7 +1489,7 @@ function SettingsTab({ toast }) {
   const save = async (e) => {
     e.preventDefault()
     setSettings({ ...settings })
-    
+
     try {
       const { error } = await supabase.from('school_settings').upsert({ id: 1, ...settings })
       if (error) console.error("Supabase school_settings error:", error)
@@ -1526,11 +1526,11 @@ function SettingsTab({ toast }) {
             ))}
             <div>
               <label className="label-modern font-bold text-navy mb-3 block">Campus Main Photo</label>
-              <FileUploader 
-                label="Front Building Image" 
-                folder="settings" 
-                currentUrl={settings.campus_photo} 
-                onUpload={url => setSettings(p => ({ ...p, campus_photo: url }))} 
+              <FileUploader
+                label="Front Building Image"
+                folder="settings"
+                currentUrl={settings.campus_photo}
+                onUpload={url => setSettings(p => ({ ...p, campus_photo: url }))}
               />
               <p className="text-[10px] text-gray-400 mt-2 italic">This image appears on the About Us page narrative section.</p>
             </div>
@@ -1541,52 +1541,52 @@ function SettingsTab({ toast }) {
           {/* Global Ticker Section */}
           <div className="space-y-6">
             <h4 className="font-bold text-navy flex items-center gap-2">
-               <Megaphone className="h-5 w-5 text-gold" /> Global Revolving Notice (Top Ticker)
+              <Megaphone className="h-5 w-5 text-gold" /> Global Revolving Notice (Top Ticker)
             </h4>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-               <div>
-                 <label className="label-modern font-bold text-navy mb-2 block">Ticker Banner Text</label>
-                 <input className="input-modern" placeholder="e.g. Admissions are open for 2083 BS!" value={settings.ticker_text || ''} onChange={e => setSettings(p => ({ ...p, ticker_text: e.target.value }))} />
-                 <p className="text-[10px] text-gray-400 mt-2 italic text-navy">Leave empty to hide the ticker completely.</p>
-               </div>
-               <div>
-                 <label className="label-modern font-bold text-navy mb-2 block">Ticker Target Link (Optional)</label>
-                 <input className="input-modern" placeholder="https://..." value={settings.ticker_link || ''} onChange={e => setSettings(p => ({ ...p, ticker_link: e.target.value }))} />
-                 <p className="text-[10px] text-gray-400 mt-2 italic text-navy">The banner becomes clickable if a link is provided.</p>
-               </div>
+              <div>
+                <label className="label-modern font-bold text-navy mb-2 block">Ticker Banner Text</label>
+                <input className="input-modern" placeholder="e.g. Admissions are open for 2083 BS!" value={settings.ticker_text || ''} onChange={e => setSettings(p => ({ ...p, ticker_text: e.target.value }))} />
+                <p className="text-[10px] text-gray-400 mt-2 italic text-navy">Leave empty to hide the ticker completely.</p>
+              </div>
+              <div>
+                <label className="label-modern font-bold text-navy mb-2 block">Ticker Target Link (Optional)</label>
+                <input className="input-modern" placeholder="https://..." value={settings.ticker_link || ''} onChange={e => setSettings(p => ({ ...p, ticker_link: e.target.value }))} />
+                <p className="text-[10px] text-gray-400 mt-2 italic text-navy">The banner becomes clickable if a link is provided.</p>
+              </div>
             </div>
           </div>
 
           <div className="h-px bg-gray-100" />
           <div className="space-y-6">
             <h4 className="font-bold text-navy flex items-center gap-2">
-               <User className="h-5 w-5 text-gold" /> Principal's Profile & Message
+              <User className="h-5 w-5 text-gold" /> Principal's Profile & Message
             </h4>
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
-               <div className="lg:col-span-1">
-                 <label className="label-modern font-bold text-navy mb-3 block">Official Photo</label>
-                 <FileUploader 
-                   label="Principal Portrait" 
-                   folder="settings" 
-                   currentUrl={settings.principal_photo} 
-                   onUpload={url => setSettings(p => ({ ...p, principal_photo: url }))} 
-                 />
-               </div>
-               <div className="lg:col-span-2 space-y-5">
-                 <div>
-                   <label className="label-modern font-bold text-navy mb-2 block">Principal's Full Name</label>
-                   <input className="input-modern" placeholder="Enter name" value={settings.principal_name || ''} onChange={e => setSettings(p => ({ ...p, principal_name: e.target.value }))} />
-                 </div>
-                 <div>
-                   <label className="label-modern font-bold text-navy mb-2 block">Official Message to Parents/Students</label>
-                   <textarea 
-                     className="input-modern min-h-[160px] leading-relaxed resize-none" 
-                     placeholder="Type official message here..." 
-                     value={settings.principal_message || ''} 
-                     onChange={e => setSettings(p => ({ ...p, principal_message: e.target.value }))} 
-                   />
-                 </div>
-               </div>
+              <div className="lg:col-span-1">
+                <label className="label-modern font-bold text-navy mb-3 block">Official Photo</label>
+                <FileUploader
+                  label="Principal Portrait"
+                  folder="settings"
+                  currentUrl={settings.principal_photo}
+                  onUpload={url => setSettings(p => ({ ...p, principal_photo: url }))}
+                />
+              </div>
+              <div className="lg:col-span-2 space-y-5">
+                <div>
+                  <label className="label-modern font-bold text-navy mb-2 block">Principal's Full Name</label>
+                  <input className="input-modern" placeholder="Enter name" value={settings.principal_name || ''} onChange={e => setSettings(p => ({ ...p, principal_name: e.target.value }))} />
+                </div>
+                <div>
+                  <label className="label-modern font-bold text-navy mb-2 block">Official Message to Parents/Students</label>
+                  <textarea
+                    className="input-modern min-h-[160px] leading-relaxed resize-none"
+                    placeholder="Type official message here..."
+                    value={settings.principal_message || ''}
+                    onChange={e => setSettings(p => ({ ...p, principal_message: e.target.value }))}
+                  />
+                </div>
+              </div>
             </div>
           </div>
 
@@ -1608,24 +1608,24 @@ function DashboardTab({ setActiveTab }) {
 
   useEffect(() => {
     const fetchStats = async () => {
-       try {
-         const [ {count: smcCount}, {count: nCount}, {count: sCount}, {count: aCount} ] = await Promise.all([
-            supabase.from('school_smc').select('*', { count: 'exact', head: true }),
-            supabase.from('school_notices').select('*', { count: 'exact', head: true }),
-            supabase.from('school_staff').select('*', { count: 'exact', head: true }),
-            supabase.from('school_articles').select('*', { count: 'exact', head: true })
-         ])
-         setStats([
-            { label: 'SMC Members', value: smcCount || 0, icon: UsersIcon, color: 'from-blue-500 to-indigo-600' },
-            { label: 'Published Notices', value: nCount || 0, icon: Bell, color: 'from-amber-400 to-orange-600' },
-            { label: 'Staff Directory', value: sCount || 0, icon: GraduationCap, color: 'from-emerald-500 to-teal-600' },
-            { label: 'School Articles', value: aCount || 0, icon: FileText, color: 'from-purple-500 to-pink-600' }
-         ])
-       } catch (err) {
-         console.error("Dashboard Stats Error:", err)
-       } finally {
-         setLoading(false)
-       }
+      try {
+        const [{ count: smcCount }, { count: nCount }, { count: sCount }, { count: aCount }] = await Promise.all([
+          supabase.from('school_smc').select('*', { count: 'exact', head: true }),
+          supabase.from('school_notices').select('*', { count: 'exact', head: true }),
+          supabase.from('school_staff').select('*', { count: 'exact', head: true }),
+          supabase.from('school_articles').select('*', { count: 'exact', head: true })
+        ])
+        setStats([
+          { label: 'SMC Members', value: smcCount || 0, icon: UsersIcon, color: 'from-blue-500 to-indigo-600' },
+          { label: 'Published Notices', value: nCount || 0, icon: Bell, color: 'from-amber-400 to-orange-600' },
+          { label: 'Staff Directory', value: sCount || 0, icon: GraduationCap, color: 'from-emerald-500 to-teal-600' },
+          { label: 'School Articles', value: aCount || 0, icon: FileText, color: 'from-purple-500 to-pink-600' }
+        ])
+      } catch (err) {
+        console.error("Dashboard Stats Error:", err)
+      } finally {
+        setLoading(false)
+      }
     }
     fetchStats()
   }, [])
@@ -1641,13 +1641,13 @@ function DashboardTab({ setActiveTab }) {
     <div className="space-y-8 animate-fade-in">
       {/* Welcome Section */}
       <div className="relative overflow-hidden bg-gradient-to-r from-navy to-navy-dark rounded-2xl p-5 sm:p-6 text-white shadow-lg flex flex-col justify-center">
-         <div className="absolute top-0 right-0 -translate-y-12 translate-x-12 w-64 h-64 bg-white/5 rounded-full blur-3xl"></div>
-         <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-4">
-            <div>
-              <h2 className="text-xl sm:text-2xl font-display font-bold">Welcome Back, Admin</h2>
-              <p className="text-blue-100/80 text-sm mt-1">Here's a snapshot of the school's current metrics today.</p>
-            </div>
-         </div>
+        <div className="absolute top-0 right-0 -translate-y-12 translate-x-12 w-64 h-64 bg-white/5 rounded-full blur-3xl"></div>
+        <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-4">
+          <div>
+            <h2 className="text-xl sm:text-2xl font-display font-bold">Welcome Back, Admin</h2>
+            <p className="text-blue-100/80 text-sm mt-1">Here's a snapshot of the school's current metrics today.</p>
+          </div>
+        </div>
       </div>
 
       {/* Stats Grid */}
@@ -1675,18 +1675,18 @@ function DashboardTab({ setActiveTab }) {
             Quick Management
           </h3>
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-             {quickActions.map((action) => (
-               <button 
-                 key={action.label} 
-                 onClick={() => setActiveTab(action.tab)}
-                 className="flex flex-col items-center justify-center gap-3 p-4 sm:p-6 bg-white border border-gray-100 rounded-3xl hover:border-gold/30 hover:shadow-premium group transition-all duration-300"
-               >
-                 <div className={`w-10 h-10 sm:w-12 sm:h-12 rounded-2xl ${action.color} flex items-center justify-center text-white shadow-md group-hover:scale-110 transition-transform`}>
-                    <action.icon className="w-5 h-5 sm:w-6 sm:h-6" />
-                 </div>
-                 <span className="text-xs sm:text-sm font-bold text-navy text-center">{action.label}</span>
-               </button>
-             ))}
+            {quickActions.map((action) => (
+              <button
+                key={action.label}
+                onClick={() => setActiveTab(action.tab)}
+                className="flex flex-col items-center justify-center gap-3 p-4 sm:p-6 bg-white border border-gray-100 rounded-3xl hover:border-gold/30 hover:shadow-premium group transition-all duration-300"
+              >
+                <div className={`w-10 h-10 sm:w-12 sm:h-12 rounded-2xl ${action.color} flex items-center justify-center text-white shadow-md group-hover:scale-110 transition-transform`}>
+                  <action.icon className="w-5 h-5 sm:w-6 sm:h-6" />
+                </div>
+                <span className="text-xs sm:text-sm font-bold text-navy text-center">{action.label}</span>
+              </button>
+            ))}
           </div>
         </div>
       </div>
@@ -1742,11 +1742,11 @@ function ToppersTab({ toast }) {
     setToppers(newToppers)
 
     try {
-      const updatePromises = newToppers.map((item, idx) => 
+      const updatePromises = newToppers.map((item, idx) =>
         supabase.from('school_toppers').update({ display_order: idx }).eq('id', item.id)
       )
       const results = await Promise.all(updatePromises)
-      
+
       const errors = results.filter(r => r.error)
       if (errors.length > 0) {
         toast({ type: 'error', text: `Failed: ${errors[0].error.message}` })
@@ -1760,7 +1760,7 @@ function ToppersTab({ toast }) {
     }
   }
 
-  const startEdit = (t) => { 
+  const startEdit = (t) => {
     setEditing(t)
     setForm(t)
     setShowEditor(true)
@@ -1777,17 +1777,17 @@ function ToppersTab({ toast }) {
   const save = async (e) => {
     e.preventDefault()
     if (editing) {
-      const payload = { 
+      const payload = {
         ...form,
         photo_url: form.photo_url || form.image_url
-      }; 
+      };
       delete payload.image_url
       delete payload.id
       const { error } = await supabase.from('school_toppers').update(payload).eq('id', editing.id)
       if (error) toast({ type: 'error', text: error.message })
       else { toast({ type: 'success', text: 'Topper updated!' }); setShowEditor(false); fetchToppers() }
     } else {
-      const payload = { 
+      const payload = {
         ...form,
         photo_url: form.photo_url || form.image_url
       };
@@ -1823,27 +1823,27 @@ function ToppersTab({ toast }) {
         <div className="bg-white rounded-3xl border-2 border-gold/30 shadow-2xl overflow-hidden animate-fade-in relative">
           <div className="p-6 md:p-8 space-y-6">
             <div className="flex items-center justify-between mb-2">
-               <h4 className="font-display font-bold text-navy text-lg">{editing ? 'Edit Topper Details' : 'New Academic Topper'}</h4>
-               <button onClick={() => setShowEditor(false)} className="p-2 hover:bg-gray-100 rounded-full text-gray-400 transition-colors"><X className="h-5 w-5" /></button>
+              <h4 className="font-display font-bold text-navy text-lg">{editing ? 'Edit Topper Details' : 'New Academic Topper'}</h4>
+              <button onClick={() => setShowEditor(false)} className="p-2 hover:bg-gray-100 rounded-full text-gray-400 transition-colors"><X className="h-5 w-5" /></button>
             </div>
             <form onSubmit={save} className="grid grid-cols-1 lg:grid-cols-3 gap-8">
               <div className="lg:col-span-1 space-y-4">
                 <label className="block text-sm font-bold text-navy">Student Photo</label>
-                <FileUploader folder="toppers" currentUrl={form.photo_url} onUpload={url => setForm(p=>({...p, photo_url: url}))} />
+                <FileUploader folder="toppers" currentUrl={form.photo_url} onUpload={url => setForm(p => ({ ...p, photo_url: url }))} />
               </div>
               <div className="lg:col-span-2 space-y-5">
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <div><label className="label-modern">Full Name *</label><input className="input-modern" placeholder="Enter student name" value={form.name} onChange={e=>setForm({...form, name: e.target.value})} required /></div>
-                  <div><label className="label-modern">Batch (Year) *</label><input className="input-modern" placeholder="e.g. 2080" value={form.batch} onChange={e=>setForm({...form, batch: e.target.value})} required /></div>
+                  <div><label className="label-modern">Full Name *</label><input className="input-modern" placeholder="Enter student name" value={form.name} onChange={e => setForm({ ...form, name: e.target.value })} required /></div>
+                  <div><label className="label-modern">Batch (Year) *</label><input className="input-modern" placeholder="e.g. 2080" value={form.batch} onChange={e => setForm({ ...form, batch: e.target.value })} required /></div>
                 </div>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <div><label className="label-modern">Score/Result *</label><input className="input-modern" placeholder="e.g. 4.0 GPA / 95%" value={form.score} onChange={e=>setForm({...form, score: e.target.value})} required /></div>
-                  <div><label className="label-modern">Badge/Position</label><input className="input-modern" placeholder="e.g. District Topper" value={form.badge} onChange={e=>setForm({...form, badge: e.target.value})} /></div>
+                  <div><label className="label-modern">Score/Result *</label><input className="input-modern" placeholder="e.g. 4.0 GPA / 95%" value={form.score} onChange={e => setForm({ ...form, score: e.target.value })} required /></div>
+                  <div><label className="label-modern">Badge/Position</label><input className="input-modern" placeholder="e.g. District Topper" value={form.badge} onChange={e => setForm({ ...form, badge: e.target.value })} /></div>
                 </div>
-                <div><label className="label-modern">Note/Highlight</label><textarea className="input-modern min-h-[100px]" placeholder="e.g. Outstanding performance in Science..." value={form.note} onChange={e=>setForm({...form, note: e.target.value})} /></div>
+                <div><label className="label-modern">Note/Highlight</label><textarea className="input-modern min-h-[100px]" placeholder="e.g. Outstanding performance in Science..." value={form.note} onChange={e => setForm({ ...form, note: e.target.value })} /></div>
                 <div className="flex gap-3 pt-4">
-                   <button type="submit" className="btn-gold flex-1 py-4 text-base font-bold shadow-xl shadow-gold/20">Save Achievement</button>
-                   <button type="button" onClick={() => setShowEditor(false)} className="px-8 py-4 border-2 border-gray-100 rounded-2xl font-bold text-navy hover:bg-gray-50 transition-all">Cancel</button>
+                  <button type="submit" className="btn-gold flex-1 py-4 text-base font-bold shadow-xl shadow-gold/20">Save Achievement</button>
+                  <button type="button" onClick={() => setShowEditor(false)} className="px-8 py-4 border-2 border-gray-100 rounded-2xl font-bold text-navy hover:bg-gray-50 transition-all">Cancel</button>
                 </div>
               </div>
             </form>
@@ -1853,13 +1853,13 @@ function ToppersTab({ toast }) {
 
       {toppers.length === 0 ? (
         <div className="text-center py-20 bg-white rounded-3xl border-2 border-dashed border-gray-100 italic text-gray-400">
-           No toppers listed. Start by adding a new record.
+          No toppers listed. Start by adding a new record.
         </div>
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
           {toppers.map((t, idx) => (
-            <div 
-              key={t.id} 
+            <div
+              key={t.id}
               draggable
               onDragStart={(e) => handleDragStart(e, idx)}
               onDragEnd={handleDragEnd}
@@ -1870,14 +1870,14 @@ function ToppersTab({ toast }) {
               <div>
                 <div className="flex items-center gap-4 mb-4">
                   <div className="flex flex-col items-center gap-2">
-                     <div className="text-gray-300 group-hover:text-gold transition-colors">
-                        <GripVertical className="h-4 w-4" />
-                     </div>
+                    <div className="text-gray-300 group-hover:text-gold transition-colors">
+                      <GripVertical className="h-4 w-4" />
+                    </div>
                   </div>
                   <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-amber-50 to-gold/20 overflow-hidden flex-shrink-0 border border-gold/10 shadow-inner">
-                    <img 
-                      src={t.photo_url ? `${t.photo_url}?t=${Date.now()}` : `https://ui-avatars.com/api/?name=${encodeURIComponent(t.name)}&background=fffbea&color=b45309`} 
-                      className="w-full h-full object-cover" 
+                    <img
+                      src={t.photo_url ? `${t.photo_url}?t=${Date.now()}` : `https://ui-avatars.com/api/?name=${encodeURIComponent(t.name)}&background=fffbea&color=b45309`}
+                      className="w-full h-full object-cover"
                       alt={t.name}
                       onError={e => e.target.src = 'https://ui-avatars.com/api/?name=' + encodeURIComponent(t.name)}
                     />
@@ -1886,8 +1886,8 @@ function ToppersTab({ toast }) {
                     <h4 className="font-bold text-navy truncate leading-tight mb-0.5">{t.name}</h4>
                     <p className="text-xs font-bold text-gold-dark uppercase tracking-widest">{t.batch} Batch</p>
                     <div className="flex items-center gap-2 mt-1">
-                       <span className="text-[10px] font-bold bg-navy text-white px-2 py-0.5 rounded-full uppercase tracking-tighter">{t.score}</span>
-                       {t.badge && <span className="text-[10px] font-bold bg-gold/10 text-gold-dark px-2 py-0.5 rounded-full border border-gold/20">{t.badge}</span>}
+                      <span className="text-[10px] font-bold bg-navy text-white px-2 py-0.5 rounded-full uppercase tracking-tighter">{t.score}</span>
+                      {t.badge && <span className="text-[10px] font-bold bg-gold/10 text-gold-dark px-2 py-0.5 rounded-full border border-gold/20">{t.badge}</span>}
                     </div>
                   </div>
                 </div>
@@ -1929,9 +1929,9 @@ function PopupsTab({ toast }) {
   const save = async (e) => {
     e.preventDefault()
     if (!form.image_url) return toast({ type: 'error', text: 'Image is required' })
-    
+
     const { error } = await supabase.from('school_popups').upsert(editing ? { ...form, id: editing.id } : [form])
-    
+
     if (error) {
       toast({ type: 'error', text: `Failed: ${error.message}. Ensure table exists.` })
     } else {
@@ -1944,8 +1944,8 @@ function PopupsTab({ toast }) {
     }
   }
 
-  const startEdit = (p) => { setEditing(p); setForm(p); setShowEditor(true); window.scrollTo(0,0) }
-  const startAdd = () => { setEditing(null); setForm({ image_url: '', link_url: '', is_active: true, display_order: 0 }); setShowEditor(true); window.scrollTo(0,0) }
+  const startEdit = (p) => { setEditing(p); setForm(p); setShowEditor(true); window.scrollTo(0, 0) }
+  const startAdd = () => { setEditing(null); setForm({ image_url: '', link_url: '', is_active: true, display_order: 0 }); setShowEditor(true); window.scrollTo(0, 0) }
   const del = async (id) => { if (confirm('Delete this popup?')) { await supabase.from('school_popups').delete().eq('id', id); toast({ type: 'success', text: 'Deleted.' }); fetchPopups() } }
 
   return (
@@ -1972,26 +1972,26 @@ function PopupsTab({ toast }) {
               <h4 className="font-display font-bold text-navy text-lg">{editing ? 'Edit Popup' : 'Add New Sequence Item'}</h4>
               <button type="button" onClick={() => setShowEditor(false)} className="p-2 hover:bg-gray-100 rounded-full text-gray-400"><X className="h-5 w-5" /></button>
             </div>
-            
+
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-               <div className="lg:col-span-1">
-                 <label className="label-modern">Popup Banner Image *</label>
-                 <FileUploader folder="popups" currentUrl={form.image_url} onUpload={url => setForm(p=>({...p, image_url: url}))} />
-               </div>
-               <div className="lg:col-span-2 space-y-5">
-                 <div><label className="label-modern">Action Link (Optional)</label><input className="input-modern" placeholder="e.g. /notices or https://..." value={form.link_url} onChange={e=>setForm({...form, link_url: e.target.value})} /></div>
-                 <div className="grid grid-cols-2 gap-4">
-                    <div><label className="label-modern">Display Order</label><input type="number" className="input-modern" value={form.display_order} onChange={e=>setForm({...form, display_order: parseInt(e.target.value)})} /></div>
-                    <div className="flex items-center gap-3 pt-8">
-                       <input type="checkbox" id="popup-active" checked={form.is_active} onChange={e=>setForm({...form, is_active: e.target.checked})} className="w-4 h-4 accent-gold" />
-                       <label htmlFor="popup-active" className="text-sm font-bold text-navy cursor-pointer">Published & Active</label>
-                    </div>
-                 </div>
-                 <div className="flex gap-3 pt-6">
-                    <button type="submit" className="flex-1 btn-gold py-4 font-bold shadow-xl shadow-gold/20">Save Popup</button>
-                    <button type="button" onClick={() => setShowEditor(false)} className="px-8 py-4 border-2 border-gray-100 rounded-2xl font-bold text-navy hover:bg-gray-50 transition-all">Cancel</button>
-                 </div>
-               </div>
+              <div className="lg:col-span-1">
+                <label className="label-modern">Popup Banner Image *</label>
+                <FileUploader folder="popups" currentUrl={form.image_url} onUpload={url => setForm(p => ({ ...p, image_url: url }))} />
+              </div>
+              <div className="lg:col-span-2 space-y-5">
+                <div><label className="label-modern">Action Link (Optional)</label><input className="input-modern" placeholder="e.g. /notices or https://..." value={form.link_url} onChange={e => setForm({ ...form, link_url: e.target.value })} /></div>
+                <div className="grid grid-cols-2 gap-4">
+                  <div><label className="label-modern">Display Order</label><input type="number" className="input-modern" value={form.display_order} onChange={e => setForm({ ...form, display_order: parseInt(e.target.value) })} /></div>
+                  <div className="flex items-center gap-3 pt-8">
+                    <input type="checkbox" id="popup-active" checked={form.is_active} onChange={e => setForm({ ...form, is_active: e.target.checked })} className="w-4 h-4 accent-gold" />
+                    <label htmlFor="popup-active" className="text-sm font-bold text-navy cursor-pointer">Published & Active</label>
+                  </div>
+                </div>
+                <div className="flex gap-3 pt-6">
+                  <button type="submit" className="flex-1 btn-gold py-4 font-bold shadow-xl shadow-gold/20">Save Popup</button>
+                  <button type="button" onClick={() => setShowEditor(false)} className="px-8 py-4 border-2 border-gray-100 rounded-2xl font-bold text-navy hover:bg-gray-50 transition-all">Cancel</button>
+                </div>
+              </div>
             </div>
           </form>
         </div>
@@ -2002,13 +2002,13 @@ function PopupsTab({ toast }) {
           {popups.map(p => (
             <div key={p.id} className="bg-white rounded-3xl border border-gray-100 overflow-hidden hover:shadow-xl transition-all group">
               <div className="relative aspect-[4/5] bg-slate-50">
-                 <img src={p.image_url} alt="Popup" className="w-full h-full object-cover" />
-                 {!p.is_active && <div className="absolute inset-0 bg-white/60 backdrop-blur-[2px] flex items-center justify-center font-black text-gray-500 uppercase tracking-widest text-xs">Inactive</div>}
-                 <div className="absolute top-3 left-3 bg-navy/80 backdrop-blur-md text-white text-[10px] font-black px-2 py-1 rounded-lg">ORDER: {p.display_order}</div>
+                <img src={p.image_url} alt="Popup" className="w-full h-full object-cover" />
+                {!p.is_active && <div className="absolute inset-0 bg-white/60 backdrop-blur-[2px] flex items-center justify-center font-black text-gray-500 uppercase tracking-widest text-xs">Inactive</div>}
+                <div className="absolute top-3 left-3 bg-navy/80 backdrop-blur-md text-white text-[10px] font-black px-2 py-1 rounded-lg">ORDER: {p.display_order}</div>
               </div>
               <div className="p-4 flex gap-2">
-                 <button onClick={() => startEdit(p)} className="flex-1 py-2.5 text-xs font-bold bg-gray-50 border border-gray-100 text-navy hover:bg-gold/10 hover:text-gold rounded-xl transition-all flex items-center justify-center gap-2"><Edit className="h-3.5 w-3.5" /> Edit</button>
-                 <button onClick={() => del(p.id)} className="w-11 py-2.5 text-red-500 bg-red-50 hover:bg-red-100 border border-red-100 rounded-xl transition-all flex items-center justify-center"><Trash2 className="h-4 w-4" /></button>
+                <button onClick={() => startEdit(p)} className="flex-1 py-2.5 text-xs font-bold bg-gray-50 border border-gray-100 text-navy hover:bg-gold/10 hover:text-gold rounded-xl transition-all flex items-center justify-center gap-2"><Edit className="h-3.5 w-3.5" /> Edit</button>
+                <button onClick={() => del(p.id)} className="w-11 py-2.5 text-red-500 bg-red-50 hover:bg-red-100 border border-red-100 rounded-xl transition-all flex items-center justify-center"><Trash2 className="h-4 w-4" /></button>
               </div>
             </div>
           ))}
@@ -2054,7 +2054,7 @@ function Admin() {
     { id: 'staff', label: 'Teachers', icon: GraduationCap },
     { id: 'smc', label: 'SMC', icon: UsersIcon },
     { id: 'testimonials', label: 'Messages', icon: Quote },
-    {id: 'gallery', label: 'Gallery', icon: Image },
+    { id: 'gallery', label: 'Gallery', icon: Image },
     { id: 'curriculum', label: 'CDC Links', icon: Library },
     { id: 'levels', label: 'Academic Info', icon: BookOpen },
     { id: 'popup', label: 'Ad Popup', icon: Bell },
@@ -2131,13 +2131,13 @@ function Admin() {
                 <X className="h-5 w-5" />
               </button>
             </div>
-            
+
             <nav className="flex-1 px-4 py-4 space-y-1.5 overflow-y-auto">
               <p className="px-4 text-[10px] font-extrabold text-gray-400 uppercase tracking-widest mb-2">Modules</p>
               {tabs.map(({ id, label, icon: Icon }) => (
-                <button 
-                  key={id} 
-                  onClick={() => { setActiveTab(id); setShowMobileSidebar(false); }} 
+                <button
+                  key={id}
+                  onClick={() => { setActiveTab(id); setShowMobileSidebar(false); }}
                   className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all font-bold text-sm ${activeTab === id ? 'bg-gold text-white shadow-md' : 'text-gray-500 hover:bg-gray-50 hover:text-navy'}`}
                 >
                   <Icon className="h-5 w-5 flex-shrink-0" />
@@ -2153,13 +2153,13 @@ function Admin() {
       <div className="flex-1 min-w-0 flex flex-col h-full overflow-hidden relative z-0">
         {/* Desktop Header */}
         <header className="hidden lg:flex bg-white border-b border-gray-200 sticky top-0 z-[70] px-8 py-4 items-center justify-between shadow-md backdrop-blur-md bg-white/95">
-           <div className="flex items-center gap-3">
-              {currentTab && <currentTab.icon className="h-5 w-5 text-gold" />}
-              <h1 className="font-display font-bold text-navy text-xl">{currentTab?.label || 'Admin Portal'}</h1>
-           </div>
-           <div className="text-xs font-semibold text-gray-400 bg-gray-50 px-3 py-1.5 rounded-full border border-gray-100">
-             Welcome, Administrator
-           </div>
+          <div className="flex items-center gap-3">
+            {currentTab && <currentTab.icon className="h-5 w-5 text-gold" />}
+            <h1 className="font-display font-bold text-navy text-xl">{currentTab?.label || 'Admin Portal'}</h1>
+          </div>
+          <div className="text-xs font-semibold text-gray-400 bg-gray-50 px-3 py-1.5 rounded-full border border-gray-100">
+            Welcome, Administrator
+          </div>
         </header>
 
         {/* Content Container */}
@@ -2229,7 +2229,7 @@ function CurriculumTab({ toast }) {
   const save = async (e) => {
     e.preventDefault()
     if (!form.url || !form.title) return toast({ type: 'error', text: 'Title and URL are required' })
-    
+
     if (editing) {
       const { error } = await supabase.from('school_curriculum').update(form).eq('id', editing.id)
       if (error) toast({ type: 'error', text: error.message })
@@ -2272,25 +2272,25 @@ function CurriculumTab({ toast }) {
         <div className="bg-white rounded-3xl border-2 border-gold/30 shadow-2xl overflow-hidden animate-fade-in relative z-50">
           <div className="p-6 md:p-8 space-y-6">
             <div className="flex items-center justify-between mb-2">
-               <h4 className="font-display font-bold text-navy text-lg">{editing ? 'Edit Link' : 'New Curriculum Link'}</h4>
-               <button onClick={() => setShowEditor(false)} className="p-2 hover:bg-gray-100 rounded-full text-gray-400 transition-colors"><X className="h-5 w-5" /></button>
+              <h4 className="font-display font-bold text-navy text-lg">{editing ? 'Edit Link' : 'New Curriculum Link'}</h4>
+              <button onClick={() => setShowEditor(false)} className="p-2 hover:bg-gray-100 rounded-full text-gray-400 transition-colors"><X className="h-5 w-5" /></button>
             </div>
             <form onSubmit={save} className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               <div>
                 <label className="label-modern">Grade *</label>
-                <select className="input-modern" value={form.grade} onChange={e=>setForm({...form, grade: e.target.value})}>
+                <select className="input-modern" value={form.grade} onChange={e => setForm({ ...form, grade: e.target.value })}>
                   {grades.map(g => <option key={g} value={g}>{g}</option>)}
                 </select>
               </div>
               <div>
                 <label className="label-modern">Subject *</label>
-                <select className="input-modern" value={form.subject} onChange={e=>setForm({...form, subject: e.target.value})}>
+                <select className="input-modern" value={form.subject} onChange={e => setForm({ ...form, subject: e.target.value })}>
                   {subjects.map(s => <option key={s} value={s}>{s}</option>)}
                 </select>
               </div>
               <div>
                 <label className="label-modern">Resource Type *</label>
-                <select className="input-modern" value={form.type} onChange={e=>setForm({...form, type: e.target.value})}>
+                <select className="input-modern" value={form.type} onChange={e => setForm({ ...form, type: e.target.value })}>
                   <option value="Document">Official Curriculum</option>
                   <option value="Archive">Lesson Syllabus</option>
                   <option value="PDF Guide">Teaching Manual</option>
@@ -2299,15 +2299,15 @@ function CurriculumTab({ toast }) {
               </div>
               <div className="md:col-span-2">
                 <label className="label-modern">Title *</label>
-                <input className="input-modern" placeholder="e.g. Teacher's Guide Class 4" value={form.title} onChange={e=>setForm({...form, title: e.target.value})} required />
+                <input className="input-modern" placeholder="e.g. Teacher's Guide Class 4" value={form.title} onChange={e => setForm({ ...form, title: e.target.value })} required />
               </div>
               <div className="md:col-span-2 lg:col-span-3">
                 <label className="label-modern">URL (CDC Link or File Link) *</label>
-                <input className="input-modern" placeholder="https://moecdc.gov.np/..." value={form.url} onChange={e=>setForm({...form, url: e.target.value})} required />
+                <input className="input-modern" placeholder="https://moecdc.gov.np/..." value={form.url} onChange={e => setForm({ ...form, url: e.target.value })} required />
               </div>
               <div className="md:col-span-2 lg:col-span-3 flex gap-4 pt-4">
-                 <button type="submit" className="btn-gold flex-1 py-4 text-base font-bold shadow-xl shadow-gold/20">Save Resource</button>
-                 <button type="button" onClick={() => setShowEditor(false)} className="px-8 py-4 border-2 border-gray-100 rounded-2xl font-bold text-navy hover:bg-gray-50 transition-all">Cancel</button>
+                <button type="submit" className="btn-gold flex-1 py-4 text-base font-bold shadow-xl shadow-gold/20">Save Resource</button>
+                <button type="button" onClick={() => setShowEditor(false)} className="px-8 py-4 border-2 border-gray-100 rounded-2xl font-bold text-navy hover:bg-gray-50 transition-all">Cancel</button>
               </div>
             </form>
           </div>
@@ -2426,7 +2426,7 @@ function AcademicOverviewTab({ toast }) {
 
   return (
     <div className="space-y-6 animate-fade-in">
-       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div className="flex items-center gap-3">
           <SectionIcon icon={BookOpen} />
           <div>
@@ -2443,58 +2443,58 @@ function AcademicOverviewTab({ toast }) {
 
       {showEditor && (
         <div className="bg-white rounded-3xl border-2 border-gold/30 shadow-2xl p-6 md:p-8 space-y-6">
-           <form onSubmit={save} className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div className="md:col-span-2">
-                <label className="label-modern">Level Title (e.g. Primary Grade 1-5) *</label>
-                <input className="input-modern" value={form.title} onChange={e=>setForm({...form, title: e.target.value})} required />
-              </div>
-              <div>
-                <label className="label-modern">Icon (Emoji) *</label>
-                <input className="input-modern" value={form.icon} onChange={e=>setForm({...form, icon: e.target.value})} maxLength={2} />
-              </div>
-              <div className="md:col-span-2">
-                <label className="label-modern">Core Subjects *</label>
-                <textarea className="input-modern h-24" value={form.core} onChange={e=>setForm({...form, core: e.target.value})} placeholder="English, Math, Science..." required />
-              </div>
-              <div className="md:col-span-2">
-                <label className="label-modern">Optional / Elective Subjects</label>
-                <textarea className="input-modern h-24" value={form.optional} onChange={e=>setForm({...form, optional: e.target.value})} placeholder="Computer, Music..." />
-              </div>
-              <div className="md:col-span-2 flex gap-4 pt-4">
-                 <button type="submit" className="btn-gold flex-1 py-4 font-bold">Save Level</button>
-                 <button type="button" onClick={() => setShowEditor(false)} className="px-8 py-4 border-2 border-gray-100 rounded-2xl">Cancel</button>
-              </div>
-           </form>
+          <form onSubmit={save} className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="md:col-span-2">
+              <label className="label-modern">Level Title (e.g. Primary Grade 1-5) *</label>
+              <input className="input-modern" value={form.title} onChange={e => setForm({ ...form, title: e.target.value })} required />
+            </div>
+            <div>
+              <label className="label-modern">Icon (Emoji) *</label>
+              <input className="input-modern" value={form.icon} onChange={e => setForm({ ...form, icon: e.target.value })} maxLength={2} />
+            </div>
+            <div className="md:col-span-2">
+              <label className="label-modern">Core Subjects *</label>
+              <textarea className="input-modern h-24" value={form.core} onChange={e => setForm({ ...form, core: e.target.value })} placeholder="English, Math, Science..." required />
+            </div>
+            <div className="md:col-span-2">
+              <label className="label-modern">Optional / Elective Subjects</label>
+              <textarea className="input-modern h-24" value={form.optional} onChange={e => setForm({ ...form, optional: e.target.value })} placeholder="Computer, Music..." />
+            </div>
+            <div className="md:col-span-2 flex gap-4 pt-4">
+              <button type="submit" className="btn-gold flex-1 py-4 font-bold">Save Level</button>
+              <button type="button" onClick={() => setShowEditor(false)} className="px-8 py-4 border-2 border-gray-100 rounded-2xl">Cancel</button>
+            </div>
+          </form>
         </div>
       )}
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-         {levels.length === 0 ? (
-            <div className="col-span-full p-12 text-center border-2 border-dashed border-gray-200 rounded-3xl">
-               <p className="text-gray-400">No levels added yet. Run the SQL to create 'school_academic_levels' table.</p>
-               <div className="mt-4 p-4 bg-slate-50 rounded-xl text-[10px] font-mono text-left overflow-x-auto whitespace-pre">
-{`CREATE TABLE school_academic_levels (
+        {levels.length === 0 ? (
+          <div className="col-span-full p-12 text-center border-2 border-dashed border-gray-200 rounded-3xl">
+            <p className="text-gray-400">No levels added yet. Run the SQL to create 'school_academic_levels' table.</p>
+            <div className="mt-4 p-4 bg-slate-50 rounded-xl text-[10px] font-mono text-left overflow-x-auto whitespace-pre">
+              {`CREATE TABLE school_academic_levels (
   id BIGINT GENERATED BY DEFAULT AS IDENTITY PRIMARY KEY,
   title TEXT,
   core TEXT,
   optional TEXT,
   icon TEXT DEFAULT '🎓'
 );`}
-               </div>
             </div>
-         ) : levels.map(l => (
-            <div key={l.id} className="bg-white p-6 rounded-3xl border border-gray-100 shadow-sm hover:shadow-md transition-all group">
-               <div className="flex items-start justify-between mb-4">
-                  <div className="text-3xl">{l.icon}</div>
-                  <div className="flex gap-2">
-                    <button onClick={() => { setEditing(l); setForm(l); setShowEditor(true); }} className="p-2 text-gray-400 hover:text-navy hover:bg-gray-50 rounded-lg transition-colors"><Edit className="h-4 w-4" /></button>
-                    <button onClick={() => del(l.id)} className="p-2 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors"><Trash2 className="h-4 w-4" /></button>
-                  </div>
-               </div>
-               <h4 className="font-display font-bold text-navy text-lg mb-2">{l.title}</h4>
-               <p className="text-xs text-gray-500 line-clamp-2 mb-4">{l.core}</p>
+          </div>
+        ) : levels.map(l => (
+          <div key={l.id} className="bg-white p-6 rounded-3xl border border-gray-100 shadow-sm hover:shadow-md transition-all group">
+            <div className="flex items-start justify-between mb-4">
+              <div className="text-3xl">{l.icon}</div>
+              <div className="flex gap-2">
+                <button onClick={() => { setEditing(l); setForm(l); setShowEditor(true); }} className="p-2 text-gray-400 hover:text-navy hover:bg-gray-50 rounded-lg transition-colors"><Edit className="h-4 w-4" /></button>
+                <button onClick={() => del(l.id)} className="p-2 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors"><Trash2 className="h-4 w-4" /></button>
+              </div>
             </div>
-         ))}
+            <h4 className="font-display font-bold text-navy text-lg mb-2">{l.title}</h4>
+            <p className="text-xs text-gray-500 line-clamp-2 mb-4">{l.core}</p>
+          </div>
+        ))}
       </div>
     </div>
   )
@@ -2561,16 +2561,16 @@ function TestimonialsTab({ toast }) {
         <div className="bg-white rounded-3xl border-2 border-gold/30 shadow-2xl overflow-hidden animate-fade-in relative z-50">
           <div className="p-6 md:p-8 space-y-6">
             <div className="flex items-center justify-between mb-2">
-               <h4 className="font-display font-bold text-navy text-lg">{editing ? 'Edit Message' : 'New Message'}</h4>
-               <button onClick={() => setShowEditor(false)} className="p-2 hover:bg-gray-100 rounded-full text-gray-400 transition-colors"><X className="h-5 w-5" /></button>
+              <h4 className="font-display font-bold text-navy text-lg">{editing ? 'Edit Message' : 'New Message'}</h4>
+              <button onClick={() => setShowEditor(false)} className="p-2 hover:bg-gray-100 rounded-full text-gray-400 transition-colors"><X className="h-5 w-5" /></button>
             </div>
             <form onSubmit={save} className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div><label className="label-modern">Full Name *</label><input className="input-modern" placeholder="Enter name" value={form.name} onChange={e=>setForm({...form, name: e.target.value})} required /></div>
-              <div><label className="label-modern">Role / Relation *</label><input className="input-modern" placeholder="e.g. Parent of Grade 10" value={form.role} onChange={e=>setForm({...form, role: e.target.value})} required /></div>
-              <div className="md:col-span-2"><label className="label-modern">Message *</label><textarea className="input-modern min-h-[140px]" placeholder="Write message..." value={form.message} onChange={e=>setForm({...form, message: e.target.value})} required /></div>
+              <div><label className="label-modern">Full Name *</label><input className="input-modern" placeholder="Enter name" value={form.name} onChange={e => setForm({ ...form, name: e.target.value })} required /></div>
+              <div><label className="label-modern">Role / Relation *</label><input className="input-modern" placeholder="e.g. Parent of Grade 10" value={form.role} onChange={e => setForm({ ...form, role: e.target.value })} required /></div>
+              <div className="md:col-span-2"><label className="label-modern">Message *</label><textarea className="input-modern min-h-[140px]" placeholder="Write message..." value={form.message} onChange={e => setForm({ ...form, message: e.target.value })} required /></div>
               <div className="md:col-span-2 flex gap-3 pt-4">
-                 <button type="submit" className="btn-gold flex-1 py-4 text-base font-bold shadow-xl shadow-gold/20">Save Message</button>
-                 <button type="button" onClick={() => setShowEditor(false)} className="px-8 py-4 border-2 border-gray-100 rounded-2xl font-bold text-navy hover:bg-gray-50 transition-all">Cancel</button>
+                <button type="submit" className="btn-gold flex-1 py-4 text-base font-bold shadow-xl shadow-gold/20">Save Message</button>
+                <button type="button" onClick={() => setShowEditor(false)} className="px-8 py-4 border-2 border-gray-100 rounded-2xl font-bold text-navy hover:bg-gray-50 transition-all">Cancel</button>
               </div>
             </form>
           </div>
@@ -2579,19 +2579,19 @@ function TestimonialsTab({ toast }) {
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {testimonials.length === 0 ? (
-           <div className="col-span-full border-2 border-dashed border-gray-200 rounded-3xl p-12 text-center">
-             <div className="inline-flex p-4 bg-gray-50 rounded-full mb-4">
-                <Quote className="h-8 w-8 text-gray-400" />
-             </div>
-             <p className="text-gray-500 font-medium">No messages yet. Add one to display on the About page.</p>
-           </div>
+          <div className="col-span-full border-2 border-dashed border-gray-200 rounded-3xl p-12 text-center">
+            <div className="inline-flex p-4 bg-gray-50 rounded-full mb-4">
+              <Quote className="h-8 w-8 text-gray-400" />
+            </div>
+            <p className="text-gray-500 font-medium">No messages yet. Add one to display on the About page.</p>
+          </div>
         ) : testimonials.map(m => (
           <div key={m.id} className="bg-gradient-to-br from-white to-gray-50 border border-gray-100 rounded-3xl p-6 shadow-[0_8px_30px_rgba(0,0,0,0.04)] hover:shadow-[0_8px_30px_rgba(212,175,55,0.15)] hover:border-gold/30 transition-all duration-300 relative group flex flex-col justify-between h-full group">
             <Quote className="h-10 w-10 text-gold/10 absolute right-6 top-6 transition-transform group-hover:scale-110 group-hover:text-gold/20 duration-500" />
             <div className="mb-6 relative z-10">
               <p className="text-sm font-medium text-gray-700 italic leading-relaxed whitespace-pre-wrap">"{m.message}"</p>
             </div>
-            
+
             <div className="flex flex-col gap-4 relative z-10">
               <div className="pt-4 border-t border-gray-100">
                 <h4 className="font-display font-bold text-navy truncate">{m.name}</h4>

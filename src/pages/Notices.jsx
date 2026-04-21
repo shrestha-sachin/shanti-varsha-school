@@ -33,8 +33,8 @@ function Notices() {
 
   const filtered = notices.filter(n => {
     const matchCat = category === 'All' || n.category === category
-    const matchSearch = !search || 
-      (n.title && n.title.toLowerCase().includes(search.toLowerCase())) || 
+    const matchSearch = !search ||
+      (n.title && n.title.toLowerCase().includes(search.toLowerCase())) ||
       (n.description && n.description.toLowerCase().includes(search.toLowerCase()))
     return matchCat && matchSearch
   })
@@ -77,7 +77,7 @@ function Notices() {
                 onChange={e => handleSearch(e.target.value)}
               />
               {search && (
-                <button 
+                <button
                   onClick={() => handleSearch('')}
                   className="absolute right-4 top-1/2 -translate-y-1/2 p-1 text-gray-400 hover:text-red-500 transition-colors"
                 >
@@ -92,8 +92,8 @@ function Notices() {
                   key={cat}
                   onClick={() => handleCategory(cat)}
                   className={`px-4 py-2 rounded-xl text-sm font-medium transition-all duration-300 ${category === cat
-                      ? 'bg-gradient-to-r from-navy to-gold text-white shadow-md'
-                      : 'bg-gray-50 text-gray-600 border border-gray-200 hover:border-gold/50 hover:text-navy'
+                    ? 'bg-gradient-to-r from-navy to-gold text-white shadow-md'
+                    : 'bg-gray-50 text-gray-600 border border-gray-200 hover:border-gold/50 hover:text-navy'
                     }`}
                 >
                   {cat}
@@ -155,13 +155,13 @@ function Notices() {
                     <div className="flex flex-col sm:flex-row md:flex-col gap-2 flex-shrink-0 md:min-w-[140px]">
                       {notice.file_url && (
                         <>
-                          <button 
-                             onClick={(e) => { e.stopPropagation(); window.open(notice.file_url, '_blank') }}
-                             className="flex items-center justify-center gap-2 px-4 py-2 bg-navy/5 hover:bg-navy hover:text-white text-navy text-xs font-bold rounded-xl transition-all border border-navy/10 shadow-sm"
+                          <button
+                            onClick={(e) => { e.stopPropagation(); window.open(notice.file_url, '_blank') }}
+                            className="flex items-center justify-center gap-2 px-4 py-2 bg-navy/5 hover:bg-navy hover:text-white text-navy text-xs font-bold rounded-xl transition-all border border-navy/10 shadow-sm"
                           >
-                             <Eye className="h-3.5 w-3.5" /> View
+                            <Eye className="h-3.5 w-3.5" /> View
                           </button>
-                          <button 
+                          <button
                             onClick={async (e) => {
                               e.stopPropagation();
                               try {
@@ -171,7 +171,7 @@ function Notices() {
                                 const a = document.createElement('a');
                                 a.href = url;
                                 const ext = notice.file_url.split('.').pop().split('?')[0] || 'file';
-                                a.download = `Notice-${notice.title.replace(/\s+/g, '-').substring(0,25)}.${ext}`;
+                                a.download = `Notice-${notice.title.replace(/\s+/g, '-').substring(0, 25)}.${ext}`;
                                 document.body.appendChild(a);
                                 a.click();
                                 document.body.removeChild(a);
@@ -186,10 +186,10 @@ function Notices() {
                         </>
                       )}
                       {notice.external_link && (
-                        <a 
-                          href={notice.external_link} 
-                          target="_blank" 
-                          rel="noopener noreferrer" 
+                        <a
+                          href={notice.external_link}
+                          target="_blank"
+                          rel="noopener noreferrer"
                           onClick={(e) => e.stopPropagation()}
                           className="flex items-center justify-center gap-2 px-4 py-2 bg-emerald-50 hover:bg-emerald-600 hover:text-white text-emerald-700 text-xs font-bold rounded-xl transition-all border border-emerald-100 shadow-sm"
                         >
@@ -219,8 +219,8 @@ function Notices() {
                 key={p}
                 onClick={() => setPage(p)}
                 className={`w-10 h-10 rounded-xl text-sm font-semibold transition-all ${page === p
-                    ? 'bg-gradient-to-r from-navy to-gold text-white shadow-md'
-                    : 'border border-gray-200 hover:border-gold/50 hover:text-navy text-gray-600'
+                  ? 'bg-gradient-to-r from-navy to-gold text-white shadow-md'
+                  : 'border border-gray-200 hover:border-gold/50 hover:text-navy text-gray-600'
                   }`}
               >
                 {p}
