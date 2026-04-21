@@ -13,6 +13,8 @@ const DEFAULT_SETTINGS = {
   popup_active: false,
   popup_image: '',
   popup_link: '',
+  ticker_text: '',
+  ticker_link: '',
 }
 
 function safeGet() {

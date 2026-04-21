@@ -6,7 +6,7 @@ import {
   UsersIcon, Bell, GraduationCap, Settings, Plus, X, Trash2, Edit, Save, 
   Search, Filter, LogOut, ChevronRight, Image, Layout, List, FileText, Newspaper,
   MapPin, Phone, Mail, Globe, Clock, Info, CheckCircle2, AlertCircle, Loader2,
-  Table, Pin, Maximize2, Download, Calendar, BookOpen, TrendingUp, Eye, EyeOff, Award, User, Quote, Upload, GripVertical, Menu, Library
+  Table, Pin, Maximize2, Download, Calendar, BookOpen, TrendingUp, Eye, EyeOff, Award, User, Quote, Upload, GripVertical, Menu, Library, Megaphone
 } from 'lucide-react'
 import ReactQuill, { Quill } from 'react-quill'
 import 'react-quill/dist/quill.snow.css'
@@ -1482,6 +1482,8 @@ function SettingsTab({ toast }) {
     principal_message: 'Welcome to Shanti Varsha. We are committed to excellence in education.',
     principal_photo: '',
     campus_photo: '',
+    ticker_text: '',
+    ticker_link: '',
   })
 
   const save = async (e) => {
@@ -1536,7 +1538,26 @@ function SettingsTab({ toast }) {
 
           <div className="h-px bg-gray-100" />
 
-          {/* Principal's Message Section */}
+          {/* Global Ticker Section */}
+          <div className="space-y-6">
+            <h4 className="font-bold text-navy flex items-center gap-2">
+               <Megaphone className="h-5 w-5 text-gold" /> Global Revolving Notice (Top Ticker)
+            </h4>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+               <div>
+                 <label className="label-modern font-bold text-navy mb-2 block">Ticker Banner Text</label>
+                 <input className="input-modern" placeholder="e.g. Admissions are open for 2083 BS!" value={settings.ticker_text || ''} onChange={e => setSettings(p => ({ ...p, ticker_text: e.target.value }))} />
+                 <p className="text-[10px] text-gray-400 mt-2 italic text-navy">Leave empty to hide the ticker completely.</p>
+               </div>
+               <div>
+                 <label className="label-modern font-bold text-navy mb-2 block">Ticker Target Link (Optional)</label>
+                 <input className="input-modern" placeholder="https://..." value={settings.ticker_link || ''} onChange={e => setSettings(p => ({ ...p, ticker_link: e.target.value }))} />
+                 <p className="text-[10px] text-gray-400 mt-2 italic text-navy">The banner becomes clickable if a link is provided.</p>
+               </div>
+            </div>
+          </div>
+
+          <div className="h-px bg-gray-100" />
           <div className="space-y-6">
             <h4 className="font-bold text-navy flex items-center gap-2">
                <User className="h-5 w-5 text-gold" /> Principal's Profile & Message

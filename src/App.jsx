@@ -1,6 +1,7 @@
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
 import Navbar from './components/Navbar'
 import Footer from './components/Footer'
+import Ticker from './components/Ticker'
 import ProtectedRoute from './components/ProtectedRoute'
 import ScrollToTop from './components/ScrollToTop'
 import Home from './pages/Home'
@@ -57,6 +58,7 @@ function AppContent() {
 
   return (
     <div className="min-h-screen flex flex-col">
+      {!isDashboard && <Ticker />}
       {!isDashboard && <Navbar />}
       <main className="flex-grow">
         <Routes>
